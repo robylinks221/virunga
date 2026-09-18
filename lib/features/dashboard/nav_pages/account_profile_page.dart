@@ -207,31 +207,74 @@ class _AccountProfilePageState extends State<AccountProfilePage> {
               icon: Icons.person_outline_rounded,
               title: 'Personal Information',
               subtitle: 'Name, phone and account details',
-              onTap: () => _message('Personal information'),
+              onTap: () => _openSettings(
+                title: 'Personal Information',
+                subtitle: 'Your Virunga account details.',
+                icon: Icons.person_outline_rounded,
+                items: const [
+                  _SettingItem('Name', 'Account name', Icons.badge_outlined),
+                  _SettingItem('Phone', 'Registered phone number', Icons.phone_outlined),
+                  _SettingItem('Account', 'Member profile information', Icons.account_circle_outlined),
+                ],
+              ),
             ),
             _AccountTile(
               icon: Icons.favorite_border_rounded,
               title: 'Saved Places',
               subtitle: 'Destinations and crafts you save',
-              onTap: () => _message('Saved places'),
+              onTap: () => _openSettings(
+                title: 'Saved Places',
+                subtitle: 'Places and crafts you want to revisit.',
+                icon: Icons.favorite_border_rounded,
+                items: const [
+                  _SettingItem('Destinations', 'Your saved destinations', Icons.landscape_outlined),
+                  _SettingItem('Crafts', 'Your saved crafts', Icons.shopping_bag_outlined),
+                ],
+              ),
             ),
             _AccountTile(
               icon: Icons.notifications_none_rounded,
               title: 'Notifications',
               subtitle: 'Manage your Virunga updates',
-              onTap: () => _message('Notifications'),
+              onTap: () => _openSettings(
+                title: 'Notifications',
+                subtitle: 'Choose the Virunga updates that matter to you.',
+                icon: Icons.notifications_none_rounded,
+                items: const [
+                  _SettingItem('Platform Updates', 'Important Virunga information', Icons.campaign_outlined),
+                  _SettingItem('Community', 'Community and culture updates', Icons.diversity_3_outlined),
+                  _SettingItem('Marketplace', 'Craft and artisan updates', Icons.storefront_outlined),
+                ],
+              ),
             ),
             _AccountTile(
               icon: Icons.language_rounded,
               title: 'Language',
               subtitle: 'Language and regional preferences',
-              onTap: () => _message('Language'),
+              onTap: () => _openSettings(
+                title: 'Language',
+                subtitle: 'Language and regional preferences.',
+                icon: Icons.language_rounded,
+                items: const [
+                  _SettingItem('English', 'Current language', Icons.check_circle_outline_rounded),
+                  _SettingItem('Regional Languages', 'More languages can be added here', Icons.translate_rounded),
+                ],
+              ),
             ),
             _AccountTile(
               icon: Icons.help_outline_rounded,
               title: 'Help & Support',
               subtitle: 'Get help using the Virunga platform',
-              onTap: () => _message('Help & support'),
+              onTap: () => _openSettings(
+                title: 'Help & Support',
+                subtitle: 'Help with using the Virunga platform.',
+                icon: Icons.help_outline_rounded,
+                items: const [
+                  _SettingItem('Using Virunga', 'Explore the platform and its features', Icons.explore_outlined),
+                  _SettingItem('Account Help', 'Help with your account', Icons.manage_accounts_outlined),
+                  _SettingItem('Contact Support', 'Support contact will be connected here', Icons.support_agent_rounded),
+                ],
+              ),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 34),
@@ -379,6 +422,135 @@ class _AccountTile extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+
+class _SettingItem {
+  const _SettingItem(this.title, this.subtitle, this.icon);
+  final String title;
+  final String subtitle;
+  final IconData icon;
+}
+
+class _AccountSettingsPage extends StatelessWidget {
+  const _AccountSettingsPage({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.items,
+  });
+
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final List<_SettingItem> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        title: Text(title),
+      ),
+      body: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          Container(
+            color: AppColors.primary,
+            padding: const EdgeInsets.fromLTRB(20, 6, 20, 26),
+            child: Row(
+              children: [
+                Container(
+                  width: 54,
+                  height: 54,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(.94),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(icon, color: AppColors.primary, size: 26),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    subtitle,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(.75),
+                      fontSize: 12,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(20, 25, 20, 12),
+            child: Text(
+              'SETTINGS',
+              style: TextStyle(
+                color: AppColors.accent,
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.3,
+              ),
+            ),
+          ),
+          ...items.map(
+            (item) => Container(
+              margin: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(17),
+                border: Border.all(color: AppColors.cardBorder),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: AppColors.accentSoft,
+                      borderRadius: BorderRadius.circular(13),
+                    ),
+                    child: Icon(item.icon, color: AppColors.primary, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.title,
+                          style: const TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          item.subtitle,
+                          style: const TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 10.5,
+                            height: 1.3,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
