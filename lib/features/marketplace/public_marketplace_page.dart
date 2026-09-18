@@ -512,7 +512,7 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
   Widget build(BuildContext context) {
     final product = widget.product;
     final saved = _SavedCrafts.contains(product);
-    final recent = _RecentlyViewed.items.where((p) => p.id != product.id).take(3).toList();
+    final recent = _RecentlyViewed.items.where((p) => p.id != product.id).take(4).toList();
     final sameCategory = _MarketplaceCatalog.products
         .where((p) => p.id != product.id && p.category == product.category && !recent.any((r) => r.id == p.id))
         .toList();
@@ -524,7 +524,7 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
       backgroundColor: AppColors.background,
       body: CustomScrollView(slivers: [
         SliverAppBar(
-          expandedHeight: 360,
+          expandedHeight: 390,
           pinned: true,
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
@@ -540,36 +540,7 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
             background: Stack(
               fit: StackFit.expand,
               children: [
-                if (product.images.length > 1)
-                  PageView.builder(
-                    itemCount: product.images.length,
-                    onPageChanged: (index) => setState(() => imageIndex = index),
-                    itemBuilder: (_, index) => _CraftImage(url: product.images[index], fit: BoxFit.cover),
-                  )
-                else
-                  _CraftImage(url: product.image, fit: BoxFit.cover),
-                if (product.images.length > 1)
-                  Positioned(
-                    left: 16,
-                    right: 16,
-                    bottom: 18,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(product.images.length, (index) => GestureDetector(
-                        onTap: () => setState(() => imageIndex = index),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 180),
-                          margin: const EdgeInsets.symmetric(horizontal: 3),
-                          width: index == imageIndex ? 22 : 7,
-                          height: 7,
-                          decoration: BoxDecoration(
-                            color: index == imageIndex ? Colors.white : Colors.white.withOpacity(.55),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      )),
-                    ),
-                  ),
+                _CraftImage(url: product.image, fit: BoxFit.cover),
               ],
             ),
           ),
@@ -579,9 +550,9 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(product.category.toUpperCase(), style: const TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1)),
             const SizedBox(height: 6),
-            Text(product.name, style: const TextStyle(color: AppColors.textPrimary, fontSize: 27, height: 1.12, fontWeight: FontWeight.w700)),
+            Text(product.name, style: const TextStyle(color: AppColors.textPrimary, fontSize: 28, height: 1.08, fontWeight: FontWeight.w800)),
             const SizedBox(height: 9),
-            Text(_formatPrice(product.price), style: const TextStyle(color: AppColors.primary, fontSize: 18, fontWeight: FontWeight.w700)),
+            Text(_formatPrice(product.price), style: const TextStyle(color: AppColors.accent, fontSize: 21, fontWeight: FontWeight.w800)),
             const SizedBox(height: 8),
             Row(children: [const Icon(Icons.location_on_outlined, color: AppColors.primary, size: 17), const SizedBox(width: 5), Expanded(child: Text(product.country, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)))]),
             const SizedBox(height: 18),
@@ -627,7 +598,7 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
                 );
               } : null,
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: AppColors.accent,
                 disabledBackgroundColor: AppColors.divider,
                 disabledForegroundColor: AppColors.textSecondary,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -662,13 +633,24 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
               ),
             ),
             const SizedBox(height: 25),
-            Container(width: double.infinity, padding: const EdgeInsets.all(18), decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(18)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Container(width: double.infinity, padding: const EdgeInsets.all(18), decoration: BoxDecoration(color: AppColors.mintSoft, borderRadius: BorderRadius.circular(18), border: Border.all(color: AppColors.cardBorder)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               const Text('ARTISAN', style: TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1.1)),
               const SizedBox(height: 6),
-              Text(product.seller, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
+              Text(product.seller, style: const TextStyle(color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.w700)),
               const SizedBox(height: 5),
-              Text(product.community + ' • ' + product.park, style: const TextStyle(color: Colors.white70, fontSize: 11.5, height: 1.5)),
+              Text(product.community + ' • ' + product.park, style: const TextStyle(color: AppColors.textSecondary, fontSize: 11.5, height: 1.5)),
             ])),
+            const SizedBox(height: 13),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(13),
+              decoration: BoxDecoration(color: AppColors.mintSoft, borderRadius: BorderRadius.circular(13)),
+              child: const Row(children: [
+                Icon(Icons.groups_2_outlined, color: AppColors.primary, size: 18),
+                SizedBox(width: 9),
+                Expanded(child: Text('Your purchase supports local artisans and their communities.', style: TextStyle(color: AppColors.primary, fontSize: 10.5, height: 1.35, fontWeight: FontWeight.w600))),
+              ]),
+            ),
             const SizedBox(height: 30),
             Text(recent.isEmpty ? 'MORE CRAFTS' : 'RECENTLY VIEWED', style: const TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1.1)),
             const SizedBox(height: 5),
@@ -677,7 +659,7 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
           ]),
         )),
         SliverToBoxAdapter(child: SizedBox(
-          height: 245,
+          height: 255,
           child: ListView.separated(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 25),
             scrollDirection: Axis.horizontal,
@@ -685,7 +667,7 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
             separatorBuilder: (_, __) => const SizedBox(width: 12),
             itemBuilder: (_, i) {
               final items = recent.isEmpty ? related : recent;
-              return SizedBox(width: 165, child: _ProductCard(product: items[i]));
+              return SizedBox(width: 160, child: _ProductCard(product: items[i]));
             },
           ),
         )),
