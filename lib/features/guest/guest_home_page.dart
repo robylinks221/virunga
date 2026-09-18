@@ -174,7 +174,7 @@ class _GuestHomePageState extends State<GuestHomePage> {
             SliverToBoxAdapter(
               child: _Search(
                 onSearch: () => _open(const VirungaSearchPage()),
-                onFilter: () => _open(ExplorePage(authService: widget.authService)),
+                onFilter: () => _open(const VirungaSearchPage()),
               ),
             ),
             SliverToBoxAdapter(
