@@ -6,7 +6,6 @@ import '../../core/api/api_config.dart';
 import '../auth/auth_service.dart';
 import '../auth/login_page.dart';
 
-import '../destinations/destination_detail_page.dart';
 import '../community/community_page.dart';
 import '../explore/explore_page.dart';
 import '../explore/explore_section_pages.dart';
@@ -142,14 +141,6 @@ class _GuestHomePageState extends State<GuestHomePage> {
     });
   }
 
-  void _openDestination(DestinationDetailData destination) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => DestinationDetailPage(destination: destination),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final greeting =
@@ -272,27 +263,27 @@ class _GuestHomePageState extends State<GuestHomePage> {
                     _Destination(
                       image: 'assets/images/onboarding_wildlife.jpg',
                       title: 'Bwindi\nImpenetrable NP',
-                      onTap: () => _openDestination(DestinationDetailData.bwindi),
+                      onTap: () => _open(const connected.DestinationDetailPage(name: 'Bwindi Impenetrable National Park', country: 'Uganda')),
                     ),
                     _Destination(
                       image: 'assets/images/onboarding_landscape.jpg',
                       title: 'Volcanoes\nNational Park',
-                      onTap: () => _openDestination(DestinationDetailData.volcanoes),
+                      onTap: () => _open(const connected.DestinationDetailPage(name: 'Volcanoes National Park', country: 'Rwanda')),
                     ),
                     _Destination(
                       image: 'assets/images/onboarding_landscape.jpg',
                       title: 'Virunga\nNational Park',
-                      onTap: () => _openDestination(DestinationDetailData.virunga),
+                      onTap: () => _open(const connected.DestinationDetailPage(name: 'Virunga National Park', country: 'DR Congo')),
                     ),
                     _Destination(
                       image: 'assets/images/onboarding_community.jpg',
                       title: 'Queen Elizabeth\nNational Park',
-                      onTap: () => _openDestination(DestinationDetailData.queenElizabeth),
+                      onTap: () => _open(const connected.DestinationDetailPage(name: 'Queen Elizabeth National Park', country: 'Uganda')),
                     ),
                     _Destination(
                       image: 'assets/images/onboarding_wildlife.jpg',
                       title: 'Kahuzi-Biega\nNational Park',
-                      onTap: () => _openDestination(DestinationDetailData.kahuziBiega),
+                      onTap: () => _open(const connected.DestinationDetailPage(name: 'Kahuzi-Biega National Park', country: 'DR Congo')),
                     ),
                   ],
                 ),
