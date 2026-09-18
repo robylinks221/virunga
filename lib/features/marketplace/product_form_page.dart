@@ -6,6 +6,12 @@ import 'package:image_picker/image_picker.dart';
 
 import '../auth/auth_exception.dart';
 import '../auth/auth_service.dart';
+import '../community/community_page.dart';
+import '../guest/guest_home_page.dart';
+import '../explore/explore_page.dart';
+import 'public_marketplace_page.dart';
+import '../dashboard/nav_pages/account_profile_page.dart';
+import '../dashboard/widgets/dashboard_bottom_nav.dart';
 import 'marketplace_models.dart';
 import 'marketplace_service.dart';
 
@@ -219,10 +225,12 @@ class _ProductFormPageState extends State<ProductFormPage> {
           style: const TextStyle(fontWeight: FontWeight.w800),
         ),
       ),
-      body: Form(
+      body: SafeArea(
+        top: false,
+        child: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(18, 20, 18, 30),
+          padding: const EdgeInsets.fromLTRB(18, 20, 18, 46),
           children: [
             Container(
               padding: const EdgeInsets.all(18),
@@ -384,6 +392,30 @@ class _ProductFormPageState extends State<ProductFormPage> {
             ),
           ],
         ),
+      ),
+      ),
+      bottomNavigationBar: DashboardBottomNav(
+        items: const [
+          DashboardNavItem(label: 'Home', icon: Icons.home_outlined, selectedIcon: Icons.home_rounded),
+          DashboardNavItem(label: 'Products', icon: Icons.inventory_2_outlined, selectedIcon: Icons.inventory_2_rounded),
+          DashboardNavItem(label: 'Community', icon: Icons.people_outline_rounded, selectedIcon: Icons.people_alt_rounded),
+          DashboardNavItem(label: 'Marketplace', icon: Icons.storefront_outlined, selectedIcon: Icons.storefront_rounded),
+          DashboardNavItem(label: 'Profile', icon: Icons.person_outline_rounded, selectedIcon: Icons.person_rounded),
+        ],
+        currentIndex: 1,
+        onTap: (index) {
+          if (index == 1) {
+            Navigator.of(context).pop();
+            return;
+          }
+          final page = switch (index) {
+            0 => GuestHomePage(authService: widget.authService, showBottomNavigation: false),
+            2 => const CommunityPage(),
+            3 => const PublicMarketplacePage(),
+            _ => AccountProfilePage(authService: widget.authService, title: 'Profile'),
+          };
+          Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => page));
+        },
       ),
     );
   }
