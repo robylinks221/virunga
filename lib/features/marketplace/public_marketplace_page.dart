@@ -500,7 +500,6 @@ class PublicCraftDetailPage extends StatefulWidget {
 
 class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
   int quantity = 1;
-  int imageIndex = 0;
 
   @override
   void initState() {
@@ -510,176 +509,170 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final product = widget.product;
-    final saved = _SavedCrafts.contains(product);
-    final recent = _RecentlyViewed.items.where((p) => p.id != product.id).take(4).toList();
-    final sameCategory = _MarketplaceCatalog.products
-        .where((p) => p.id != product.id && p.category == product.category && !recent.any((r) => r.id == p.id))
-        .toList();
-    final otherCrafts = _MarketplaceCatalog.products
-        .where((p) => p.id != product.id && p.category != product.category && !recent.any((r) => r.id == p.id))
-        .toList();
-    final related = [...sameCategory, ...otherCrafts].take(3).toList();
+    final p = widget.product;
+    final saved = _SavedCrafts.contains(p);
+    final available = p.inStock && p.quantityAvailable > 0;
+    final recent = _RecentlyViewed.items.where((x) => x.id != p.id).take(4).toList();
+    final fallback = _MarketplaceCatalog.products.where((x) => x.id != p.id && !recent.any((r) => r.id == x.id)).take(4).toList();
+    final shown = recent.isNotEmpty ? recent : fallback;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: CustomScrollView(slivers: [
         SliverAppBar(
-          expandedHeight: 390,
+          expandedHeight: 405,
           pinned: true,
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
+          leading: Padding(padding: const EdgeInsets.all(8), child: _circle(Icons.arrow_back_rounded, () => Navigator.pop(context))),
           actions: [
-            IconButton(
-              tooltip: saved ? 'Remove from saved' : 'Save craft',
-              onPressed: () => setState(() => _SavedCrafts.toggle(product)),
-              icon: Icon(saved ? Icons.favorite_rounded : Icons.favorite_border_rounded),
-            ),
-            IconButton(onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MarketplaceCartPage())), icon: _cartIcon()),
+            _circle(Icons.share_outlined, () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Share craft link coming soon.')))),
+            const SizedBox(width: 7),
+            _circle(saved ? Icons.favorite_rounded : Icons.favorite_border_rounded, () => setState(() => _SavedCrafts.toggle(p))),
+            const SizedBox(width: 10),
           ],
-          flexibleSpace: FlexibleSpaceBar(
-            background: Stack(
-              fit: StackFit.expand,
-              children: [
-                _CraftImage(url: product.image, fit: BoxFit.cover),
-              ],
-            ),
-          ),
-        ),
-        SliverToBoxAdapter(child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 23, 20, 0),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(product.category.toUpperCase(), style: const TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1)),
-            const SizedBox(height: 6),
-            Text(product.name, style: const TextStyle(color: AppColors.textPrimary, fontSize: 28, height: 1.08, fontWeight: FontWeight.w800)),
-            const SizedBox(height: 9),
-            Text(_formatPrice(product.price), style: const TextStyle(color: AppColors.accent, fontSize: 21, fontWeight: FontWeight.w800)),
-            const SizedBox(height: 8),
-            Row(children: [const Icon(Icons.location_on_outlined, color: AppColors.primary, size: 17), const SizedBox(width: 5), Expanded(child: Text(product.country, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)))]),
-            const SizedBox(height: 18),
-            const SizedBox(height: 14),
-            const Row(children: [
-              Icon(Icons.visibility_outlined, color: AppColors.textSecondary, size: 15),
-              SizedBox(width: 5),
-              Text('200 views', style: TextStyle(color: AppColors.textSecondary, fontSize: 10.5, fontWeight: FontWeight.w500)),
-            ]),
-            const SizedBox(height: 10),
-            Row(children: [
-              Icon(product.inStock ? Icons.check_circle_outline_rounded : Icons.inventory_2_outlined, color: product.inStock ? AppColors.success : AppColors.textSecondary, size: 15),
-              const SizedBox(width: 5),
-              Text(
-                product.inStock ? (product.quantityAvailable.toString() + ' available') : 'Currently out of stock',
-                style: TextStyle(color: product.inStock ? AppColors.success : AppColors.textSecondary, fontSize: 10.5, fontWeight: FontWeight.w600),
-              ),
-            ]),
-            const SizedBox(height: 22),
-            if (product.inStock && product.quantityAvailable > 0) ...[
-              Row(children: [
-                const Text('Quantity', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
-                const Spacer(),
-                _qty(Icons.remove_rounded, () { if (quantity > 1) setState(() => quantity--); }),
-                SizedBox(width: 38, child: Text(quantity.toString(), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w700))),
-                _qty(Icons.add_rounded, () {
-                  if (quantity < product.quantityAvailable) setState(() => quantity++);
-                }),
-              ]),
-              const SizedBox(height: 18),
-            ],
-            SizedBox(width: double.infinity, height: 52, child: FilledButton.icon(
-              onPressed: product.inStock && product.quantityAvailable > 0 ? () {
-                _MarketplaceCart.add(product, quantity);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(product.name + ' added to cart'),
-                    action: SnackBarAction(
-                      label: 'VIEW CART',
-                      onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MarketplaceCartPage())),
-                    ),
-                  ),
-                );
-              } : null,
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.accent,
-                disabledBackgroundColor: AppColors.divider,
-                disabledForegroundColor: AppColors.textSecondary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              ),
-              icon: Icon(product.inStock && product.quantityAvailable > 0 ? Icons.shopping_bag_outlined : Icons.inventory_2_outlined),
-              label: Text(product.inStock && product.quantityAvailable > 0 ? 'Add to Cart' : 'Out of Stock', style: const TextStyle(fontWeight: FontWeight.w700)),
-            )),
-            const SizedBox(height: 29),
-            const Text('About this craft', style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w700)),
-            const SizedBox(height: 8),
-            Text(product.description, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12.5, height: 1.6)),
-            const SizedBox(height: 22),
-            InkWell(
-              onTap: () {
-                final categoryProducts = _MarketplaceCatalog.products.where((p) => p.category == product.category).toList();
-                Navigator.of(context).push(MaterialPageRoute(builder: (_) => CraftCategoryPage(category: product.category, products: categoryProducts)));
-              },
-              borderRadius: BorderRadius.circular(14),
+          flexibleSpace: FlexibleSpaceBar(background: Stack(fit: StackFit.expand, children: [
+            _CraftImage(url: p.image, fit: BoxFit.cover),
+            Positioned(
+              right: 18, bottom: 18,
               child: Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.cardBorder)),
-                child: Row(children: [
-                  Container(width: 38, height: 38, decoration: BoxDecoration(color: AppColors.accentSoft, borderRadius: BorderRadius.circular(11)), child: const Icon(Icons.grid_view_rounded, color: AppColors.primary, size: 18)),
-                  const SizedBox(width: 11),
-                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    const Text('EXPLORE CATEGORY', style: TextStyle(color: AppColors.accent, fontSize: 8, fontWeight: FontWeight.w700, letterSpacing: .8)),
-                    const SizedBox(height: 3),
-                    Text(product.category, style: const TextStyle(color: AppColors.textPrimary, fontSize: 12.5, fontWeight: FontWeight.w700)),
-                  ])),
-                  const Icon(Icons.chevron_right_rounded, color: AppColors.primary),
+                padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
+                decoration: BoxDecoration(color: AppColors.primary.withOpacity(.92), borderRadius: BorderRadius.circular(20)),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  Container(width: 9, height: 9, decoration: BoxDecoration(color: available ? AppColors.success : AppColors.danger, shape: BoxShape.circle)),
+                  const SizedBox(width: 7),
+                  Text(available ? 'In Stock  ·  undefined available' : 'Out of Stock', style: const TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.w700)),
                 ]),
               ),
             ),
-            const SizedBox(height: 25),
-            Container(width: double.infinity, padding: const EdgeInsets.all(18), decoration: BoxDecoration(color: AppColors.mintSoft, borderRadius: BorderRadius.circular(18), border: Border.all(color: AppColors.cardBorder)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text('ARTISAN', style: TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1.1)),
-              const SizedBox(height: 6),
-              Text(product.seller, style: const TextStyle(color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.w700)),
-              const SizedBox(height: 5),
-              Text(product.community + ' • ' + product.park, style: const TextStyle(color: AppColors.textSecondary, fontSize: 11.5, height: 1.5)),
-            ])),
-            const SizedBox(height: 13),
+          ])),
+        ),
+        SliverToBoxAdapter(child: Container(
+          transform: Matrix4.translationValues(0, -16, 0),
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+          decoration: const BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Container(
-              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+              decoration: BoxDecoration(color: AppColors.mintSoft, borderRadius: BorderRadius.circular(18)),
+              child: Text(p.category.toUpperCase(), style: const TextStyle(color: AppColors.primary, fontSize: 8.5, fontWeight: FontWeight.w800, letterSpacing: .8)),
+            ),
+            const SizedBox(height: 12),
+            Text(p.name, style: const TextStyle(color: AppColors.primary, fontSize: 28, height: 1.08, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 8),
+            Text(_formatPrice(p.price), style: const TextStyle(color: AppColors.accent, fontSize: 22, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 14),
+            Text(p.description, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12.5, height: 1.55)),
+            const SizedBox(height: 20),
+            const Divider(color: AppColors.divider),
+            const SizedBox(height: 15),
+            const Row(children: [
+              Expanded(child: _ProductValue(icon: Icons.front_hand_outlined, text: 'Handmade')),
+              Expanded(child: _ProductValue(icon: Icons.groups_2_outlined, text: 'Supports\nCommunities')),
+              Expanded(child: _ProductValue(icon: Icons.eco_outlined, text: 'Local\nCraft')),
+              Expanded(child: _ProductValue(icon: Icons.verified_user_outlined, text: 'Authentic')),
+            ]),
+            const SizedBox(height: 15),
+            const Divider(color: AppColors.divider),
+            const SizedBox(height: 16),
+            Row(children: [
+              Container(width: 55, height: 55, decoration: const BoxDecoration(color: AppColors.mintSoft, shape: BoxShape.circle), child: const Icon(Icons.storefront_outlined, color: AppColors.primary, size: 25)),
+              const SizedBox(width: 12),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(p.seller.isEmpty ? 'Local Craft Seller' : p.seller, style: const TextStyle(color: AppColors.primary, fontSize: 14.5, fontWeight: FontWeight.w800)),
+                const SizedBox(height: 4),
+                Text([p.community, p.country].where((x) => x.trim().isNotEmpty).join(', '), style: const TextStyle(color: AppColors.textSecondary, fontSize: 10.5)),
+              ])),
+              const Icon(Icons.chevron_right_rounded, color: AppColors.primary),
+            ]),
+            const SizedBox(height: 20),
+            if (available) ...[
+              Row(children: [
+                const Text('Quantity', style: TextStyle(color: AppColors.primary, fontSize: 12.5, fontWeight: FontWeight.w800)),
+                const Spacer(),
+                _qty(Icons.remove_rounded, () { if (quantity > 1) setState(() => quantity--); }),
+                SizedBox(width: 42, child: Text('$quantity', textAlign: TextAlign.center, style: const TextStyle(color: AppColors.primary, fontSize: 15, fontWeight: FontWeight.w800))),
+                _qty(Icons.add_rounded, () { if (quantity < p.quantityAvailable) setState(() => quantity++); }),
+              ]),
+              const SizedBox(height: 14),
+            ],
+            SizedBox(width: double.infinity, height: 53, child: FilledButton.icon(
+              onPressed: available ? () {
+                _MarketplaceCart.add(p, quantity);
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('undefined added to cart')));
+                setState(() {});
+              } : null,
+              style: FilledButton.styleFrom(backgroundColor: AppColors.accent, foregroundColor: Colors.white, disabledBackgroundColor: AppColors.divider, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+              icon: Icon(available ? Icons.shopping_cart_outlined : Icons.inventory_2_outlined),
+              label: Text(available ? 'Add to Cart' : 'Out of Stock', style: const TextStyle(fontWeight: FontWeight.w800)),
+            )),
+            const SizedBox(height: 10),
+            Row(children: [
+              Expanded(child: SizedBox(height: 48, child: OutlinedButton.icon(
+                onPressed: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Seller messaging coming soon.'))),
+                style: OutlinedButton.styleFrom(foregroundColor: AppColors.primary, side: const BorderSide(color: AppColors.cardBorder), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                icon: const Icon(Icons.chat_bubble_outline_rounded, size: 19), label: const Text('Message Seller', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+              ))),
+              const SizedBox(width: 10),
+              Expanded(child: SizedBox(height: 48, child: OutlinedButton.icon(
+                onPressed: () => setState(() => _SavedCrafts.toggle(p)),
+                style: OutlinedButton.styleFrom(foregroundColor: AppColors.primary, side: const BorderSide(color: AppColors.cardBorder), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                icon: Icon(saved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded, size: 19), label: Text(saved ? 'Saved' : 'Save for Later', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+              ))),
+            ]),
+            Container(
+              margin: const EdgeInsets.only(top: 16),
               padding: const EdgeInsets.all(13),
               decoration: BoxDecoration(color: AppColors.mintSoft, borderRadius: BorderRadius.circular(13)),
               child: const Row(children: [
-                Icon(Icons.groups_2_outlined, color: AppColors.primary, size: 18),
-                SizedBox(width: 9),
+                Icon(Icons.groups_2_outlined, color: AppColors.primary, size: 18), SizedBox(width: 9),
                 Expanded(child: Text('Your purchase supports local artisans and their communities.', style: TextStyle(color: AppColors.primary, fontSize: 10.5, height: 1.35, fontWeight: FontWeight.w600))),
               ]),
             ),
-            const SizedBox(height: 30),
-            Text(recent.isEmpty ? 'MORE CRAFTS' : 'RECENTLY VIEWED', style: const TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1.1)),
-            const SizedBox(height: 5),
-            Text(recent.isEmpty ? 'You may also like' : 'Continue exploring', style: const TextStyle(color: AppColors.textPrimary, fontSize: 20, fontWeight: FontWeight.w700)),
-            const SizedBox(height: 13),
+            if (shown.isNotEmpty) ...[
+              const SizedBox(height: 30),
+              Row(children: [
+                const Expanded(child: Text('Recently Viewed', style: TextStyle(color: AppColors.primary, fontSize: 19, fontWeight: FontWeight.w800))),
+                TextButton(onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PublicMarketplacePage())), child: const Text('See All')),
+              ]),
+              const SizedBox(height: 8),
+              SizedBox(
+                height: 225,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: shown.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 11),
+                  itemBuilder: (_, i) => SizedBox(width: 154, child: _ProductCard(product: shown[i])),
+                ),
+              ),
+            ],
           ]),
-        )),
-        SliverToBoxAdapter(child: SizedBox(
-          height: 255,
-          child: ListView.separated(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 25),
-            scrollDirection: Axis.horizontal,
-            itemCount: (recent.isEmpty ? related : recent).length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
-            itemBuilder: (_, i) {
-              final items = recent.isEmpty ? related : recent;
-              return SizedBox(width: 160, child: _ProductCard(product: items[i]));
-            },
-          ),
         )),
       ]),
     );
   }
 
-  Widget _qty(IconData icon, VoidCallback onTap) => InkWell(
-    onTap: onTap,
-    borderRadius: BorderRadius.circular(10),
-    child: Container(width: 36, height: 36, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.cardBorder)), child: Icon(icon, color: AppColors.primary, size: 18)),
+  Widget _circle(IconData icon, VoidCallback tap) => Material(
+    color: Colors.white.withOpacity(.95), shape: const CircleBorder(),
+    child: InkWell(onTap: tap, customBorder: const CircleBorder(), child: SizedBox(width: 40, height: 40, child: Icon(icon, color: AppColors.primary, size: 20))),
   );
+
+  Widget _qty(IconData icon, VoidCallback tap) => InkWell(
+    onTap: tap, borderRadius: BorderRadius.circular(10),
+    child: Container(width: 38, height: 38, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.cardBorder)), child: Icon(icon, color: AppColors.primary, size: 19)),
+  );
+}
+
+class _ProductValue extends StatelessWidget {
+  const _ProductValue({required this.icon, required this.text});
+  final IconData icon;
+  final String text;
+  @override
+  Widget build(BuildContext context) => Column(children: [
+    Icon(icon, color: AppColors.accent, size: 22),
+    const SizedBox(height: 7),
+    Text(text, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.primary, fontSize: 8.5, height: 1.25, fontWeight: FontWeight.w600)),
+  ]);
 }
 
 class SavedCraftsPage extends StatefulWidget {
