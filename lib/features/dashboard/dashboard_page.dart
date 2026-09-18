@@ -4,6 +4,7 @@ import '../../core/theme/app_theme.dart';
 import '../auth/auth_service.dart';
 import '../auth/login_page.dart';
 import '../marketplace/marketplace_page.dart';
+import '../marketplace/public_marketplace_page.dart';
 import '../explore/explore_page.dart';
 import '../community/community_page.dart';
 import 'dashboard_model.dart';
@@ -232,11 +233,7 @@ class _DashboardPageState extends State<DashboardPage> {
       }
 
       if (item.label == 'Marketplace') {
-        pages.add(
-          MarketplacePage(
-            authService: widget.authService,
-          ),
-        );
+        pages.add(const PublicMarketplacePage());
         continue;
       }
 
