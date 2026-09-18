@@ -66,6 +66,24 @@ class _AccountProfilePageState extends State<AccountProfilePage> {
       );
   }
 
+  void _openSettings({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required List<_SettingItem> items,
+  }) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => _AccountSettingsPage(
+          title: title,
+          subtitle: subtitle,
+          icon: icon,
+          items: items,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
