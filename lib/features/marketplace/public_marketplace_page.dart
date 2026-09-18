@@ -197,8 +197,8 @@ class _ProductCard extends StatelessWidget {
                     child: Container(
                       width: 34,
                       height: 34,
-                      decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                      child: const Icon(Icons.favorite_border_rounded, size: 18, color: AppColors.primary),
+                      decoration: BoxDecoration(color: Colors.white.withOpacity(.94), shape: BoxShape.circle),
+                      child: const Icon(Icons.arrow_outward_rounded, size: 17, color: AppColors.primary),
                     ),
                   ),
                 ],
@@ -255,8 +255,27 @@ class CraftCategoryPage extends StatelessWidget {
           Text('Handmade pieces from makers across Greater Virunga.', style: TextStyle(color: Colors.white.withOpacity(.72), fontSize: 11.5)),
         ]),
       )),
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 14),
+          child: Row(children: [
+            Expanded(
+              child: Text(
+                products.isEmpty ? 'Crafts' : products.length.toString() + ' crafts',
+                style: const TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w700),
+              ),
+            ),
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.cardBorder)),
+              child: const Icon(Icons.tune_rounded, color: AppColors.primary, size: 19),
+            ),
+          ]),
+        ),
+      ),
       SliverPadding(
-        padding: const EdgeInsets.fromLTRB(20, 22, 20, 34),
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 34),
         sliver: products.isEmpty
           ? const SliverToBoxAdapter(child: Padding(padding: EdgeInsets.only(top: 70), child: Center(child: Text('Products will appear here.', style: TextStyle(color: AppColors.textSecondary)))))
           : SliverGrid(
@@ -282,7 +301,12 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
   @override
   Widget build(BuildContext context) {
     final product = widget.product;
-    final recent = _PublicMarketplacePageState._products.where((p) => p.name != product.name).take(3).toList();
+    _RecentlyViewed.add(product);
+    final recent = _RecentlyViewed.items.where((p) => p.name != product.name).take(3).toList();
+    final related = _PublicMarketplacePageState._products
+        .where((p) => p.name != product.name && !recent.any((r) => r.name == p.name))
+        .take(3)
+        .toList();
     return Scaffold(
       backgroundColor: AppColors.background,
       body: CustomScrollView(slivers: [
@@ -317,7 +341,15 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
             SizedBox(width: double.infinity, height: 52, child: FilledButton.icon(
               onPressed: () {
                 _MarketplaceCart.add(product, quantity);
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(product.name + ' added to cart')));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(product.name + ' added to cart'),
+                    action: SnackBarAction(
+                      label: 'VIEW CART',
+                      onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MarketplaceCartPage())),
+                    ),
+                  ),
+                );
               },
               style: FilledButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
               icon: const Icon(Icons.shopping_bag_outlined),
@@ -336,9 +368,9 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
               Text('Artisan profile information will connect here when marketplace data is available.', style: TextStyle(color: Colors.white70, fontSize: 11.5, height: 1.5)),
             ])),
             const SizedBox(height: 30),
-            const Text('RECENTLY VIEWED', style: TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1.1)),
+            Text(recent.isEmpty ? 'MORE CRAFTS' : 'RECENTLY VIEWED', style: const TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1.1)),
             const SizedBox(height: 5),
-            const Text('You may also like', style: TextStyle(color: AppColors.textPrimary, fontSize: 20, fontWeight: FontWeight.w700)),
+            Text(recent.isEmpty ? 'You may also like' : 'Continue exploring', style: const TextStyle(color: AppColors.textPrimary, fontSize: 20, fontWeight: FontWeight.w700)),
             const SizedBox(height: 13),
           ]),
         )),
@@ -347,9 +379,12 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
           child: ListView.separated(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 25),
             scrollDirection: Axis.horizontal,
-            itemCount: recent.length,
+            itemCount: (recent.isEmpty ? related : recent).length,
             separatorBuilder: (_, __) => const SizedBox(width: 12),
-            itemBuilder: (_, i) => SizedBox(width: 165, child: _ProductCard(product: recent[i])),
+            itemBuilder: (_, i) {
+              final items = recent.isEmpty ? related : recent;
+              return SizedBox(width: 165, child: _ProductCard(product: items[i]));
+            },
           ),
         )),
       ]),
@@ -408,7 +443,44 @@ class _MarketplaceCartPageState extends State<MarketplaceCartPage> {
               );
             },
           ),
+      bottomNavigationBar: items.isEmpty
+          ? null
+          : SafeArea(
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
+                decoration: const BoxDecoration(color: Colors.white, border: Border(top: BorderSide(color: AppColors.cardBorder))),
+                child: SizedBox(
+                  height: 50,
+                  child: FilledButton(
+                    onPressed: () {},
+                    style: FilledButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                    child: const Text('Continue with Cart', style: TextStyle(fontWeight: FontWeight.w700)),
+                  ),
+                ),
+              ),
+            ),
     );
+  }
+
+  Widget _cartQty(IconData icon, VoidCallback onTap) => InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(8),
+    child: Container(
+      width: 28,
+      height: 28,
+      decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(8), border: Border.all(color: AppColors.cardBorder)),
+      child: Icon(icon, color: AppColors.primary, size: 15),
+    ),
+  );
+}
+
+class _RecentlyViewed {
+  static final List<_CraftProduct> items = [];
+
+  static void add(_CraftProduct product) {
+    items.removeWhere((item) => item.name == product.name);
+    items.insert(0, product);
+    if (items.length > 6) items.removeLast();
   }
 }
 
