@@ -7,6 +7,7 @@ import '../marketplace/marketplace_page.dart';
 import '../marketplace/public_marketplace_page.dart';
 import '../explore/explore_page.dart';
 import '../community/community_page.dart';
+import '../guest/guest_home_page.dart';
 import 'dashboard_model.dart';
 import 'dashboard_service.dart';
 import 'nav_pages/account_profile_page.dart';
@@ -203,8 +204,8 @@ class _DashboardPageState extends State<DashboardPage> {
           data: data,
           onRefresh: _reload,
         ),
-      _ => MemberDashboardHome(
-          data: data,
+      _ => GuestHomePage(
+          authService: widget.authService,
         ),
     };
 
