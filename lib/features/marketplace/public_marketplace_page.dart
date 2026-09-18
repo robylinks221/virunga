@@ -57,7 +57,6 @@ class _PublicMarketplacePageState extends State<PublicMarketplacePage> {
       final products = decoded
           .whereType<Map>()
           .map((item) => _CraftProduct.fromJson(Map<String, dynamic>.from(item)))
-          .where((product) => product.isActive)
           .toList();
       if (!mounted) return;
       setState(() { _products = products; _MarketplaceCatalog.products = products; _loading = false; });
