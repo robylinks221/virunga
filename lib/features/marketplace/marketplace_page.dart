@@ -36,6 +36,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
   String? _error;
   int? _selectedCategoryId;
   String _query = '';
+  String _stockFilter = 'all';
 
   @override
   void initState() {
@@ -104,7 +105,14 @@ class _MarketplacePageState extends State<MarketplacePage> {
           product.categoryName.toLowerCase().contains(query) ||
           product.description.toLowerCase().contains(query);
 
-      return matchesCategory && matchesSearch;
+      final matchesStock = switch (_stockFilter) {
+        'in' => product.inStock && product.quantityAvailable > 2,
+        'low' => product.inStock && product.quantityAvailable > 0 && product.quantityAvailable <= 2,
+        'out' => !product.inStock || product.quantityAvailable <= 0,
+        _ => true,
+      };
+
+      return matchesCategory && matchesSearch && matchesStock;
     }).toList();
   }
 
@@ -178,85 +186,47 @@ class _MarketplacePageState extends State<MarketplacePage> {
                   },
                 ),
               ),
-              if (!_loading && _error == null && _categories.isNotEmpty)
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 62,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 11,
-                      ),
-                      children: [
-                        _CategoryChip(
-                          label: 'All',
-                          selected: _selectedCategoryId == null,
-                          onTap: () {
-                            setState(() => _selectedCategoryId = null);
-                          },
-                        ),
-                        ..._categories.where((c) => c.isActive).map(
-                              (category) => Padding(
-                                padding: const EdgeInsets.only(left: 8),
-                                child: _CategoryChip(
-                                  label: category.name,
-                                  selected:
-                                      _selectedCategoryId == category.id,
-                                  onTap: () {
-                                    setState(
-                                      () =>
-                                          _selectedCategoryId = category.id,
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                      ],
-                    ),
-                  ),
-                ),
               if (!_loading && _error == null)
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                    padding: const EdgeInsets.fromLTRB(18, 18, 18, 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'DISCOVER',
-                                style: TextStyle(
-                                  color: _gold,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 1.7,
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                'Crafts & Artisans',
-                                style: TextStyle(
-                                  color: AppColors.textPrimary,
-                                  fontSize: 24,
-                                  height: 1,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ],
-                          ),
+                        const Text('MANAGE INVENTORY', style: TextStyle(color: AppColors.accent, fontSize: 9.5, fontWeight: FontWeight.w800, letterSpacing: 1.2)),
+                        const SizedBox(height: 5),
+                        const Text('Your craft collection', style: TextStyle(color: AppColors.textPrimary, fontSize: 23, fontWeight: FontWeight.w800)),
+                        const SizedBox(height: 14),
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(children: [
+                            _StockChip(label: 'All', selected: _stockFilter == 'all', onTap: () => setState(() => _stockFilter = 'all')),
+                            const SizedBox(width: 8),
+                            _StockChip(label: 'In Stock', selected: _stockFilter == 'in', onTap: () => setState(() => _stockFilter = 'in')),
+                            const SizedBox(width: 8),
+                            _StockChip(label: 'Low Stock', selected: _stockFilter == 'low', onTap: () => setState(() => _stockFilter = 'low')),
+                            const SizedBox(width: 8),
+                            _StockChip(label: 'Out of Stock', selected: _stockFilter == 'out', onTap: () => setState(() => _stockFilter = 'out')),
+                          ]),
                         ),
-                        Text(
-                          '${products.length} product${products.length == 1 ? '' : 's'}',
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
+                        if (_categories.isNotEmpty) ...[
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            height: 38,
+                            child: ListView(
+                              scrollDirection: Axis.horizontal,
+                              children: [
+                                _CategoryChip(label: 'All categories', selected: _selectedCategoryId == null, onTap: () => setState(() => _selectedCategoryId = null)),
+                                ..._categories.where((item) => item.isActive).map((category) => Padding(
+                                  padding: const EdgeInsets.only(left: 8),
+                                  child: _CategoryChip(label: category.name, selected: _selectedCategoryId == category.id, onTap: () => setState(() => _selectedCategoryId = category.id)),
+                                )),
+                              ],
+                            ),
                           ),
-                        ),
+                        ],
+                        const SizedBox(height: 13),
+                        Text('${products.length} craft${products.length == 1 ? '' : 's'}', style: const TextStyle(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ),
@@ -341,98 +311,73 @@ class _MarketplacePageState extends State<MarketplacePage> {
 }
 
 class _MarketplaceHeader extends StatelessWidget {
-  const _MarketplaceHeader({
-    required this.controller,
-    required this.onAdd,
-    required this.onChanged,
-  });
-
+  const _MarketplaceHeader({required this.controller, required this.onAdd, required this.onChanged});
   final TextEditingController controller;
   final VoidCallback onAdd;
   final ValueChanged<String> onChanged;
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: _MarketplacePageState._forest,
-      padding: const EdgeInsets.fromLTRB(18, 18, 18, 22),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Expanded(
-                child: Text(
-                  'My Crafts',
-                  style: TextStyle(color: Colors.white, fontSize: 27, fontWeight: FontWeight.w800),
-                ),
-              ),
-              FilledButton.icon(
-                onPressed: onAdd,
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.accent,
-                  foregroundColor: AppColors.primary,
-                  padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
-                ),
-                icon: const Icon(Icons.add_rounded, size: 19),
-                label: const Text('Add Craft', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11)),
-              ),
-            ],
+  Widget build(BuildContext context) => Container(
+    color: AppColors.background,
+    padding: const EdgeInsets.fromLTRB(18, 20, 18, 8),
+    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      const Text('My Crafts', style: TextStyle(color: AppColors.primary, fontSize: 29, height: 1.05, fontWeight: FontWeight.w800)),
+      const SizedBox(height: 6),
+      const Text('Manage your products and grow your craft business.', style: TextStyle(color: AppColors.textSecondary, fontSize: 12.5)),
+      const SizedBox(height: 18),
+      SizedBox(
+        width: double.infinity,
+        height: 52,
+        child: FilledButton.icon(
+          onPressed: onAdd,
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.accent,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           ),
-          const SizedBox(height: 5),
-          Text(
-            'Add, edit and manage crafts in your shop.',
-            style: TextStyle(color: Colors.white.withOpacity(.72), fontSize: 13),
-          ),
-          const SizedBox(height: 18),
-          const Text(
-            'Marketplace',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 27,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 5),
-          Text(
-            'Authentic crafts. Local artisans. Living culture.',
-            style: TextStyle(
-              color: Colors.white.withOpacity(.72),
-              fontSize: 13,
-            ),
-          ),
-          const SizedBox(height: 18),
-          TextField(
-            controller: controller,
-            onChanged: onChanged,
-            textInputAction: TextInputAction.search,
-            decoration: InputDecoration(
-              hintText: 'Search handmade products...',
-              hintStyle: const TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 13,
-              ),
-              prefixIcon: const Icon(
-                Icons.search_rounded,
-                color: AppColors.primary,
-              ),
-              filled: true,
-              fillColor: Colors.white,
-              contentPadding: const EdgeInsets.symmetric(vertical: 15),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(13),
-                borderSide: BorderSide.none,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(13),
-                borderSide: BorderSide.none,
-              ),
-            ),
-          ),
-        ],
+          icon: const Icon(Icons.add_rounded, size: 23),
+          label: const Text('Add New Craft', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
+        ),
       ),
-    );
-  }
+      const SizedBox(height: 14),
+      TextField(
+        controller: controller,
+        onChanged: onChanged,
+        textInputAction: TextInputAction.search,
+        decoration: InputDecoration(
+          hintText: 'Search your crafts...',
+          hintStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12.5),
+          prefixIcon: const Icon(Icons.search_rounded, color: AppColors.primary),
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding: const EdgeInsets.symmetric(vertical: 14),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: AppColors.cardBorder)),
+          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: AppColors.cardBorder)),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: AppColors.primary)),
+        ),
+      ),
+    ]),
+  );
+}
+
+class _StockChip extends StatelessWidget {
+  const _StockChip({required this.label, required this.selected, required this.onTap});
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => ChoiceChip(
+    label: Text(label),
+    selected: selected,
+    showCheckmark: false,
+    onSelected: (_) => onTap(),
+    selectedColor: AppColors.primary,
+    backgroundColor: Colors.white,
+    side: BorderSide(color: selected ? AppColors.primary : AppColors.cardBorder),
+    labelStyle: TextStyle(color: selected ? Colors.white : AppColors.textPrimary, fontSize: 11, fontWeight: FontWeight.w700),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  );
 }
 
 class _CategoryChip extends StatelessWidget {
