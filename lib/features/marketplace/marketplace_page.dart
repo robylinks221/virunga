@@ -25,8 +25,6 @@ class _MarketplacePageState extends State<MarketplacePage> {
   static const Color _cream = AppColors.background;
   static const Color _gold = AppColors.accent;
 
-  final TextEditingController _searchController = TextEditingController();
-
   late final MarketplaceService _service;
 
   List<MarketplaceProduct> _products = const [];
@@ -35,7 +33,6 @@ class _MarketplacePageState extends State<MarketplacePage> {
   bool _loading = true;
   String? _error;
   int? _selectedCategoryId;
-  String _query = '';
   String _stockFilter = 'all';
 
   @override
@@ -43,12 +40,6 @@ class _MarketplacePageState extends State<MarketplacePage> {
     super.initState();
     _service = MarketplaceService(authService: widget.authService);
     _load();
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
   }
 
   Future<void> _load() async {
@@ -94,17 +85,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
   }
 
   List<MarketplaceProduct> get _visibleProducts {
-    final query = _query.trim().toLowerCase();
-
     return _products.where((product) {
-      final matchesCategory = _selectedCategoryId == null ||
-          product.categoryId == _selectedCategoryId;
-
-      final matchesSearch = query.isEmpty ||
-          product.name.toLowerCase().contains(query) ||
-          product.categoryName.toLowerCase().contains(query) ||
-          product.description.toLowerCase().contains(query);
-
       final matchesStock = switch (_stockFilter) {
         'in' => product.inStock && product.quantityAvailable > 2,
         'low' => product.inStock && product.quantityAvailable > 0 && product.quantityAvailable <= 2,
@@ -112,7 +93,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
         _ => true,
       };
 
-      return matchesCategory && matchesSearch && matchesStock;
+      return matchesStock;
     }).toList();
   }
 
@@ -178,13 +159,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
               SliverToBoxAdapter(
-                child: _MarketplaceHeader(
-                  controller: _searchController,
-                  onAdd: _addProduct,
-                  onChanged: (value) {
-                    setState(() => _query = value);
-                  },
-                ),
+                child: _MarketplaceHeader(onAdd: _addProduct),
               ),
               if (!_loading && _error == null)
                 SliverToBoxAdapter(
@@ -209,22 +184,6 @@ class _MarketplacePageState extends State<MarketplacePage> {
                             _StockChip(label: 'Out of Stock', selected: _stockFilter == 'out', onTap: () => setState(() => _stockFilter = 'out')),
                           ]),
                         ),
-                        if (_categories.isNotEmpty) ...[
-                          const SizedBox(height: 12),
-                          SizedBox(
-                            height: 38,
-                            child: ListView(
-                              scrollDirection: Axis.horizontal,
-                              children: [
-                                _CategoryChip(label: 'All categories', selected: _selectedCategoryId == null, onTap: () => setState(() => _selectedCategoryId = null)),
-                                ..._categories.where((item) => item.isActive).map((category) => Padding(
-                                  padding: const EdgeInsets.only(left: 8),
-                                  child: _CategoryChip(label: category.name, selected: _selectedCategoryId == category.id, onTap: () => setState(() => _selectedCategoryId = category.id)),
-                                )),
-                              ],
-                            ),
-                          ),
-                        ],
                         const SizedBox(height: 13),
                         Text('${products.length} craft${products.length == 1 ? '' : 's'}', style: const TextStyle(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w600)),
                       ],
@@ -254,52 +213,17 @@ class _MarketplacePageState extends State<MarketplacePage> {
               else
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(18, 0, 18, 30),
-                  sliver: SliverGrid(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 13,
-                      crossAxisSpacing: 13,
-                      childAspectRatio: .63,
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final product = products[index];
-
-                        return Stack(
-                          children: [
-                            Positioned.fill(
-                              child: MarketplaceProductCard(
-                                product: product,
-                                onTap: () => _editProduct(product),
-                              ),
-                            ),
-                            Positioned(
-                              top: 8,
-                              right: 8,
-                              child: PopupMenuButton<String>(
-                                color: Colors.white,
-                                icon: Container(
-                                  width: 34,
-                                  height: 34,
-                                  decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                                  child: const Icon(Icons.more_horiz_rounded, color: AppColors.primary, size: 20),
-                                ),
-                                onSelected: (value) {
-                                  if (value == 'edit') _editProduct(product);
-                                  if (value == 'delete') _deleteProduct(product);
-                                },
-                                itemBuilder: (_) => const [
-                                  PopupMenuItem(value: 'edit', child: Row(children: [Icon(Icons.edit_outlined, size: 19), SizedBox(width: 10), Text('Edit craft')])),
-                                  PopupMenuItem(value: 'delete', child: Row(children: [Icon(Icons.delete_outline_rounded, color: AppColors.danger, size: 19), SizedBox(width: 10), Text('Delete craft')])),
-                                ],
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                      childCount: products.length,
-                    ),
+                  sliver: SliverList.separated(
+                    itemCount: products.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 11),
+                    itemBuilder: (context, index) {
+                      final product = products[index];
+                      return _SellerCraftCard(
+                        product: product,
+                        onEdit: () => _editProduct(product),
+                        onDelete: () => _deleteProduct(product),
+                      );
+                    },
                   ),
                 ),
             ],
@@ -311,23 +235,21 @@ class _MarketplacePageState extends State<MarketplacePage> {
 }
 
 class _MarketplaceHeader extends StatelessWidget {
-  const _MarketplaceHeader({required this.controller, required this.onAdd, required this.onChanged});
-  final TextEditingController controller;
+  const _MarketplaceHeader({required this.onAdd});
   final VoidCallback onAdd;
-  final ValueChanged<String> onChanged;
 
   @override
   Widget build(BuildContext context) => Container(
     color: AppColors.background,
-    padding: const EdgeInsets.fromLTRB(18, 20, 18, 8),
+    padding: const EdgeInsets.fromLTRB(18, 24, 18, 10),
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      const Text('My Crafts', style: TextStyle(color: AppColors.primary, fontSize: 29, height: 1.05, fontWeight: FontWeight.w800)),
-      const SizedBox(height: 6),
-      const Text('Manage your products and grow your craft business.', style: TextStyle(color: AppColors.textSecondary, fontSize: 12.5)),
-      const SizedBox(height: 18),
+      const Text('My Crafts', style: TextStyle(color: AppColors.primary, fontSize: 30, height: 1.05, fontWeight: FontWeight.w800)),
+      const SizedBox(height: 7),
+      const Text('Manage your products and grow your business.', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+      const SizedBox(height: 17),
       SizedBox(
         width: double.infinity,
-        height: 52,
+        height: 55,
         child: FilledButton.icon(
           onPressed: onAdd,
           style: FilledButton.styleFrom(
@@ -335,29 +257,82 @@ class _MarketplaceHeader extends StatelessWidget {
             foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           ),
-          icon: const Icon(Icons.add_rounded, size: 23),
+          icon: const Icon(Icons.add_rounded, size: 25),
           label: const Text('Add New Craft', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
-        ),
-      ),
-      const SizedBox(height: 14),
-      TextField(
-        controller: controller,
-        onChanged: onChanged,
-        textInputAction: TextInputAction.search,
-        decoration: InputDecoration(
-          hintText: 'Search your crafts...',
-          hintStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12.5),
-          prefixIcon: const Icon(Icons.search_rounded, color: AppColors.primary),
-          filled: true,
-          fillColor: Colors.white,
-          contentPadding: const EdgeInsets.symmetric(vertical: 14),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: AppColors.cardBorder)),
-          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: AppColors.cardBorder)),
-          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: AppColors.primary)),
         ),
       ),
     ]),
   );
+}
+
+class _SellerCraftCard extends StatelessWidget {
+  const _SellerCraftCard({required this.product, required this.onEdit, required this.onDelete});
+  final MarketplaceProduct product;
+  final VoidCallback onEdit, onDelete;
+
+  String _money(double value) {
+    final raw = value.round().toString();
+    final out = StringBuffer();
+    for (var i = 0; i < raw.length; i++) {
+      if (i > 0 && (raw.length - i) % 3 == 0) out.write(',');
+      out.write(raw[i]);
+    }
+    return 'UGX $out';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final low = product.inStock && product.quantityAvailable > 0 && product.quantityAvailable <= 2;
+    final out = !product.inStock || product.quantityAvailable <= 0;
+    final status = out ? 'Out of Stock' : low ? 'Low Stock' : 'In Stock';
+    final statusColor = out ? AppColors.danger : low ? AppColors.warning : AppColors.success;
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(17),
+      child: InkWell(
+        onTap: onEdit,
+        borderRadius: BorderRadius.circular(17),
+        child: Container(
+          height: 126,
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(17), border: Border.all(color: AppColors.cardBorder)),
+          child: Row(children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: SizedBox(
+                width: 108,
+                height: 106,
+                child: product.featuredImage.trim().isEmpty
+                    ? const ColoredBox(color: Color(0xFFEAE7DE), child: Icon(Icons.image_outlined, color: AppColors.textMuted))
+                    : Image.network(product.featuredImage, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const ColoredBox(color: Color(0xFFEAE7DE), child: Icon(Icons.broken_image_outlined, color: AppColors.textMuted))),
+              ),
+            ),
+            const SizedBox(width: 13),
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
+              Text(product.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.primary, fontSize: 15, height: 1.12, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 7),
+              Text(_money(product.price), style: const TextStyle(color: AppColors.accent, fontSize: 15, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 8),
+              Row(children: [
+                Container(width: 9, height: 9, decoration: BoxDecoration(color: statusColor, shape: BoxShape.circle)),
+                const SizedBox(width: 7),
+                Flexible(child: Text(out ? status : '$status · ${product.quantityAvailable} available', overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textSecondary, fontSize: 10.5))),
+              ]),
+            ])),
+            PopupMenuButton<String>(
+              color: Colors.white,
+              icon: const Icon(Icons.more_vert_rounded, color: AppColors.primary),
+              onSelected: (value) { if (value == 'edit') onEdit(); if (value == 'delete') onDelete(); },
+              itemBuilder: (_) => const [
+                PopupMenuItem(value: 'edit', child: Row(children: [Icon(Icons.edit_outlined, size: 19), SizedBox(width: 10), Text('Edit craft')])),
+                PopupMenuItem(value: 'delete', child: Row(children: [Icon(Icons.delete_outline_rounded, color: AppColors.danger, size: 19), SizedBox(width: 10), Text('Delete craft')])),
+              ],
+            ),
+          ]),
+        ),
+      ),
+    );
+  }
 }
 
 class _StockChip extends StatelessWidget {
