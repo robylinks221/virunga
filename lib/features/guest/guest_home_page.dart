@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import '../../core/api/api_config.dart';
+import '../../core/theme/app_theme.dart';
 import '../auth/auth_service.dart';
 import '../auth/login_page.dart';
 
@@ -29,14 +30,16 @@ class GuestHomePage extends StatefulWidget {
 }
 
 class _GuestHomePageState extends State<GuestHomePage> {
-  static const green = Color(0xFF006B46);
-  static const deepGreen = Color(0xFF003F2D);
+  // Home layout is intentionally unchanged; these aliases keep the approved
+  // design while using the same Virunga brand colours as the rest of the app.
+  static const green = AppColors.primary;
+  static const deepGreen = AppColors.primary;
   static const ink = Color(0xFF14231D);
   static const muted = Color(0xFF6F7A75);
   static const background = Color(0xFFFAFBF8);
   static const softGreen = Color(0xFFEAF3EE);
   static const border = Color(0xFFE5EAE7);
-  static const gold = Color(0xFFC79B48);
+  static const gold = AppColors.accent;
 
   String? _firstName;
   bool _authenticated = false;
