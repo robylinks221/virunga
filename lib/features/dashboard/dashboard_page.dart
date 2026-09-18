@@ -222,7 +222,7 @@ class _DashboardPageState extends State<DashboardPage> {
       }
 
       if (item.label == 'Explore') {
-        pages.add(const ExplorePage());
+        pages.add(ExplorePage(authService: widget.authService));
         continue;
       }
 
