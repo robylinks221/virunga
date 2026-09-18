@@ -1,9 +1,24 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../community/community_page.dart';
+import '../marketplace/marketplace_page.dart';
+import '../auth/auth_service.dart';
+import 'explore_section_pages.dart';
 
 class ExplorePage extends StatelessWidget {
-  const ExplorePage({super.key});
+  const ExplorePage({
+    super.key,
+    required this.authService,
+  });
+
+  final AuthService authService;
+
+  void _open(BuildContext context, Widget page) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => page),
+    );
+  }
 
   void _comingSoon(BuildContext context, String title) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -141,7 +156,31 @@ class ExplorePage extends StatelessWidget {
               itemBuilder: (context, index) {
                 final item = items[index];
                 return InkWell(
-                  onTap: () => _comingSoon(context, item.$2),
+                  onTap: () {
+                    switch (item.$2) {
+                      case 'Countries':
+                        _open(context, const CountriesPage());
+                        break;
+                      case 'Destinations':
+                        _open(context, const DestinationsPage());
+                        break;
+                      case 'Porters':
+                        _open(context, const PortersPage());
+                        break;
+                      case 'Crafts':
+                        _open(context, MarketplacePage(authService: authService));
+                        break;
+                      case 'Community':
+                        _open(context, const CommunityPage());
+                        break;
+                      case 'Conservation':
+                        _open(context, const ConservationPage());
+                        break;
+                      case 'Rangers':
+                        _open(context, const RangersPage());
+                        break;
+                    }
+                  },
                   borderRadius: BorderRadius.circular(18),
                   child: Container(
                     padding: const EdgeInsets.all(15),
