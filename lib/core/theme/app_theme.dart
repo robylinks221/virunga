@@ -2,17 +2,22 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   AppColors._();
-  static const primary = Color(0xFF0B3B2E);
-  static const primaryDeep = Color(0xFF03261E);
-  static const primarySoft = Color(0xFF14513E);
-  static const accent = Color(0xFFE4B33E);
-  static const accentLight = Color(0xFFF3CE65);
-  static const accentSoft = Color(0xFFFFF3D0);
-  static const background = Color(0xFFF7F4EE);
+
+  // Virunga approved brand colours.
+  static const primary = Color(0xFF032329);
+  static const primaryDeep = Color(0xFF032329);
+  static const primarySoft = Color(0xFF0A3941);
+
+  static const accent = Color(0xFFF58020);
+  static const accentLight = Color(0xFFFFA45C);
+  static const accentSoft = Color(0xFFFFEBDD);
+
+  static const background = Color(0xFFFAFBF8);
   static const surface = Color(0xFFFFFFFF);
-  static const textPrimary = Color(0xFF17201D);
-  static const textSecondary = Color(0xFF6E7772);
+  static const textPrimary = Color(0xFF14231D);
+  static const textSecondary = Color(0xFF6F7A75);
   static const textMuted = Color(0xFF9AA19D);
+
   static const success = Color(0xFF17854B);
   static const warning = Color(0xFFE69D18);
   static const danger = Color(0xFFC85145);
@@ -21,13 +26,14 @@ class AppColors {
   static const mintSoft = Color(0xFFE9F6EE);
   static const blueSoft = Color(0xFFE9F1FF);
   static const purpleSoft = Color(0xFFF0EAFF);
-  static const divider = Color(0xFFE8E4DC);
-  static const cardBorder = Color(0xFFEAE6DE);
+
+  static const divider = Color(0xFFE5EAE7);
+  static const cardBorder = Color(0xFFE5EAE7);
 }
 
 class AppTypography {
   AppTypography._();
-  static const fontFamily = 'Roboto';
+  static const fontFamily = 'Poppins';
   static const h1 = 27.0;
   static const h2 = 22.0;
   static const h3 = 18.0;
@@ -56,6 +62,7 @@ class AppRadii {
 
 class AppTheme {
   AppTheme._();
+
   static ThemeData get light => ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
