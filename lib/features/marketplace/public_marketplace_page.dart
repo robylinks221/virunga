@@ -478,7 +478,7 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
   Widget build(BuildContext context) {
     final product = widget.product;
     final saved = _SavedCrafts.contains(product);
-    final recent = _RecentlyViewed.items.where((p) => p.name != product.name).take(3).toList();
+    final recent = _RecentlyViewed.items.where((p) => p.id != product.id).take(3).toList();
     final sameCategory = _MarketplaceCatalog.products
         .where((p) => p.id != product.id && p.category == product.category && !recent.any((r) => r.id == p.id))
         .toList();
@@ -506,10 +506,14 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
             background: Stack(
               fit: StackFit.expand,
               children: [
-                _CraftImage(
-                  url: product.images.isNotEmpty ? product.images[imageIndex.clamp(0, product.images.length - 1)] : product.image,
-                  fit: BoxFit.cover,
-                ),
+                if (product.images.length > 1)
+                  PageView.builder(
+                    itemCount: product.images.length,
+                    onPageChanged: (index) => setState(() => imageIndex = index),
+                    itemBuilder: (_, index) => _CraftImage(url: product.images[index], fit: BoxFit.cover),
+                  )
+                else
+                  _CraftImage(url: product.image, fit: BoxFit.cover),
                 if (product.images.length > 1)
                   Positioned(
                     left: 16,
@@ -561,19 +565,20 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
               ),
             ]),
             const SizedBox(height: 22),
-            Row(children: [
-              const Text('Quantity', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
-              const Spacer(),
-              _qty(Icons.remove_rounded, () { if (quantity > 1) setState(() => quantity--); }),
-              SizedBox(width: 38, child: Text(quantity.toString(), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w700))),
-              _qty(Icons.add_rounded, () {
-                final max = product.quantityAvailable;
-                if (max <= 0 || quantity < max) setState(() => quantity++);
-              }),
-            ]),
-            const SizedBox(height: 18),
+            if (product.inStock && product.quantityAvailable > 0) ...[
+              Row(children: [
+                const Text('Quantity', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                const Spacer(),
+                _qty(Icons.remove_rounded, () { if (quantity > 1) setState(() => quantity--); }),
+                SizedBox(width: 38, child: Text(quantity.toString(), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w700))),
+                _qty(Icons.add_rounded, () {
+                  if (quantity < product.quantityAvailable) setState(() => quantity++);
+                }),
+              ]),
+              const SizedBox(height: 18),
+            ],
             SizedBox(width: double.infinity, height: 52, child: FilledButton.icon(
-              onPressed: () {
+              onPressed: product.inStock && product.quantityAvailable > 0 ? () {
                 _MarketplaceCart.add(product, quantity);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -584,10 +589,15 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
                     ),
                   ),
                 );
-              },
-              style: FilledButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-              icon: const Icon(Icons.shopping_bag_outlined),
-              label: const Text('Add to Cart', style: TextStyle(fontWeight: FontWeight.w700)),
+              } : null,
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                disabledBackgroundColor: AppColors.divider,
+                disabledForegroundColor: AppColors.textSecondary,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
+              icon: Icon(product.inStock && product.quantityAvailable > 0 ? Icons.shopping_bag_outlined : Icons.inventory_2_outlined),
+              label: Text(product.inStock && product.quantityAvailable > 0 ? 'Add to Cart' : 'Out of Stock', style: const TextStyle(fontWeight: FontWeight.w700)),
             )),
             const SizedBox(height: 29),
             const Text('About this craft', style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w700)),
