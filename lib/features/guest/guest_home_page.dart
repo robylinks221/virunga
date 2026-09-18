@@ -11,7 +11,7 @@ import '../community/community_page.dart';
 import '../explore/explore_page.dart';
 import '../explore/explore_section_pages.dart';
 import '../explore/country_destination_detail_pages.dart' as connected;
-import '../marketplace/marketplace_page.dart';
+import '../marketplace/public_marketplace_page.dart';
 
 class GuestHomePage extends StatefulWidget {
   const GuestHomePage({super.key, required this.authService});
@@ -109,11 +109,7 @@ class _GuestHomePageState extends State<GuestHomePage> {
   }
 
   void _openMarketplace() {
-    if (_authenticated) {
-      _open(MarketplacePage(authService: widget.authService));
-      return;
-    }
-    _login();
+    _open(const PublicMarketplacePage());
   }
 
   void _nav(int index) {
