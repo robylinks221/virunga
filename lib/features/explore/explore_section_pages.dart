@@ -194,29 +194,288 @@ class CountriesPage extends StatelessWidget {
       ),
     ];
 
-    return _PhotoCollectionPage(
-      eyebrow: 'THREE COUNTRIES • ONE REGION',
-      title: 'Explore by Country',
-      subtitle:
-          'Discover Greater Virunga through Uganda, Rwanda and DR Congo.',
-      heroImage: 'assets/images/onboarding_landscape.jpg',
-      heroLabel: 'GREATER VIRUNGA',
-      heroTitle: 'Three countries. One connected landscape.',
-      children: countries
-          .map(
-            (country) => _WidePhotoCard(
-              image: country.image,
-              eyebrow: country.tagline,
-              title: country.name,
-              subtitle: country.description,
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => CountryDetailPage(country: country.name),
-                ),
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        title: const Text(
+          'Explore by Country',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+        ),
+      ),
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          SliverToBoxAdapter(
+            child: Container(
+              color: AppColors.primary,
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 22),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'GREATER VIRUNGA',
+                    style: TextStyle(
+                      color: AppColors.accent,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 7),
+                  const Text(
+                    'Three countries.\nOne connected region.',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 27,
+                      height: 1.08,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 9),
+                  Text(
+                    'Explore the landscapes, people and protected places of Uganda, Rwanda and DR Congo.',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(.72),
+                      fontSize: 12,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
               ),
             ),
-          )
-          .toList(),
+          ),
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 286,
+              child: ListView.separated(
+                padding: const EdgeInsets.fromLTRB(20, 22, 20, 16),
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                itemCount: countries.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                itemBuilder: (context, index) {
+                  final country = countries[index];
+                  return _CountryDiscoveryCard(
+                    country: country,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => CountryDetailPage(country: country.name),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(20, 16, 20, 13),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'DISCOVER THE REGION',
+                    style: TextStyle(
+                      color: AppColors.accent,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.3,
+                    ),
+                  ),
+                  SizedBox(height: 5),
+                  Text(
+                    'Choose your starting point',
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 34),
+            sliver: SliverList.separated(
+              itemCount: countries.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 10),
+              itemBuilder: (context, index) {
+                final country = countries[index];
+                return _CountryListCard(
+                  country: country,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => CountryDetailPage(country: country.name),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CountryDiscoveryCard extends StatelessWidget {
+  const _CountryDiscoveryCard({required this.country, required this.onTap});
+  final _CountryCardData country;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 218,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(22),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(22),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.asset(country.image, fit: BoxFit.cover),
+              const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Color(0x08000000), Color(0xE6000000)],
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 14,
+                right: 14,
+                child: Container(
+                  width: 35,
+                  height: 35,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.arrow_outward_rounded,
+                    color: AppColors.primary,
+                    size: 18,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Spacer(),
+                    Text(
+                      country.name.toUpperCase(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: .9,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      country.tagline,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(.82),
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CountryListCard extends StatelessWidget {
+  const _CountryListCard({required this.country, required this.onTap});
+  final _CountryCardData country;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppColors.cardBorder),
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(13),
+              child: Image.asset(
+                country.image,
+                width: 78,
+                height: 78,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(width: 13),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    country.name.toUpperCase(),
+                    style: const TextStyle(
+                      color: AppColors.accent,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: .8,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    country.tagline,
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    country.description,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 10.5,
+                      height: 1.3,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.primary,
+              size: 22,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
