@@ -27,7 +27,12 @@ class CountryDetailPage extends StatelessWidget {
 }
 
 class _CountryPage extends StatelessWidget {
-  const _CountryPage({required this.country, required this.destinations, required this.image});
+  const _CountryPage({
+    required this.country,
+    required this.destinations,
+    required this.image,
+  });
+
   final String country;
   final List<String> destinations;
   final String image;
@@ -35,11 +40,54 @@ class _CountryPage extends StatelessWidget {
   String get tagline {
     switch (country) {
       case 'Uganda':
-        return 'Forests, savannah, mountains and living communities.';
+        return 'Mountain forests, protected landscapes and living craft traditions.';
       case 'Rwanda':
-        return 'Volcanoes, mountain forests and a rich cultural landscape.';
+        return 'Volcanic landscapes, mountain forests and refined craft traditions.';
       default:
-        return 'Extraordinary forests, mountains and protected landscapes.';
+        return 'Virunga forests, dramatic landscapes and enduring craft traditions.';
+    }
+  }
+
+  String get overview {
+    switch (country) {
+      case 'Uganda':
+        return 'Explore Uganda through its Greater Virunga landscapes, protected areas and the craft traditions of communities connected to the region.';
+      case 'Rwanda':
+        return 'Explore Rwanda through its Greater Virunga landscapes, protected areas and the craft traditions of communities connected to the region.';
+      default:
+        return 'Explore DR Congo through its Greater Virunga landscapes, protected areas and the craft traditions of communities connected to the region.';
+    }
+  }
+
+  List<(String, IconData)> get craftCategories => const [
+    ('Baskets & Weaving', Icons.shopping_basket_outlined),
+    ('Wood Carvings', Icons.handyman_outlined),
+    ('Beadwork', Icons.diamond_outlined),
+    ('Textiles', Icons.checkroom_outlined),
+    ('Pottery', Icons.local_cafe_outlined),
+    ('Artworks', Icons.palette_outlined),
+  ];
+
+  List<_CountryCraft> get crafts {
+    switch (country) {
+      case 'Uganda':
+        return const [
+          _CountryCraft('Virunga Beaded Sandals', 'Beadwork', 'assets/images/crafts_beaded_sandals.jpg'),
+          _CountryCraft('Heritage Textile', 'Textiles', 'assets/images/onboarding_community.jpg'),
+          _CountryCraft('Handmade Basket', 'Baskets & Weaving', 'assets/images/onboarding_landscape.jpg'),
+        ];
+      case 'Rwanda':
+        return const [
+          _CountryCraft('Handwoven Basket', 'Baskets & Weaving', 'assets/images/onboarding_community.jpg'),
+          _CountryCraft('Traditional Beadwork', 'Beadwork', 'assets/images/crafts_beaded_sandals.jpg'),
+          _CountryCraft('Heritage Textile', 'Textiles', 'assets/images/onboarding_landscape.jpg'),
+        ];
+      default:
+        return const [
+          _CountryCraft('Carved Wildlife Art', 'Wood Carvings', 'assets/images/onboarding_wildlife.jpg'),
+          _CountryCraft('Virunga Beadwork', 'Beadwork', 'assets/images/crafts_beaded_sandals.jpg'),
+          _CountryCraft('Community Weaving', 'Baskets & Weaving', 'assets/images/onboarding_community.jpg'),
+        ];
     }
   }
 
@@ -55,7 +103,7 @@ class _CountryPage extends StatelessWidget {
         physics: const BouncingScrollPhysics(),
         slivers: [
           SliverAppBar(
-            expandedHeight: 310,
+            expandedHeight: 285,
             pinned: true,
             backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
@@ -70,7 +118,7 @@ class _CountryPage extends StatelessWidget {
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [Color(0x18000000), Color(0xF0000000)],
+                        colors: [Color(0x12000000), Color(0xE8000000)],
                       ),
                     ),
                   ),
@@ -84,31 +132,28 @@ class _CountryPage extends StatelessWidget {
                           'GREATER VIRUNGA',
                           style: TextStyle(
                             color: AppColors.accent,
-                            fontSize: 10,
+                            fontSize: 9.5,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 1.4,
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 7),
                         Text(
                           country,
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 31,
+                            fontSize: 32,
                             height: 1.05,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
                         const SizedBox(height: 8),
-                        SizedBox(
-                          width: 315,
-                          child: Text(
-                            tagline,
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(.78),
-                              fontSize: 12,
-                              height: 1.45,
-                            ),
+                        Text(
+                          tagline,
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(.78),
+                            fontSize: 11.5,
+                            height: 1.45,
                           ),
                         ),
                       ],
@@ -118,42 +163,33 @@ class _CountryPage extends StatelessWidget {
               ),
             ),
           ),
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: 76,
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 14, 20, 10),
-                scrollDirection: Axis.horizontal,
-                children: [
-                  _countryQuickLink(Icons.landscape_outlined, 'Destinations'),
-                  _countryQuickLink(Icons.pets_outlined, 'Nature'),
-                  _countryQuickLink(Icons.diversity_3_outlined, 'Culture'),
-                  _countryQuickLink(Icons.shopping_basket_outlined, 'Crafts'),
-                  _countryQuickLink(Icons.eco_outlined, 'Conservation'),
-                ],
-              ),
-            ),
-          ),
+
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 17, 20, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _sectionTitle('ABOUT ' + country.toUpperCase()),
-                  const SizedBox(height: 8),
-                  _body('Discover the part of Greater Virunga found in $country, from protected landscapes and wildlife to communities, heritage and locally made crafts.'),
-                  const SizedBox(height: 28),
-                  _countryHeading('Top destinations', 'Explore protected places across $country'),
-                ],
+              padding: const EdgeInsets.fromLTRB(20, 26, 20, 0),
+              child: _CountrySectionIntro(
+                eyebrow: 'OVERVIEW',
+                title: 'A closer look at $country',
+                body: overview,
+              ),
+            ),
+          ),
+
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 32, 20, 12),
+              child: _CountrySectionIntro(
+                eyebrow: 'DESTINATIONS',
+                title: 'Greater Virunga destinations',
+                body: 'Protected landscapes in $country that belong to the region covered by Virunga.',
               ),
             ),
           ),
           SliverToBoxAdapter(
             child: SizedBox(
-              height: 225,
+              height: 222,
               child: ListView.separated(
-                padding: const EdgeInsets.fromLTRB(20, 13, 20, 16),
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
                 itemCount: destinations.length,
@@ -173,40 +209,122 @@ class _CountryPage extends StatelessWidget {
               ),
             ),
           ),
+
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 15, 20, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 13),
+              child: _CountrySectionIntro(
+                eyebrow: 'CRAFT CATEGORIES',
+                title: 'Craft traditions of $country',
+                body: 'Browse locally made craft categories connected to communities in the Greater Virunga region.',
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: _CountryCraftCategories(items: craftCategories),
+          ),
+
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 30, 20, 13),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  _countryHeading('Discover $country', 'A quick look at the character of the country'),
-                  const SizedBox(height: 13),
-                  _countryEditorialFeature(
-                    image: 'assets/images/onboarding_community.jpg',
-                    eyebrow: 'NATURE • CULTURE • HERITAGE',
-                    title: 'More than a destination',
-                    subtitle: 'Discover wildlife, communities, conservation and the living heritage that shapes $country.',
+                  Expanded(
+                    child: _CountrySectionIntro(
+                      eyebrow: 'FEATURED CRAFTS',
+                      title: 'Made in $country',
+                      body: 'A selection of crafts from local makers.',
+                    ),
                   ),
-                  const SizedBox(height: 28),
-                  _countryHeading('Things to do', 'Signature ways to experience the landscape'),
-                  const SizedBox(height: 13),
-                  _countryActivityStrip(),
-                  const SizedBox(height: 28),
-                  _countryHeading('Crafts & artisans', 'Discover making traditions connected to $country'),
-                  const SizedBox(height: 13),
-                  _countryCraftBanner(
-                    onTap: () => _open(context, const PublicMarketplacePage()),
+                  TextButton(
+                    onPressed: () => _open(context, const PublicMarketplacePage()),
+                    child: const Text(
+                      'See all',
+                      style: TextStyle(
+                        color: AppColors.accent,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 28),
-                  _countryHeading('People of the landscape', 'The people supporting tourism and conservation'),
-                  const SizedBox(height: 13),
-                  _countryPeopleFeature(country),
-                  const SizedBox(height: 28),
-                  _countryHeading('Plan your journey', 'Everything useful in one simple place'),
-                  const SizedBox(height: 13),
-                  _countryJourneyPanel(country),
-                  const SizedBox(height: 34),
                 ],
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 260,
+              child: ListView.separated(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                itemCount: crafts.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                itemBuilder: (context, index) => _CountryCraftCard(
+                  craft: crafts[index],
+                  country: country,
+                  onTap: () => _open(context, const PublicMarketplacePage()),
+                ),
+              ),
+            ),
+          ),
+
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 38),
+              child: InkWell(
+                onTap: () => _open(context, const PublicMarketplacePage()),
+                borderRadius: BorderRadius.circular(18),
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(18, 17, 16, 17),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Row(
+                    children: [
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'EXPLORE THE MARKETPLACE',
+                              style: TextStyle(
+                                color: AppColors.accent,
+                                fontSize: 8.5,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                            SizedBox(height: 5),
+                            Text(
+                              'Discover more local crafts',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        width: 38,
+                        height: 38,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.arrow_outward_rounded,
+                          color: AppColors.primary,
+                          size: 18,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -214,37 +332,63 @@ class _CountryPage extends StatelessWidget {
       ),
     );
   }
-
 }
 
-Widget _countryQuickLink(IconData icon, String label) => Container(
-  margin: const EdgeInsets.only(right: 8),
-  padding: const EdgeInsets.symmetric(horizontal: 13),
-  decoration: BoxDecoration(
-    color: Colors.white,
-    borderRadius: BorderRadius.circular(99),
-    border: Border.all(color: AppColors.cardBorder),
-  ),
-  child: Row(
-    children: [
-      Icon(icon, color: AppColors.primary, size: 17),
-      const SizedBox(width: 6),
-      Text(label, style: const TextStyle(color: AppColors.textPrimary, fontSize: 10.5, fontWeight: FontWeight.w600)),
-    ],
-  ),
-);
+class _CountrySectionIntro extends StatelessWidget {
+  const _CountrySectionIntro({
+    required this.eyebrow,
+    required this.title,
+    required this.body,
+  });
 
-Widget _countryHeading(String title, String subtitle) => Column(
-  crossAxisAlignment: CrossAxisAlignment.start,
-  children: [
-    Text(title, style: const TextStyle(color: AppColors.textPrimary, fontSize: 21, fontWeight: FontWeight.w700)),
-    const SizedBox(height: 4),
-    Text(subtitle, style: const TextStyle(color: AppColors.textSecondary, fontSize: 10.5, height: 1.35)),
-  ],
-);
+  final String eyebrow;
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        eyebrow,
+        style: const TextStyle(
+          color: AppColors.accent,
+          fontSize: 9,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.25,
+        ),
+      ),
+      const SizedBox(height: 6),
+      Text(
+        title,
+        style: const TextStyle(
+          color: AppColors.textPrimary,
+          fontSize: 22,
+          height: 1.12,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      const SizedBox(height: 7),
+      Text(
+        body,
+        style: const TextStyle(
+          color: AppColors.textSecondary,
+          fontSize: 11.5,
+          height: 1.5,
+        ),
+      ),
+    ],
+  );
+}
 
 class _CountryDestinationCard extends StatelessWidget {
-  const _CountryDestinationCard({required this.name, required this.country, required this.image, required this.onTap});
+  const _CountryDestinationCard({
+    required this.name,
+    required this.country,
+    required this.image,
+    required this.onTap,
+  });
+
   final String name;
   final String country;
   final String image;
@@ -252,12 +396,12 @@ class _CountryDestinationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    width: 220,
+    width: 230,
     child: InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(18),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(18),
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -267,18 +411,8 @@ class _CountryDestinationCard extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Color(0x08000000), Color(0xE8000000)],
+                  colors: [Color(0x06000000), Color(0xE8000000)],
                 ),
-              ),
-            ),
-            Positioned(
-              top: 13,
-              right: 13,
-              child: Container(
-                width: 34,
-                height: 34,
-                decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                child: const Icon(Icons.arrow_outward_rounded, color: AppColors.primary, size: 17),
               ),
             ),
             Padding(
@@ -287,9 +421,48 @@ class _CountryDestinationCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Spacer(),
-                  Text(country.toUpperCase(), style: const TextStyle(color: AppColors.accent, fontSize: 8.5, fontWeight: FontWeight.w700, letterSpacing: .8)),
+                  Text(
+                    country.toUpperCase(),
+                    style: const TextStyle(
+                      color: AppColors.accent,
+                      fontSize: 8,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: .8,
+                    ),
+                  ),
                   const SizedBox(height: 4),
-                  Text(name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: 15, height: 1.15, fontWeight: FontWeight.w700)),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            height: 1.15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        width: 34,
+                        height: 34,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.arrow_outward_rounded,
+                          color: AppColors.primary,
+                          size: 17,
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -300,31 +473,48 @@ class _CountryDestinationCard extends StatelessWidget {
   );
 }
 
-Widget _countryActivityStrip() {
-  const items = [
-    ('Wildlife Viewing', Icons.pets_outlined),
-    ('Gorilla Trekking', Icons.forest_outlined),
-    ('Birding', Icons.flutter_dash_outlined),
-    ('Hiking', Icons.hiking_outlined),
-  ];
-  return SizedBox(
-    height: 112,
+class _CountryCraftCategories extends StatelessWidget {
+  const _CountryCraftCategories({required this.items});
+  final List<(String, IconData)> items;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    height: 104,
     child: ListView.separated(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
       itemCount: items.length,
-      separatorBuilder: (_, __) => const SizedBox(width: 10),
+      separatorBuilder: (_, __) => const SizedBox(width: 15),
       itemBuilder: (_, index) {
         final item = items[index];
-        return Container(
-          width: 125,
-          padding: const EdgeInsets.all(13),
-          decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(18)),
+        return SizedBox(
+          width: 70,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(item.$2, color: AppColors.accent, size: 23),
-              const Spacer(),
-              Text(item.$1, style: const TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.w600)),
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.cardBorder),
+                ),
+                child: Icon(item.$2, color: AppColors.primary, size: 23),
+              ),
+              const SizedBox(height: 7),
+              Text(
+                item.$1,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 8.5,
+                  height: 1.15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ],
           ),
         );
@@ -333,228 +523,91 @@ Widget _countryActivityStrip() {
   );
 }
 
-Widget _countryCraftBanner({required VoidCallback onTap}) => InkWell(
-  onTap: onTap,
-  borderRadius: BorderRadius.circular(20),
-  child: Container(
-    height: 155,
-    clipBehavior: Clip.antiAlias,
-    decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
-    child: Stack(
-      fit: StackFit.expand,
-      children: [
-        Image.asset('assets/images/crafts_beaded_sandals.jpg', fit: BoxFit.cover),
-        const DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: [Color(0xE8000000), Color(0x18000000)],
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(17),
-          child: Row(
-            children: [
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text('LOCAL MAKING', style: TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1)),
-                    SizedBox(height: 5),
-                    Text('Crafts & artisan stories', style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w700)),
-                  ],
-                ),
-              ),
-              Container(
-                width: 38,
-                height: 38,
-                decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                child: const Icon(Icons.arrow_outward_rounded, color: AppColors.primary, size: 18),
-              ),
-            ],
-          ),
-        ),
-      ],
-    ),
-  ),
-);
+class _CountryCraftCard extends StatelessWidget {
+  const _CountryCraftCard({
+    required this.craft,
+    required this.country,
+    required this.onTap,
+  });
 
-Widget _countryPeopleCard(IconData icon, String title, String subtitle) => Container(
-  padding: const EdgeInsets.all(15),
-  decoration: BoxDecoration(
-    color: Colors.white,
-    borderRadius: BorderRadius.circular(18),
-    border: Border.all(color: AppColors.cardBorder),
-  ),
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Container(
-        width: 42,
-        height: 42,
-        decoration: BoxDecoration(color: AppColors.accentSoft, borderRadius: BorderRadius.circular(12)),
-        child: Icon(icon, color: AppColors.primary, size: 20),
-      ),
-      const SizedBox(height: 16),
-      Text(title, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w700)),
-      const SizedBox(height: 3),
-      Text(subtitle, style: const TextStyle(color: AppColors.textSecondary, fontSize: 9.5)),
-    ],
-  ),
-);
+  final _CountryCraft craft;
+  final String country;
+  final VoidCallback onTap;
 
-Widget _countryEditorialFeature({
-  required String image,
-  required String eyebrow,
-  required String title,
-  required String subtitle,
-}) => Container(
-  height: 210,
-  clipBehavior: Clip.antiAlias,
-  decoration: BoxDecoration(borderRadius: BorderRadius.circular(22)),
-  child: Stack(
-    fit: StackFit.expand,
-    children: [
-      Image.asset(image, fit: BoxFit.cover),
-      const DecoratedBox(
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    width: 172,
+    child: InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(17),
+      child: Container(
+        clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0x10000000), Color(0xE8000000)],
-          ),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(17),
+          border: Border.all(color: AppColors.cardBorder),
         ),
-      ),
-      Padding(
-        padding: const EdgeInsets.all(17),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Spacer(),
-            Text(eyebrow, style: const TextStyle(color: AppColors.accent, fontSize: 8.5, fontWeight: FontWeight.w700, letterSpacing: .9)),
-            const SizedBox(height: 5),
-            Text(title, style: const TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.w700)),
-            const SizedBox(height: 5),
-            Text(subtitle, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.white.withOpacity(.78), fontSize: 10.5, height: 1.35)),
+            Expanded(
+              child: Image.asset(
+                craft.image,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    craft.category.toUpperCase(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: AppColors.accent,
+                      fontSize: 7.5,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: .5,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    craft.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    country,
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 9.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
-    ],
-  ),
-);
+    ),
+  );
+}
 
-Widget _countryPeopleFeature(String country) => Container(
-  padding: const EdgeInsets.all(18),
-  decoration: BoxDecoration(
-    color: AppColors.primary,
-    borderRadius: BorderRadius.circular(22),
-  ),
-  child: Column(
-    children: [
-      Row(
-        children: [
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(color: Colors.white.withOpacity(.10), borderRadius: BorderRadius.circular(15)),
-            child: const Icon(Icons.backpack_outlined, color: AppColors.accent, size: 24),
-          ),
-          const SizedBox(width: 13),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Porters', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
-                SizedBox(height: 3),
-                Text('Supporting journeys and local livelihoods', style: TextStyle(color: Colors.white70, fontSize: 10)),
-              ],
-            ),
-          ),
-          const Icon(Icons.arrow_outward_rounded, color: Colors.white, size: 18),
-        ],
-      ),
-      Padding(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        child: Divider(height: 1, color: Colors.white.withOpacity(.12)),
-      ),
-      Row(
-        children: [
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(color: Colors.white.withOpacity(.10), borderRadius: BorderRadius.circular(15)),
-            child: const Icon(Icons.shield_outlined, color: AppColors.accent, size: 24),
-          ),
-          const SizedBox(width: 13),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Rangers', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
-                SizedBox(height: 3),
-                Text('Protecting wildlife and protected landscapes', style: TextStyle(color: Colors.white70, fontSize: 10)),
-              ],
-            ),
-          ),
-          const Icon(Icons.arrow_outward_rounded, color: Colors.white, size: 18),
-        ],
-      ),
-    ],
-  ),
-);
-
-Widget _countryJourneyPanel(String country) => Container(
-  padding: const EdgeInsets.all(6),
-  decoration: BoxDecoration(
-    color: Colors.white,
-    borderRadius: BorderRadius.circular(22),
-    border: Border.all(color: AppColors.cardBorder),
-  ),
-  child: Column(
-    children: [
-      _journeyRow(Icons.info_outline_rounded, 'Visitor information', 'Practical travel information'),
-      _journeyDivider(),
-      _journeyRow(Icons.location_on_outlined, 'Places to explore', 'Protected landscapes across $country'),
-      _journeyDivider(),
-      _journeyRow(Icons.eco_outlined, 'Conservation', 'Nature and landscape protection'),
-    ],
-  ),
-);
-
-Widget _journeyRow(IconData icon, String title, String subtitle) => Padding(
-  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 11),
-  child: Row(
-    children: [
-      Container(
-        width: 42,
-        height: 42,
-        decoration: BoxDecoration(color: AppColors.accentSoft, borderRadius: BorderRadius.circular(12)),
-        child: Icon(icon, color: AppColors.primary, size: 20),
-      ),
-      const SizedBox(width: 12),
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: const TextStyle(color: AppColors.textPrimary, fontSize: 12.5, fontWeight: FontWeight.w700)),
-            const SizedBox(height: 2),
-            Text(subtitle, style: const TextStyle(color: AppColors.textSecondary, fontSize: 9.5)),
-          ],
-        ),
-      ),
-      const Icon(Icons.chevron_right_rounded, color: AppColors.primary, size: 20),
-    ],
-  ),
-);
-
-Widget _journeyDivider() => const Padding(
-  padding: EdgeInsets.symmetric(horizontal: 10),
-  child: Divider(height: 1, color: AppColors.cardBorder),
-);
-
+class _CountryCraft {
+  const _CountryCraft(this.name, this.category, this.image);
+  final String name;
+  final String category;
+  final String image;
+}
 
 class DestinationDetailPage extends StatelessWidget {
   const DestinationDetailPage({super.key, required this.name, required this.country, this.authService});
