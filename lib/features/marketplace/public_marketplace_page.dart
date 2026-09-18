@@ -485,18 +485,13 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
             const SizedBox(height: 8),
             Row(children: [const Icon(Icons.location_on_outlined, color: AppColors.primary, size: 17), const SizedBox(width: 5), Text(product.country, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12))]),
             const SizedBox(height: 18),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.cardBorder)),
-              child: const Row(children: [
-                Expanded(child: _CraftTrustItem(icon: Icons.handyman_outlined, label: 'Handmade')),
-                SizedBox(width: 8),
-                Expanded(child: _CraftTrustItem(icon: Icons.public_rounded, label: 'Greater Virunga')),
-                SizedBox(width: 8),
-                Expanded(child: _CraftTrustItem(icon: Icons.groups_2_outlined, label: 'Local makers')),
-              ]),
-            ),
-            const SizedBox(height: 23),
+            const SizedBox(height: 14),
+            const Row(children: [
+              Icon(Icons.visibility_outlined, color: AppColors.textSecondary, size: 15),
+              SizedBox(width: 5),
+              Text('200 views', style: TextStyle(color: AppColors.textSecondary, fontSize: 10.5, fontWeight: FontWeight.w500)),
+            ]),
+            const SizedBox(height: 22),
             Row(children: [
               const Text('Quantity', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
               const Spacer(),
@@ -584,21 +579,6 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
     onTap: onTap,
     borderRadius: BorderRadius.circular(10),
     child: Container(width: 36, height: 36, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.cardBorder)), child: Icon(icon, color: AppColors.primary, size: 18)),
-  );
-}
-
-class _CraftTrustItem extends StatelessWidget {
-  const _CraftTrustItem({required this.icon, required this.label});
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) => Column(
-    children: [
-      Icon(icon, color: AppColors.primary, size: 18),
-      const SizedBox(height: 5),
-      Text(label, textAlign: TextAlign.center, maxLines: 2, style: const TextStyle(color: AppColors.textSecondary, fontSize: 8.5, fontWeight: FontWeight.w600, height: 1.15)),
-    ],
   );
 }
 
