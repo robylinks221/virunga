@@ -5,7 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../auth/auth_service.dart';
 import 'marketplace_models.dart';
 import 'marketplace_service.dart';
-import 'product_details_page.dart';
+import 'product_form_page.dart';
 import 'widgets/marketplace_product_card.dart';
 
 class MarketplacePage extends StatefulWidget {
@@ -108,12 +108,53 @@ class _MarketplacePageState extends State<MarketplacePage> {
     }).toList();
   }
 
-  Future<void> _openProduct(MarketplaceProduct product) async {
-    await Navigator.of(context).push(
+  Future<void> _addProduct() async {
+    final result = await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => ProductDetailsPage(product: product),
+        builder: (_) => ProductFormPage(authService: widget.authService),
       ),
     );
+    if (result != null) await _load();
+  }
+
+  Future<void> _editProduct(MarketplaceProduct product) async {
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ProductFormPage(
+          authService: widget.authService,
+          product: product,
+        ),
+      ),
+    );
+    if (result != null) await _load();
+  }
+
+  Future<void> _deleteProduct(MarketplaceProduct product) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete craft?'),
+        content: Text('Delete “${product.name}”? This cannot be undone.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Cancel')),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppColors.danger),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    try {
+      await _service.deleteProduct(product.id);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Craft deleted.')));
+      await _load();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_cleanError(e))));
+    }
   }
 
   @override
@@ -131,6 +172,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
               SliverToBoxAdapter(
                 child: _MarketplaceHeader(
                   controller: _searchController,
+                  onAdd: _addProduct,
                   onChanged: (value) {
                     setState(() => _query = value);
                   },
@@ -254,9 +296,36 @@ class _MarketplacePageState extends State<MarketplacePage> {
                       (context, index) {
                         final product = products[index];
 
-                        return MarketplaceProductCard(
-                          product: product,
-                          onTap: () => _openProduct(product),
+                        return Stack(
+                          children: [
+                            Positioned.fill(
+                              child: MarketplaceProductCard(
+                                product: product,
+                                onTap: () => _editProduct(product),
+                              ),
+                            ),
+                            Positioned(
+                              top: 8,
+                              right: 8,
+                              child: PopupMenuButton<String>(
+                                color: Colors.white,
+                                icon: Container(
+                                  width: 34,
+                                  height: 34,
+                                  decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                                  child: const Icon(Icons.more_horiz_rounded, color: AppColors.primary, size: 20),
+                                ),
+                                onSelected: (value) {
+                                  if (value == 'edit') _editProduct(product);
+                                  if (value == 'delete') _deleteProduct(product);
+                                },
+                                itemBuilder: (_) => const [
+                                  PopupMenuItem(value: 'edit', child: Row(children: [Icon(Icons.edit_outlined, size: 19), SizedBox(width: 10), Text('Edit craft')])),
+                                  PopupMenuItem(value: 'delete', child: Row(children: [Icon(Icons.delete_outline_rounded, color: AppColors.danger, size: 19), SizedBox(width: 10), Text('Delete craft')])),
+                                ],
+                              ),
+                            ),
+                          ],
                         );
                       },
                       childCount: products.length,
@@ -274,10 +343,12 @@ class _MarketplacePageState extends State<MarketplacePage> {
 class _MarketplaceHeader extends StatelessWidget {
   const _MarketplaceHeader({
     required this.controller,
+    required this.onAdd,
     required this.onChanged,
   });
 
   final TextEditingController controller;
+  final VoidCallback onAdd;
   final ValueChanged<String> onChanged;
 
   @override
@@ -288,6 +359,32 @@ class _MarketplaceHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'My Crafts',
+                  style: TextStyle(color: Colors.white, fontSize: 27, fontWeight: FontWeight.w800),
+                ),
+              ),
+              FilledButton.icon(
+                onPressed: onAdd,
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.accent,
+                  foregroundColor: AppColors.primary,
+                  padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
+                ),
+                icon: const Icon(Icons.add_rounded, size: 19),
+                label: const Text('Add Craft', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 5),
+          Text(
+            'Add, edit and manage crafts in your shop.',
+            style: TextStyle(color: Colors.white.withOpacity(.72), fontSize: 13),
+          ),
+          const SizedBox(height: 18),
           const Text(
             'Marketplace',
             style: TextStyle(
