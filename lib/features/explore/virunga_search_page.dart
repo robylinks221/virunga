@@ -16,6 +16,9 @@ class VirungaSearchPage extends StatefulWidget {
 class _VirungaSearchPageState extends State<VirungaSearchPage> {
   final _controller = TextEditingController();
   String _query = '';
+  String _filter = 'All';
+
+  static const _filters = ['All', 'Countries', 'Destinations', 'People', 'Culture', 'Crafts'];
 
   List<_SearchItem> get _items => [
     _SearchItem('Uganda', 'Country', 'Forests, savannah and mountain landscapes', Icons.public_outlined, () => _open(CountryDetailPage(country: 'Uganda'))),
@@ -45,10 +48,26 @@ class _VirungaSearchPageState extends State<VirungaSearchPage> {
   @override
   Widget build(BuildContext context) {
     final q = _query.trim().toLowerCase();
-    final results = q.isEmpty ? _items : _items.where((item) =>
+    final searched = q.isEmpty ? _items : _items.where((item) =>
       item.title.toLowerCase().contains(q) ||
       item.category.toLowerCase().contains(q) ||
       item.subtitle.toLowerCase().contains(q)).toList();
+    final results = searched.where((item) {
+      switch (_filter) {
+        case 'Countries':
+          return item.category == 'Country';
+        case 'Destinations':
+          return item.category == 'Destination';
+        case 'People':
+          return item.title == 'Porters' || item.title == 'Rangers';
+        case 'Culture':
+          return item.title == 'Community & Culture';
+        case 'Crafts':
+          return item.title == 'Crafts & Artisans';
+        default:
+          return true;
+      }
+    }).toList();
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -88,6 +107,38 @@ class _VirungaSearchPageState extends State<VirungaSearchPage> {
                   ),
                 ),
               ],
+            ),
+          ),
+          SizedBox(
+            height: 58,
+            child: ListView.separated(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              scrollDirection: Axis.horizontal,
+              itemCount: _filters.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemBuilder: (_, index) {
+                final filter = _filters[index];
+                final selected = filter == _filter;
+                return ChoiceChip(
+                  label: Text(filter),
+                  selected: selected,
+                  showCheckmark: false,
+                  onSelected: (_) => setState(() => _filter = filter),
+                  selectedColor: AppColors.primary,
+                  backgroundColor: Colors.white,
+                  side: BorderSide(
+                    color: selected ? AppColors.primary : AppColors.cardBorder,
+                  ),
+                  labelStyle: TextStyle(
+                    color: selected ? Colors.white : AppColors.textPrimary,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(99),
+                  ),
+                );
+              },
             ),
           ),
           Expanded(
