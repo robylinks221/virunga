@@ -71,33 +71,6 @@ class _CountryPage extends StatelessWidget {
     ('Artworks', Icons.palette_outlined),
   ];
 
-  List<_CountryCraft> get crafts {
-    switch (country) {
-      case 'Uganda':
-        return const [
-          _CountryCraft('Virunga Beaded Sandals', 'Beadwork', 'assets/images/crafts_beaded_sandals.jpg'),
-          _CountryCraft('Heritage Textile', 'Textiles', 'assets/images/onboarding_community.jpg'),
-          _CountryCraft('Handmade Basket', 'Baskets & Weaving', 'assets/images/onboarding_landscape.jpg'),
-        ];
-      case 'Rwanda':
-        return const [
-          _CountryCraft('Handwoven Basket', 'Baskets & Weaving', 'assets/images/onboarding_community.jpg'),
-          _CountryCraft('Traditional Beadwork', 'Beadwork', 'assets/images/crafts_beaded_sandals.jpg'),
-          _CountryCraft('Heritage Textile', 'Textiles', 'assets/images/onboarding_landscape.jpg'),
-        ];
-      default:
-        return const [
-          _CountryCraft('Carved Wildlife Art', 'Wood Carvings', 'assets/images/onboarding_wildlife.jpg'),
-          _CountryCraft('Virunga Beadwork', 'Beadwork', 'assets/images/crafts_beaded_sandals.jpg'),
-          _CountryCraft('Community Weaving', 'Baskets & Weaving', 'assets/images/onboarding_community.jpg'),
-        ];
-    }
-  }
-
-  void _open(BuildContext context, Widget page) {
-    Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -515,92 +488,6 @@ class _CountryCraftCategories extends StatelessWidget {
   );
 }
 
-class _CountryCraftCard extends StatelessWidget {
-  const _CountryCraftCard({
-    required this.craft,
-    required this.country,
-    required this.onTap,
-  });
-
-  final _CountryCraft craft;
-  final String country;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => SizedBox(
-    width: 172,
-    child: InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(17),
-      child: Container(
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(17),
-          border: Border.all(color: AppColors.cardBorder),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Image.asset(
-                craft.image,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    craft.category.toUpperCase(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: AppColors.accent,
-                      fontSize: 7.5,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: .5,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    craft.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    country,
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 9.5,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
-class _CountryCraft {
-  const _CountryCraft(this.name, this.category, this.image);
-  final String name;
-  final String category;
-  final String image;
-}
-
 class DestinationDetailPage extends StatelessWidget {
   const DestinationDetailPage({
     super.key,
@@ -612,33 +499,6 @@ class DestinationDetailPage extends StatelessWidget {
   final String name;
   final String country;
   final AuthService? authService;
-
-  List<_CountryCraft> get crafts {
-    switch (country) {
-      case 'Uganda':
-        return const [
-          _CountryCraft('Handwoven Basket', 'Baskets & Weaving', 'assets/images/onboarding_community.jpg'),
-          _CountryCraft('Virunga Beadwork', 'Beadwork', 'assets/images/crafts_beaded_sandals.jpg'),
-          _CountryCraft('Heritage Textile', 'Textiles', 'assets/images/onboarding_landscape.jpg'),
-        ];
-      case 'Rwanda':
-        return const [
-          _CountryCraft('Handwoven Basket', 'Baskets & Weaving', 'assets/images/onboarding_community.jpg'),
-          _CountryCraft('Traditional Beadwork', 'Beadwork', 'assets/images/crafts_beaded_sandals.jpg'),
-          _CountryCraft('Heritage Textile', 'Textiles', 'assets/images/onboarding_landscape.jpg'),
-        ];
-      default:
-        return const [
-          _CountryCraft('Carved Wildlife Art', 'Wood Carvings', 'assets/images/onboarding_wildlife.jpg'),
-          _CountryCraft('Virunga Beadwork', 'Beadwork', 'assets/images/crafts_beaded_sandals.jpg'),
-          _CountryCraft('Community Weaving', 'Baskets & Weaving', 'assets/images/onboarding_community.jpg'),
-        ];
-    }
-  }
-
-  void _open(BuildContext context, Widget page) {
-    Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -747,7 +607,8 @@ class DestinationDetailPage extends StatelessWidget {
             ),
           ),
           SliverToBoxAdapter(
-            child: _craftCategories(
+            child: _ApiCraftCategories(
+              country: country,
               onTap: () => _open(context, const PublicMarketplacePage()),
             ),
           ),
@@ -868,6 +729,80 @@ class _RealCraft {
     if (image.startsWith('http://backend.redrocksafrica.com/')) image = image.replaceFirst('http://', 'https://');
     return _RealCraft(json['name']?.toString() ?? '', category['name']?.toString() ?? '', country['name']?.toString() ?? '', park['name']?.toString() ?? '', image);
   }
+}
+
+class _ApiCraftCategories extends StatefulWidget {
+  const _ApiCraftCategories({required this.country, required this.onTap, this.park});
+  final String country;
+  final String? park;
+  final VoidCallback onTap;
+
+  @override
+  State<_ApiCraftCategories> createState() => _ApiCraftCategoriesState();
+}
+
+class _ApiCraftCategoriesState extends State<_ApiCraftCategories> {
+  late final Future<List<String>> _future = _load();
+
+  Future<List<String>> _load() async {
+    final response = await http.get(Uri.parse('https://backend.redrocksafrica.com/api/web/crafts/all/'));
+    if (response.statusCode < 200 || response.statusCode >= 300) return const [];
+    final decoded = jsonDecode(response.body);
+    if (decoded is! List) return const [];
+    final categories = decoded.whereType<Map>().map((e) => _RealCraft.fromJson(Map<String, dynamic>.from(e))).where((craft) {
+      final countryOk = craft.country.toLowerCase() == widget.country.toLowerCase();
+      final parkOk = widget.park == null || craft.park.toLowerCase() == widget.park!.toLowerCase();
+      return countryOk && parkOk && craft.category.trim().isNotEmpty;
+    }).map((craft) => craft.category).toSet().toList()
+      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    return categories;
+  }
+
+  @override
+  Widget build(BuildContext context) => FutureBuilder<List<String>>(
+    future: _future,
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const SizedBox(height: 86, child: Center(child: CircularProgressIndicator(color: AppColors.primary)));
+      }
+      final categories = snapshot.data ?? const <String>[];
+      if (categories.isEmpty) {
+        return const Padding(
+          padding: EdgeInsets.fromLTRB(20, 4, 20, 12),
+          child: Text('No craft categories are currently connected to this location.', style: TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+        );
+      }
+      return SizedBox(
+        height: 104,
+        child: ListView.separated(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          scrollDirection: Axis.horizontal,
+          itemCount: categories.length,
+          separatorBuilder: (_, __) => const SizedBox(width: 12),
+          itemBuilder: (_, index) {
+            final category = categories[index];
+            return InkWell(
+              onTap: widget.onTap,
+              borderRadius: BorderRadius.circular(40),
+              child: SizedBox(
+                width: 82,
+                child: Column(children: [
+                  Container(
+                    width: 62,
+                    height: 62,
+                    decoration: const BoxDecoration(color: AppColors.accentSoft, shape: BoxShape.circle),
+                    child: const Icon(Icons.handyman_outlined, color: AppColors.primary, size: 24),
+                  ),
+                  const SizedBox(height: 7),
+                  Text(category, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textPrimary, fontSize: 8.5, height: 1.15, fontWeight: FontWeight.w600)),
+                ]),
+              ),
+            );
+          },
+        ),
+      );
+    },
+  );
 }
 
 class _RealCraftCarousel extends StatefulWidget {
