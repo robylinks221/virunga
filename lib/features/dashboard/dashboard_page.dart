@@ -4,6 +4,8 @@ import '../../core/theme/app_theme.dart';
 import '../auth/auth_service.dart';
 import '../auth/login_page.dart';
 import '../marketplace/marketplace_page.dart';
+import '../explore/explore_page.dart';
+import '../community/community_page.dart';
 import 'dashboard_model.dart';
 import 'dashboard_service.dart';
 import 'nav_pages/account_profile_page.dart';
@@ -219,6 +221,25 @@ class _DashboardPageState extends State<DashboardPage> {
         continue;
       }
 
+      if (item.label == 'Explore') {
+        pages.add(const ExplorePage());
+        continue;
+      }
+
+      if (item.label == 'Community') {
+        pages.add(const CommunityPage());
+        continue;
+      }
+
+      if (item.label == 'Marketplace') {
+        pages.add(
+          MarketplacePage(
+            authService: widget.authService,
+          ),
+        );
+        continue;
+      }
+
       if (item.label == 'Profile' || item.label == 'More') {
         pages.add(
           AccountProfilePage(
@@ -339,21 +360,20 @@ class _DashboardPageState extends State<DashboardPage> {
         icon: Icons.home_outlined,
         selectedIcon: Icons.home_rounded,
       ),
-      if (isCraftSeller)
-        const DashboardNavItem(
-          label: 'Products',
-          icon: Icons.storefront_outlined,
-          selectedIcon: Icons.storefront_rounded,
-        ),
       const DashboardNavItem(
-        label: 'Wallet',
-        icon: Icons.account_balance_wallet_outlined,
-        selectedIcon: Icons.account_balance_wallet_rounded,
+        label: 'Explore',
+        icon: Icons.explore_outlined,
+        selectedIcon: Icons.explore_rounded,
       ),
       const DashboardNavItem(
-        label: 'Group',
-        icon: Icons.groups_outlined,
-        selectedIcon: Icons.groups_rounded,
+        label: 'Community',
+        icon: Icons.diversity_3_outlined,
+        selectedIcon: Icons.diversity_3_rounded,
+      ),
+      const DashboardNavItem(
+        label: 'Marketplace',
+        icon: Icons.shopping_bag_outlined,
+        selectedIcon: Icons.shopping_bag_rounded,
       ),
       const DashboardNavItem(
         label: 'Profile',
