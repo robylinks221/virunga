@@ -58,6 +58,12 @@ class _PublicMarketplacePageState extends State<PublicMarketplacePage> {
         foregroundColor: Colors.white,
         elevation: 0,
         title: const Text('Marketplace', style: TextStyle(fontWeight: FontWeight.w700)),
+        actions: [
+          IconButton(
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MarketplaceCartPage())),
+            icon: const Icon(Icons.shopping_bag_outlined),
+          ),
+        ],
       ),
       body: SafeArea(
         top: false,
@@ -107,7 +113,19 @@ class _PublicMarketplacePageState extends State<PublicMarketplacePage> {
                       label: Text(c),
                       selected: selected,
                       showCheckmark: false,
-                      onSelected: (_) => setState(() => _category = c),
+                      onSelected: (_) {
+                        setState(() => _category = c);
+                        if (c != 'All') {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => CraftCategoryPage(
+                                category: c,
+                                products: _products.where((p) => p.category == c).toList(),
+                              ),
+                            ),
+                          );
+                        }
+                      },
                       selectedColor: AppColors.primary,
                       backgroundColor: Colors.white,
                       side: const BorderSide(color: AppColors.cardBorder),
@@ -206,62 +224,211 @@ class _ProductCard extends StatelessWidget {
   }
 }
 
-class PublicCraftDetailPage extends StatelessWidget {
+class CraftCategoryPage extends StatelessWidget {
+  const CraftCategoryPage({super.key, required this.category, required this.products});
+  final String category;
+  final List<_CraftProduct> products;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: AppColors.background,
+    appBar: AppBar(
+      backgroundColor: AppColors.primary,
+      foregroundColor: Colors.white,
+      title: const Text('Craft Category', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+      actions: [
+        IconButton(
+          onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MarketplaceCartPage())),
+          icon: const Icon(Icons.shopping_bag_outlined),
+        ),
+      ],
+    ),
+    body: CustomScrollView(slivers: [
+      SliverToBoxAdapter(child: Container(
+        color: AppColors.primary,
+        padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Text('CRAFT CATEGORY', style: TextStyle(color: AppColors.accent, fontSize: 9.5, fontWeight: FontWeight.w700, letterSpacing: 1.3)),
+          const SizedBox(height: 6),
+          Text(category, style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 7),
+          Text('Handmade pieces from makers across Greater Virunga.', style: TextStyle(color: Colors.white.withOpacity(.72), fontSize: 11.5)),
+        ]),
+      )),
+      SliverPadding(
+        padding: const EdgeInsets.fromLTRB(20, 22, 20, 34),
+        sliver: products.isEmpty
+          ? const SliverToBoxAdapter(child: Padding(padding: EdgeInsets.only(top: 70), child: Center(child: Text('Products will appear here.', style: TextStyle(color: AppColors.textSecondary)))))
+          : SliverGrid(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: .66),
+              delegate: SliverChildBuilderDelegate((_, i) => _ProductCard(product: products[i]), childCount: products.length),
+            ),
+      ),
+    ]),
+  );
+}
+
+class PublicCraftDetailPage extends StatefulWidget {
   const PublicCraftDetailPage({super.key, required this.product});
   final _CraftProduct product;
+  @override
+  State<PublicCraftDetailPage> createState() => _PublicCraftDetailPageState();
+}
+
+class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
+  int quantity = 1;
+  bool saved = false;
 
   @override
   Widget build(BuildContext context) {
+    final product = widget.product;
+    final recent = _PublicMarketplacePageState._products.where((p) => p.name != product.name).take(3).toList();
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 330,
-            pinned: true,
-            backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white,
-            flexibleSpace: FlexibleSpaceBar(background: Image.asset(product.image, fit: BoxFit.cover)),
+      body: CustomScrollView(slivers: [
+        SliverAppBar(
+          expandedHeight: 360,
+          pinned: true,
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          actions: [
+            IconButton(onPressed: () => setState(() => saved = !saved), icon: Icon(saved ? Icons.favorite_rounded : Icons.favorite_border_rounded)),
+            IconButton(onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MarketplaceCartPage())), icon: const Icon(Icons.shopping_bag_outlined)),
+          ],
+          flexibleSpace: FlexibleSpaceBar(background: Image.asset(product.image, fit: BoxFit.cover)),
+        ),
+        SliverToBoxAdapter(child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 23, 20, 0),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(product.category.toUpperCase(), style: const TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1)),
+            const SizedBox(height: 6),
+            Text(product.name, style: const TextStyle(color: AppColors.textPrimary, fontSize: 27, height: 1.12, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 8),
+            Row(children: [const Icon(Icons.location_on_outlined, color: AppColors.primary, size: 17), const SizedBox(width: 5), Text(product.country, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12))]),
+            const SizedBox(height: 23),
+            Row(children: [
+              const Text('Quantity', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+              const Spacer(),
+              _qty(Icons.remove_rounded, () { if (quantity > 1) setState(() => quantity--); }),
+              SizedBox(width: 38, child: Text(quantity.toString(), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w700))),
+              _qty(Icons.add_rounded, () => setState(() => quantity++)),
+            ]),
+            const SizedBox(height: 18),
+            SizedBox(width: double.infinity, height: 52, child: FilledButton.icon(
+              onPressed: () {
+                _MarketplaceCart.add(product, quantity);
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(product.name + ' added to cart')));
+              },
+              style: FilledButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+              icon: const Icon(Icons.shopping_bag_outlined),
+              label: const Text('Add to Cart', style: TextStyle(fontWeight: FontWeight.w700)),
+            )),
+            const SizedBox(height: 29),
+            const Text('About this craft', style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 8),
+            Text(product.description, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12.5, height: 1.6)),
+            const SizedBox(height: 25),
+            Container(width: double.infinity, padding: const EdgeInsets.all(18), decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(18)), child: const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('ARTISAN STORY', style: TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1.1)),
+              SizedBox(height: 6),
+              Text('Meet the maker behind the craft', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
+              SizedBox(height: 5),
+              Text('Artisan profile information will connect here when marketplace data is available.', style: TextStyle(color: Colors.white70, fontSize: 11.5, height: 1.5)),
+            ])),
+            const SizedBox(height: 30),
+            const Text('RECENTLY VIEWED', style: TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1.1)),
+            const SizedBox(height: 5),
+            const Text('You may also like', style: TextStyle(color: AppColors.textPrimary, fontSize: 20, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 13),
+          ]),
+        )),
+        SliverToBoxAdapter(child: SizedBox(
+          height: 245,
+          child: ListView.separated(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 25),
+            scrollDirection: Axis.horizontal,
+            itemCount: recent.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemBuilder: (_, i) => SizedBox(width: 165, child: _ProductCard(product: recent[i])),
           ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(product.category.toUpperCase(), style: const TextStyle(color: AppColors.accent, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.2)),
-                  const SizedBox(height: 7),
-                  Text(product.name, style: const TextStyle(color: AppColors.textPrimary, fontSize: 27, height: 1.15, fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 9),
-                  Row(children: [const Icon(Icons.location_on_outlined, color: AppColors.primary, size: 18), const SizedBox(width: 5), Text(product.country, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13))]),
-                  const SizedBox(height: 25),
-                  const Text('About this craft', style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 9),
-                  Text(product.description, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, height: 1.65)),
-                  const SizedBox(height: 24),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(18),
-                    decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(18)),
-                    child: const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('ARTISAN STORY', style: TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1.2)),
-                        SizedBox(height: 7),
-                        Text('Meet the people behind the craft', style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w700)),
-                        SizedBox(height: 6),
-                        Text('Artisan profiles and live product information will appear here when marketplace data is connected.', style: TextStyle(color: Colors.white70, fontSize: 12, height: 1.5)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+        )),
+      ]),
     );
   }
+
+  Widget _qty(IconData icon, VoidCallback onTap) => InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(10),
+    child: Container(width: 36, height: 36, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.cardBorder)), child: Icon(icon, color: AppColors.primary, size: 18)),
+  );
+}
+
+class MarketplaceCartPage extends StatefulWidget {
+  const MarketplaceCartPage({super.key});
+  @override
+  State<MarketplaceCartPage> createState() => _MarketplaceCartPageState();
+}
+
+class _MarketplaceCartPageState extends State<MarketplaceCartPage> {
+  @override
+  Widget build(BuildContext context) {
+    final items = _MarketplaceCart.items;
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(backgroundColor: AppColors.primary, foregroundColor: Colors.white, title: const Text('Your Cart', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700))),
+      body: items.isEmpty
+        ? const Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Icon(Icons.shopping_bag_outlined, color: AppColors.primary, size: 44),
+            SizedBox(height: 13),
+            Text('Your cart is empty', style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w700)),
+            SizedBox(height: 5),
+            Text('Crafts you add will appear here.', style: TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+          ]))
+        : ListView.separated(
+            padding: const EdgeInsets.fromLTRB(20, 22, 20, 34),
+            itemCount: items.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 10),
+            itemBuilder: (_, i) {
+              final item = items[i];
+              return Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(17), border: Border.all(color: AppColors.cardBorder)),
+                child: Row(children: [
+                  ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.asset(item.product.image, width: 76, height: 76, fit: BoxFit.cover)),
+                  const SizedBox(width: 12),
+                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(item.product.name, style: const TextStyle(color: AppColors.textPrimary, fontSize: 12.5, fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 4),
+                    Text(item.product.country, style: const TextStyle(color: AppColors.textSecondary, fontSize: 10)),
+                    const SizedBox(height: 7),
+                    Text('Qty ' + item.quantity.toString(), style: const TextStyle(color: AppColors.primary, fontSize: 10.5, fontWeight: FontWeight.w700)),
+                  ])),
+                  IconButton(onPressed: () => setState(() => _MarketplaceCart.remove(item)), icon: const Icon(Icons.delete_outline_rounded, color: AppColors.textSecondary)),
+                ]),
+              );
+            },
+          ),
+    );
+  }
+}
+
+class _MarketplaceCart {
+  static final List<_CartItem> items = [];
+  static void add(_CraftProduct product, int quantity) {
+    final index = items.indexWhere((item) => item.product.name == product.name);
+    if (index >= 0) {
+      items[index].quantity += quantity;
+    } else {
+      items.add(_CartItem(product, quantity));
+    }
+  }
+  static void remove(_CartItem item) => items.remove(item);
+}
+
+class _CartItem {
+  _CartItem(this.product, this.quantity);
+  final _CraftProduct product;
+  int quantity;
 }
 
 class _CraftProduct {
