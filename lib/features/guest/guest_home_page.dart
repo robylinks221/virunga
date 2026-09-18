@@ -7,6 +7,11 @@ import '../auth/auth_service.dart';
 import '../auth/login_page.dart';
 
 import '../destinations/destination_detail_page.dart';
+import '../community/community_page.dart';
+import '../explore/explore_page.dart';
+import '../explore/explore_section_pages.dart';
+import '../explore/country_destination_detail_pages.dart' as connected;
+import '../marketplace/marketplace_page.dart';
 
 class GuestHomePage extends StatefulWidget {
   const GuestHomePage({super.key, required this.authService});
@@ -99,15 +104,35 @@ class _GuestHomePageState extends State<GuestHomePage> {
     );
   }
 
+  void _open(Widget page) {
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
+  }
+
+  void _openMarketplace() {
+    if (_authenticated) {
+      _open(MarketplacePage(authService: widget.authService));
+      return;
+    }
+    _login();
+  }
+
   void _nav(int index) {
     setState(() => _navIndex = index);
-    if (index == 0) return;
-
-    if ((index == 2 || index == 4) && !_authenticated) {
-      _login();
-    } else {
-      const labels = ['Home', 'Explore', 'Bookings', 'Marketplace', 'Profile'];
-      _message(labels[index]);
+    switch (index) {
+      case 0:
+        return;
+      case 1:
+        _open(ExplorePage(authService: widget.authService));
+        break;
+      case 2:
+        _open(const CommunityPage());
+        break;
+      case 3:
+        _openMarketplace();
+        break;
+      case 4:
+        _login();
+        break;
     }
 
     Future.delayed(const Duration(milliseconds: 160), () {
@@ -145,14 +170,14 @@ class _GuestHomePageState extends State<GuestHomePage> {
             ),
             SliverToBoxAdapter(
               child: _Search(
-                onSearch: () => _message('Search'),
-                onFilter: () => _message('Search filters'),
+                onSearch: () => _open(ExplorePage(authService: widget.authService)),
+                onFilter: () => _open(ExplorePage(authService: widget.authService)),
               ),
             ),
             SliverToBoxAdapter(
               child: _TitleRow(
                 title: 'Tourism Services',
-                onViewAll: () => _message('Tourism Services'),
+                onViewAll: () => _open(ExplorePage(authService: widget.authService)),
               ),
             ),
             SliverToBoxAdapter(
@@ -168,14 +193,14 @@ class _GuestHomePageState extends State<GuestHomePage> {
                       icon: Icons.luggage_outlined,
                       title: 'Porters',
                       subtitle: 'Support local communities',
-                      onTap: () => _message('Porters'),
+                      onTap: () => _open(const PortersPage()),
                     ),
                     _Service(
-                      image: 'assets/images/onboarding_wildlife.jpg',
-                      icon: Icons.person_pin_circle_outlined,
-                      title: 'Local Guides',
-                      subtitle: 'Experienced. Certified. Local.',
-                      onTap: () => _message('Local Guides'),
+                      image: 'assets/images/onboarding_community.jpg',
+                      icon: Icons.diversity_3_outlined,
+                      title: 'Community & Culture',
+                      subtitle: 'People. Heritage. Living culture.',
+                      onTap: () => _open(const CommunityPage()),
                     ),
                   ],
                 ),
@@ -186,14 +211,14 @@ class _GuestHomePageState extends State<GuestHomePage> {
                 padding: const EdgeInsets.fromLTRB(20, 26, 20, 0),
                 child: _CraftFeatureCard(
                   image: 'assets/images/crafts_beaded_sandals.jpg',
-                  onTap: () => _message('Traditional Arts and Crafts'),
+                  onTap: _openMarketplace,
                 ),
               ),
             ),
             SliverToBoxAdapter(
               child: _TitleRow(
                 title: 'Explore by Country',
-                onViewAll: () => _message('Countries'),
+                onViewAll: () => _open(const CountriesPage()),
               ),
             ),
             SliverToBoxAdapter(
@@ -208,19 +233,19 @@ class _GuestHomePageState extends State<GuestHomePage> {
                       image: 'assets/images/onboarding_landscape.jpg',
                       title: 'Uganda',
                       subtitle: 'The Pearl of Africa',
-                      onTap: () => _message('Uganda'),
+                      onTap: () => _open(const connected.CountryDetailPage(country: 'Uganda')),
                     ),
                     _Country(
                       image: 'assets/images/onboarding_wildlife.jpg',
                       title: 'Rwanda',
                       subtitle: 'Land of a Thousand Hills',
-                      onTap: () => _message('Rwanda'),
+                      onTap: () => _open(const connected.CountryDetailPage(country: 'Rwanda')),
                     ),
                     _Country(
                       image: 'assets/images/onboarding_community.jpg',
                       title: 'DR Congo',
                       subtitle: 'A Land of Extraordinary Beauty',
-                      onTap: () => _message('DR Congo'),
+                      onTap: () => _open(const connected.CountryDetailPage(country: 'DR Congo')),
                     ),
                   ],
                 ),
@@ -229,7 +254,7 @@ class _GuestHomePageState extends State<GuestHomePage> {
             SliverToBoxAdapter(
               child: _TitleRow(
                 title: 'Top Destinations',
-                onViewAll: () => _message('Top Destinations'),
+                onViewAll: () => _open(const DestinationsPage()),
               ),
             ),
             SliverToBoxAdapter(
@@ -1386,9 +1411,9 @@ class _BottomNav extends StatelessWidget {
               label: 'Explore',
             ),
             NavigationDestination(
-              icon: Icon(Icons.calendar_month_outlined),
-              selectedIcon: Icon(Icons.calendar_month_rounded),
-              label: 'Bookings',
+              icon: Icon(Icons.groups_outlined),
+              selectedIcon: Icon(Icons.groups_rounded),
+              label: 'Community',
             ),
             NavigationDestination(
               icon: Icon(Icons.shopping_bag_outlined),
@@ -1398,7 +1423,7 @@ class _BottomNav extends StatelessWidget {
             NavigationDestination(
               icon: Icon(Icons.person_outline_rounded),
               selectedIcon: Icon(Icons.person_rounded),
-              label: 'Profile',
+              label: 'Account',
             ),
           ],
         ),
