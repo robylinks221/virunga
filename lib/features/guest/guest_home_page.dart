@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 import '../../core/api/api_config.dart';
 import '../../core/theme/app_theme.dart';
@@ -217,6 +218,15 @@ class _GuestHomePageState extends State<GuestHomePage> {
                   onTap: _openMarketplace,
                 ),
               ),
+            ),
+            SliverToBoxAdapter(
+              child: _TitleRow(
+                title: 'Crafts from the Community',
+                onViewAll: _openMarketplace,
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: _HomeCraftCarousel(onViewAll: _openMarketplace),
             ),
             SliverToBoxAdapter(
               child: _TitleRow(
@@ -1173,6 +1183,115 @@ class _CraftFeatureCard extends StatelessWidget {
       ),
     );
   }
+}
+
+
+class _HomeCraft {
+  const _HomeCraft({required this.name, required this.category, required this.image, required this.price});
+  final String name, category, image;
+  final double price;
+
+  factory _HomeCraft.fromJson(Map<String, dynamic> json) {
+    final category = json['category'] is Map ? Map<String, dynamic>.from(json['category']) : <String, dynamic>{};
+    var image = json['featured_image']?.toString().trim() ?? '';
+    if (image.startsWith('http://backend.redrocksafrica.com/')) {
+      image = image.replaceFirst('http://backend.redrocksafrica.com/', 'https://backend.redrocksafrica.com/');
+    }
+    return _HomeCraft(
+      name: json['name']?.toString() ?? 'Craft',
+      category: category['name']?.toString() ?? '',
+      image: image,
+      price: double.tryParse(json['price']?.toString() ?? '') ?? 0,
+    );
+  }
+}
+
+class _HomeCraftCarousel extends StatefulWidget {
+  const _HomeCraftCarousel({required this.onViewAll});
+  final VoidCallback onViewAll;
+
+  @override
+  State<_HomeCraftCarousel> createState() => _HomeCraftCarouselState();
+}
+
+class _HomeCraftCarouselState extends State<_HomeCraftCarousel> {
+  late final Future<List<_HomeCraft>> _future = _load();
+
+  Future<List<_HomeCraft>> _load() async {
+    final response = await http.get(Uri.parse('https://backend.redrocksafrica.com/api/web/crafts/all/'));
+    if (response.statusCode < 200 || response.statusCode >= 300) throw Exception('Crafts unavailable');
+    final decoded = jsonDecode(response.body);
+    if (decoded is! List) return const [];
+    final crafts = decoded.whereType<Map>().map((item) => _HomeCraft.fromJson(Map<String, dynamic>.from(item))).toList();
+    crafts.shuffle();
+    return crafts.take(8).toList();
+  }
+
+  String _money(double value) {
+    final raw = value.round().toString();
+    final out = StringBuffer();
+    for (var i = 0; i < raw.length; i++) {
+      if (i > 0 && (raw.length - i) % 3 == 0) out.write(',');
+      out.write(raw[i]);
+    }
+    return 'UGX $out';
+  }
+
+  @override
+  Widget build(BuildContext context) => FutureBuilder<List<_HomeCraft>>(
+    future: _future,
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const SizedBox(height: 225, child: Center(child: CircularProgressIndicator(color: AppColors.primary)));
+      }
+      final crafts = snapshot.data ?? const <_HomeCraft>[];
+      if (crafts.isEmpty) return const SizedBox.shrink();
+      return SizedBox(
+        height: 232,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
+          itemCount: crafts.length,
+          separatorBuilder: (_, __) => const SizedBox(width: 12),
+          itemBuilder: (_, index) {
+            final craft = crafts[index];
+            return Material(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(19),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: widget.onViewAll,
+                child: Container(
+                  width: 178,
+                  decoration: BoxDecoration(border: Border.all(color: AppColors.cardBorder), borderRadius: BorderRadius.circular(19)),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    SizedBox(
+                      height: 139,
+                      width: double.infinity,
+                      child: craft.image.isEmpty
+                          ? const ColoredBox(color: Color(0xFFEAE7DE), child: Icon(Icons.image_outlined, color: AppColors.textMuted))
+                          : Image.network(craft.image, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const ColoredBox(color: Color(0xFFEAE7DE), child: Icon(Icons.broken_image_outlined, color: AppColors.textMuted))),
+                    ),
+                    Expanded(child: Padding(
+                      padding: const EdgeInsets.fromLTRB(11, 9, 11, 9),
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        if (craft.category.isNotEmpty) Text(craft.category.toUpperCase(), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.accent, fontSize: 7.5, fontWeight: FontWeight.w800, letterSpacing: .6)),
+                        const SizedBox(height: 3),
+                        Text(craft.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.primary, fontSize: 11.5, fontWeight: FontWeight.w800)),
+                        const Spacer(),
+                        Text(_money(craft.price), style: const TextStyle(color: AppColors.textPrimary, fontSize: 10.5, fontWeight: FontWeight.w700)),
+                      ]),
+                    )),
+                  ]),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    },
+  );
 }
 
 class _Destination extends StatefulWidget {
