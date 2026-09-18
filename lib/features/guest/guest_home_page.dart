@@ -792,7 +792,7 @@ class _CountryState extends State<_Country> {
                     width: 38,
                     height: 38,
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.90),
+                      color: Colors.white.withOpacity(0.90),
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
@@ -1306,7 +1306,7 @@ class _DestinationState extends State<_Destination> {
                     Container(
                       height: 1,
                       margin: const EdgeInsets.symmetric(vertical: 9),
-                      color: const Color(0xFFD8C2A3).withValues(alpha: 0.24),
+                      color: const Color(0xFFD8C2A3).withOpacity(0.24),
                     ),
                     Row(
                       children: [
