@@ -42,7 +42,7 @@ class DashboardBottomNav extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primaryDeep.withValues(alpha: 0.20),
+              color: AppColors.primaryDeep.withOpacity(0.20),
               blurRadius: 20,
               offset: const Offset(0, -5),
             ),
@@ -65,7 +65,7 @@ class DashboardBottomNav extends StatelessWidget {
                     child: InkWell(
                       onTap: () => onTap(index),
                       splashColor:
-                      AppColors.accentLight.withValues(alpha: 0.10),
+                      AppColors.accentLight.withOpacity(0.10),
                       highlightColor: Colors.transparent,
                       child: Stack(
                         alignment: Alignment.center,
