@@ -173,19 +173,50 @@ class CountriesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ExploreSectionPage(
-      title: 'Explore by Country',
-      eyebrow: 'THREE COUNTRIES • ONE REGION',
-      subtitle: 'Discover the Greater Virunga landscape through Uganda, Rwanda and DR Congo.',
-      icon: Icons.public_outlined,
-      onItem: (item) => Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => CountryDetailPage(country: item.title)),
+    const countries = [
+      _CountryCardData(
+        'Uganda',
+        'The Pearl of Africa',
+        'Forests, savannah, mountains and communities',
+        'assets/images/onboarding_landscape.jpg',
       ),
-      items: const [
-        ExploreSectionItem(Icons.flag_outlined, 'Uganda', 'Forests, savannah, mountains and communities'),
-        ExploreSectionItem(Icons.flag_outlined, 'Rwanda', 'Volcanoes, mountain forests and culture'),
-        ExploreSectionItem(Icons.flag_outlined, 'DR Congo', 'Virunga landscapes, forests and biodiversity'),
-      ],
+      _CountryCardData(
+        'Rwanda',
+        'Land of a Thousand Hills',
+        'Volcanoes, mountain forests and living culture',
+        'assets/images/onboarding_wildlife.jpg',
+      ),
+      _CountryCardData(
+        'DR Congo',
+        'Extraordinary Wild Landscapes',
+        'Virunga landscapes, forests and biodiversity',
+        'assets/images/onboarding_community.jpg',
+      ),
+    ];
+
+    return _PhotoCollectionPage(
+      eyebrow: 'THREE COUNTRIES • ONE REGION',
+      title: 'Explore by Country',
+      subtitle:
+          'Discover Greater Virunga through Uganda, Rwanda and DR Congo.',
+      heroImage: 'assets/images/onboarding_landscape.jpg',
+      heroLabel: 'GREATER VIRUNGA',
+      heroTitle: 'Three countries. One connected landscape.',
+      children: countries
+          .map(
+            (country) => _WidePhotoCard(
+              image: country.image,
+              eyebrow: country.tagline,
+              title: country.name,
+              subtitle: country.description,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => CountryDetailPage(country: country.name),
+                ),
+              ),
+            ),
+          )
+          .toList(),
     );
   }
 }
@@ -195,27 +226,313 @@ class DestinationsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ExploreSectionPage(
-      title: 'Destinations',
+    const destinations = [
+      _DestinationCardData('Bwindi Impenetrable National Park', 'Uganda', 'Mountain forest', 'assets/images/onboarding_wildlife.jpg'),
+      _DestinationCardData('Mgahinga Gorilla National Park', 'Uganda', 'Volcanoes and forest', 'assets/images/onboarding_landscape.jpg'),
+      _DestinationCardData('Queen Elizabeth National Park', 'Uganda', 'Savannah and wildlife', 'assets/images/onboarding_community.jpg'),
+      _DestinationCardData('Volcanoes National Park', 'Rwanda', 'Mountain forests', 'assets/images/onboarding_landscape.jpg'),
+      _DestinationCardData('Virunga National Park', 'DR Congo', 'Mountains, forest and wildlife', 'assets/images/onboarding_wildlife.jpg'),
+      _DestinationCardData('Kahuzi-Biega National Park', 'DR Congo', 'Tropical forest', 'assets/images/onboarding_community.jpg'),
+    ];
+
+    return _PhotoCollectionPage(
       eyebrow: 'PROTECTED LANDSCAPES',
-      subtitle: 'Explore important natural destinations across the Greater Virunga region.',
-      icon: Icons.landscape_outlined,
-      onItem: (item) {
-        final country = item.subtitle.split(' • ').first;
-        Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => DestinationDetailPage(name: item.title, country: country)),
-        );
-      },
-      items: const [
-        ExploreSectionItem(Icons.forest_outlined, 'Bwindi Impenetrable National Park', 'Uganda • Mountain forest'),
-        ExploreSectionItem(Icons.terrain_outlined, 'Mgahinga Gorilla National Park', 'Uganda • Volcanoes and forest'),
-        ExploreSectionItem(Icons.grass_outlined, 'Queen Elizabeth National Park', 'Uganda • Savannah and wildlife'),
-        ExploreSectionItem(Icons.terrain_outlined, 'Volcanoes National Park', 'Rwanda • Mountain forests'),
-        ExploreSectionItem(Icons.landscape_outlined, 'Virunga National Park', 'DR Congo • Mountains, forest and wildlife'),
-        ExploreSectionItem(Icons.forest_outlined, 'Kahuzi-Biega National Park', 'DR Congo • Tropical forest'),
-      ],
+      title: 'Destinations',
+      subtitle:
+          'Explore important natural destinations across the Greater Virunga region.',
+      heroImage: 'assets/images/onboarding_wildlife.jpg',
+      heroLabel: 'DISCOVER THE WILD',
+      heroTitle: 'Forests, volcanoes, savannah and wildlife.',
+      children: destinations
+          .map(
+            (destination) => _WidePhotoCard(
+              image: destination.image,
+              eyebrow: destination.country.toUpperCase(),
+              title: destination.name,
+              subtitle: destination.landscape,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => DestinationDetailPage(
+                    name: destination.name,
+                    country: destination.country,
+                  ),
+                ),
+              ),
+            ),
+          )
+          .toList(),
     );
   }
+}
+
+class _PhotoCollectionPage extends StatelessWidget {
+  const _PhotoCollectionPage({
+    required this.eyebrow,
+    required this.title,
+    required this.subtitle,
+    required this.heroImage,
+    required this.heroLabel,
+    required this.heroTitle,
+    required this.children,
+  });
+
+  final String eyebrow;
+  final String title;
+  final String subtitle;
+  final String heroImage;
+  final String heroLabel;
+  final String heroTitle;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          Container(
+            color: AppColors.primary,
+            padding: const EdgeInsets.fromLTRB(20, 3, 20, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  eyebrow,
+                  style: const TextStyle(
+                    color: AppColors.accent,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.3,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 27,
+                    height: 1.1,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(.72),
+                    fontSize: 12,
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 22, 20, 0),
+            child: Container(
+              height: 205,
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.asset(heroImage, fit: BoxFit.cover),
+                  const DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Color(0x08000000), Color(0xD9000000)],
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(18),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Spacer(),
+                        Text(
+                          heroLabel,
+                          style: const TextStyle(
+                            color: AppColors.accent,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.1,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          heroTitle,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            height: 1.15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(20, 27, 20, 13),
+            child: Text(
+              'EXPLORE',
+              style: TextStyle(
+                color: AppColors.accent,
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.3,
+              ),
+            ),
+          ),
+          ...children,
+          const SizedBox(height: 28),
+        ],
+      ),
+    );
+  }
+}
+
+class _WidePhotoCard extends StatelessWidget {
+  const _WidePhotoCard({
+    required this.image,
+    required this.eyebrow,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final String image;
+  final String eyebrow;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
+          height: 190,
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.asset(image, fit: BoxFit.cover),
+              const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Color(0x00000000), Color(0xE0000000)],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Spacer(),
+                    Text(
+                      eyebrow.toUpperCase(),
+                      style: const TextStyle(
+                        color: AppColors.accent,
+                        fontSize: 8.5,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: .8,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                title,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 17,
+                                  height: 1.15,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              Text(
+                                subtitle,
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(.76),
+                                  fontSize: 10.5,
+                                  height: 1.3,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(.94),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.arrow_outward_rounded,
+                            color: AppColors.primary,
+                            size: 18,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CountryCardData {
+  const _CountryCardData(this.name, this.tagline, this.description, this.image);
+  final String name;
+  final String tagline;
+  final String description;
+  final String image;
+}
+
+class _DestinationCardData {
+  const _DestinationCardData(this.name, this.country, this.landscape, this.image);
+  final String name;
+  final String country;
+  final String landscape;
+  final String image;
 }
 
 class PortersPage extends StatelessWidget {
