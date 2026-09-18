@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 import '../../core/theme/app_theme.dart';
 
@@ -14,6 +17,9 @@ class _PublicMarketplacePageState extends State<PublicMarketplacePage> {
   String _query = '';
   String _category = 'All';
   String _country = 'All';
+  bool _loading = true;
+  String? _loadError;
+  List<_CraftProduct> _products = [];
 
   static const _categories = [
     'All',
@@ -24,12 +30,27 @@ class _PublicMarketplacePageState extends State<PublicMarketplacePage> {
     'Pottery & Ceramics',
   ];
 
-  static const _products = [
-    _CraftProduct('Virunga Beaded Sandals', 'Beadwork & Jewellery', 'Uganda', 'Hand-finished beadwork inspired by communities around the Virunga landscape.', 'assets/images/crafts_beaded_sandals.jpg'),
-    _CraftProduct('Handwoven Basket', 'Baskets & Weaving', 'Rwanda', 'Traditional woven craft made with patterns rooted in local making traditions.', 'assets/images/onboarding_community.jpg'),
-    _CraftProduct('Carved Wildlife Art', 'Wood Carvings', 'DR Congo', 'Decorative wood craft celebrating the wildlife and forests of the region.', 'assets/images/onboarding_wildlife.jpg'),
-    _CraftProduct('Heritage Textile', 'Textiles & Clothing', 'Uganda', 'A presentation of textile craft and living cultural expression.', 'assets/images/onboarding_landscape.jpg'),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadCrafts();
+  }
+
+  Future<void> _loadCrafts() async {
+    if (mounted) setState(() { _loading = true; _loadError = null; });
+    try {
+      final response = await http.get(Uri.parse('https://backend.redrocksafrica.com/api/web/crafts/all/'));
+      if (response.statusCode < 200 || response.statusCode >= 300) throw Exception('Server error');
+      final decoded = jsonDecode(response.body);
+      if (decoded is! List) throw Exception('Unexpected crafts response');
+      final products = decoded.whereType<Map>().map((item) => _CraftProduct.fromJson(Map<String, dynamic>.from(item))).toList();
+      if (!mounted) return;
+      setState(() { _products = products; _MarketplaceCatalog.products = products; _loading = false; });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() { _loading = false; _loadError = e.toString(); });
+    }
+  }
 
   @override
   void dispose() {
@@ -201,11 +222,12 @@ class _PublicMarketplacePageState extends State<PublicMarketplacePage> {
                 ),
               ),
             ),
-            if (products.isEmpty)
-              const SliverFillRemaining(
-                hasScrollBody: false,
-                child: Center(child: Text('No crafts match your search.', style: TextStyle(color: AppColors.textSecondary))),
-              )
+            if (_loading)
+              const SliverFillRemaining(hasScrollBody: false, child: Center(child: CircularProgressIndicator(color: AppColors.primary)))
+            else if (_loadError != null)
+              SliverFillRemaining(hasScrollBody: false, child: Center(child: OutlinedButton(onPressed: _loadCrafts, child: const Text('Could not load crafts — Try Again'))))
+            else if (products.isEmpty)
+              const SliverFillRemaining(hasScrollBody: false, child: Center(child: Text('No crafts match your search.', style: TextStyle(color: AppColors.textSecondary))))
             else
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 30),
@@ -290,7 +312,7 @@ class _ProductCardState extends State<_ProductCard> {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Image.asset(product.image, fit: BoxFit.cover),
+                  _CraftImage(url: product.image, fit: BoxFit.cover),
                   Positioned(
                     top: 10,
                     right: 10,
@@ -432,7 +454,7 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
     final saved = _SavedCrafts.contains(product);
     _RecentlyViewed.add(product);
     final recent = _RecentlyViewed.items.where((p) => p.name != product.name).take(3).toList();
-    final related = _PublicMarketplacePageState._products
+    final related = _MarketplaceCatalog.products
         .where((p) => p.name != product.name && !recent.any((r) => r.name == p.name))
         .take(3)
         .toList();
@@ -452,7 +474,7 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
             ),
             IconButton(onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MarketplaceCartPage())), icon: _cartIcon()),
           ],
-          flexibleSpace: FlexibleSpaceBar(background: Image.asset(product.image, fit: BoxFit.cover)),
+          flexibleSpace: FlexibleSpaceBar(background: _CraftImage(url: product.image, fit: BoxFit.cover)),
         ),
         SliverToBoxAdapter(child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 23, 20, 0),
@@ -507,7 +529,7 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
             const SizedBox(height: 22),
             InkWell(
               onTap: () {
-                final categoryProducts = _PublicMarketplacePageState._products.where((p) => p.category == product.category).toList();
+                final categoryProducts = _MarketplaceCatalog.products.where((p) => p.category == product.category).toList();
                 Navigator.of(context).push(MaterialPageRoute(builder: (_) => CraftCategoryPage(category: product.category, products: categoryProducts)));
               },
               borderRadius: BorderRadius.circular(14),
@@ -527,12 +549,12 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
               ),
             ),
             const SizedBox(height: 25),
-            Container(width: double.infinity, padding: const EdgeInsets.all(18), decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(18)), child: const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('ARTISAN STORY', style: TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1.1)),
-              SizedBox(height: 6),
-              Text('Meet the maker behind the craft', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
-              SizedBox(height: 5),
-              Text('Artisan profile information will connect here when marketplace data is available.', style: TextStyle(color: Colors.white70, fontSize: 11.5, height: 1.5)),
+            Container(width: double.infinity, padding: const EdgeInsets.all(18), decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(18)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const Text('ARTISAN', style: TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1.1)),
+              const SizedBox(height: 6),
+              Text(product.seller, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 5),
+              Text(product.community + ' • ' + product.park, style: const TextStyle(color: Colors.white70, fontSize: 11.5, height: 1.5)),
             ])),
             const SizedBox(height: 30),
             Text(recent.isEmpty ? 'MORE CRAFTS' : 'RECENTLY VIEWED', style: const TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1.1)),
@@ -698,7 +720,7 @@ class _MarketplaceCartPageState extends State<MarketplaceCartPage> {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(17), border: Border.all(color: AppColors.cardBorder)),
                 child: Row(children: [
-                  ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.asset(item.product.image, width: 76, height: 76, fit: BoxFit.cover)),
+                  ClipRRect(borderRadius: BorderRadius.circular(12), child: _CraftImage(url: item.product.image, width: 76, height: 76, fit: BoxFit.cover)),
                   const SizedBox(width: 12),
                   Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text(item.product.name, style: const TextStyle(color: AppColors.textPrimary, fontSize: 12.5, fontWeight: FontWeight.w700)),
@@ -785,11 +807,59 @@ class _CartItem {
   int quantity;
 }
 
+class _MarketplaceCatalog {
+  static List<_CraftProduct> products = [];
+}
+
 class _CraftProduct {
-  const _CraftProduct(this.name, this.category, this.country, this.description, this.image);
-  final String name;
-  final String category;
-  final String country;
-  final String description;
-  final String image;
+  const _CraftProduct({required this.id, required this.name, required this.category, required this.country, required this.description, required this.image, required this.images, required this.price, required this.quantityAvailable, required this.inStock, required this.isActive, required this.seller, required this.community, required this.park});
+  final int id;
+  final String name, category, country, description, image, seller, community, park;
+  final List<String> images;
+  final double price;
+  final int quantityAvailable;
+  final bool inStock, isActive;
+
+  factory _CraftProduct.fromJson(Map<String, dynamic> json) {
+    final category = json['category'] is Map ? Map<String, dynamic>.from(json['category']) : <String, dynamic>{};
+    final imagesJson = json['images'] is Map ? Map<String, dynamic>.from(json['images']) : <String, dynamic>{};
+    final seller = json['seller'] is Map ? Map<String, dynamic>.from(json['seller']) : <String, dynamic>{};
+    final community = seller['community'] is Map ? Map<String, dynamic>.from(seller['community']) : <String, dynamic>{};
+    final park = community['national_park'] is Map ? Map<String, dynamic>.from(community['national_park']) : <String, dynamic>{};
+    final country = community['country'] is Map ? Map<String, dynamic>.from(community['country']) : <String, dynamic>{};
+    final allImages = ['featured','image_2','image_3'].map((key) => _secureImageUrl(imagesJson[key]?.toString() ?? '')).where((url) => url.isNotEmpty).toList();
+    return _CraftProduct(
+      id: int.tryParse(json['id']?.toString() ?? '') ?? 0,
+      name: json['name']?.toString() ?? '',
+      category: category['name']?.toString() ?? '',
+      country: country['name']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
+      image: allImages.isNotEmpty ? allImages.first : '',
+      images: allImages,
+      price: double.tryParse(json['price']?.toString() ?? '') ?? 0,
+      quantityAvailable: int.tryParse(json['quantity_available']?.toString() ?? '') ?? 0,
+      inStock: json['in_stock'] == true,
+      isActive: json['is_active'] == true,
+      seller: seller['name']?.toString() ?? '',
+      community: community['name']?.toString() ?? '',
+      park: park['name']?.toString() ?? '',
+    );
+  }
+  static String _secureImageUrl(String raw) {
+    final value = raw.trim();
+    if (value.isEmpty || value == 'null') return '';
+    return value.startsWith('http://backend.redrocksafrica.com/') ? value.replaceFirst('http://', 'https://') : value;
+  }
+}
+
+class _CraftImage extends StatelessWidget {
+  const _CraftImage({required this.url, this.width, this.height, this.fit = BoxFit.cover});
+  final String url;
+  final double? width, height;
+  final BoxFit fit;
+  @override
+  Widget build(BuildContext context) {
+    if (url.isEmpty) return Container(width: width, height: height, color: AppColors.accentSoft, alignment: Alignment.center, child: const Icon(Icons.image_outlined, color: AppColors.primary));
+    return Image.network(url, width: width, height: height, fit: fit, errorBuilder: (_, __, ___) => Container(width: width, height: height, color: AppColors.accentSoft, alignment: Alignment.center, child: const Icon(Icons.broken_image_outlined, color: AppColors.primary)));
+  }
 }
