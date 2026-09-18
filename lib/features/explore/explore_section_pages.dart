@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_theme.dart';
+import 'country_destination_detail_pages.dart';
 
 class ExploreSectionPage extends StatelessWidget {
   const ExploreSectionPage({
@@ -10,6 +11,7 @@ class ExploreSectionPage extends StatelessWidget {
     required this.subtitle,
     required this.icon,
     required this.items,
+    this.onItem,
   });
 
   final String title;
@@ -17,6 +19,7 @@ class ExploreSectionPage extends StatelessWidget {
   final String subtitle;
   final IconData icon;
   final List<ExploreSectionItem> items;
+  final void Function(ExploreSectionItem)? onItem;
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +97,10 @@ class ExploreSectionPage extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           ...items.map(
-            (item) => Container(
+            (item) => InkWell(
+              onTap: onItem == null ? null : () => onItem!(item),
+              borderRadius: BorderRadius.circular(17),
+              child: Container(
               margin: const EdgeInsets.only(bottom: 10),
               padding: const EdgeInsets.all(15),
               decoration: BoxDecoration(
@@ -145,6 +151,7 @@ class ExploreSectionPage extends StatelessWidget {
                   ),
                 ],
               ),
+              ),
             ),
           ),
         ],
@@ -166,12 +173,15 @@ class CountriesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const ExploreSectionPage(
+    return ExploreSectionPage(
       title: 'Explore by Country',
       eyebrow: 'THREE COUNTRIES • ONE REGION',
       subtitle: 'Discover the Greater Virunga landscape through Uganda, Rwanda and DR Congo.',
       icon: Icons.public_outlined,
-      items: [
+      onItem: (item) => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => CountryDetailPage(country: item.title)),
+      ),
+      items: const [
         ExploreSectionItem(Icons.flag_outlined, 'Uganda', 'Forests, savannah, mountains and communities'),
         ExploreSectionItem(Icons.flag_outlined, 'Rwanda', 'Volcanoes, mountain forests and culture'),
         ExploreSectionItem(Icons.flag_outlined, 'DR Congo', 'Virunga landscapes, forests and biodiversity'),
@@ -185,12 +195,18 @@ class DestinationsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const ExploreSectionPage(
+    return ExploreSectionPage(
       title: 'Destinations',
       eyebrow: 'PROTECTED LANDSCAPES',
       subtitle: 'Explore important natural destinations across the Greater Virunga region.',
       icon: Icons.landscape_outlined,
-      items: [
+      onItem: (item) {
+        final country = item.subtitle.split(' • ').first;
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => DestinationDetailPage(name: item.title, country: country)),
+        );
+      },
+      items: const [
         ExploreSectionItem(Icons.forest_outlined, 'Bwindi Impenetrable National Park', 'Uganda • Mountain forest'),
         ExploreSectionItem(Icons.terrain_outlined, 'Mgahinga Gorilla National Park', 'Uganda • Volcanoes and forest'),
         ExploreSectionItem(Icons.grass_outlined, 'Queen Elizabeth National Park', 'Uganda • Savannah and wildlife'),
