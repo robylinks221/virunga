@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_theme.dart';
 import '../marketplace_models.dart';
 
 class MarketplaceProductCard extends StatelessWidget {
@@ -58,7 +59,7 @@ class MarketplaceProductCard extends StatelessWidget {
               height: 24,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: Color(0xFF0B3B2E),
+                color: AppColors.primary,
               ),
             ),
           ),
@@ -129,7 +130,7 @@ class MarketplaceProductCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: Color(0xFF777E79),
+                      color: AppColors.textSecondary,
                       fontSize: 9,
                       fontWeight: FontWeight.w700,
                       letterSpacing: .6,
@@ -141,7 +142,7 @@ class MarketplaceProductCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: Color(0xFF17251F),
+                      color: AppColors.textPrimary,
                       fontSize: 14,
                       height: 1.15,
                       fontWeight: FontWeight.w800,
