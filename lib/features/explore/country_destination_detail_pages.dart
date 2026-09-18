@@ -609,6 +609,7 @@ class DestinationDetailPage extends StatelessWidget {
           SliverToBoxAdapter(
             child: _ApiCraftCategories(
               country: country,
+              park: name,
               onTap: () => _open(context, const PublicMarketplacePage()),
             ),
           ),
@@ -715,8 +716,9 @@ class DestinationDetailPage extends StatelessWidget {
 
 
 class _RealCraft {
-  const _RealCraft(this.name, this.category, this.country, this.park, this.image);
+  const _RealCraft(this.name, this.category, this.country, this.park, this.image, this.isActive);
   final String name, category, country, park, image;
+  final bool isActive;
 
   factory _RealCraft.fromJson(Map<String, dynamic> json) {
     final category = json['category'] is Map ? Map<String, dynamic>.from(json['category']) : <String, dynamic>{};
@@ -727,7 +729,14 @@ class _RealCraft {
     final country = community['country'] is Map ? Map<String, dynamic>.from(community['country']) : <String, dynamic>{};
     var image = images['featured']?.toString() ?? '';
     if (image.startsWith('http://backend.redrocksafrica.com/')) image = image.replaceFirst('http://', 'https://');
-    return _RealCraft(json['name']?.toString() ?? '', category['name']?.toString() ?? '', country['name']?.toString() ?? '', park['name']?.toString() ?? '', image);
+    return _RealCraft(
+      json['name']?.toString() ?? '',
+      category['name']?.toString() ?? '',
+      country['name']?.toString() ?? '',
+      park['name']?.toString() ?? '',
+      image,
+      json['is_active'] == true,
+    );
   }
 }
 
@@ -752,7 +761,7 @@ class _ApiCraftCategoriesState extends State<_ApiCraftCategories> {
     final categories = decoded.whereType<Map>().map((e) => _RealCraft.fromJson(Map<String, dynamic>.from(e))).where((craft) {
       final countryOk = craft.country.toLowerCase() == widget.country.toLowerCase();
       final parkOk = widget.park == null || craft.park.toLowerCase() == widget.park!.toLowerCase();
-      return countryOk && parkOk && craft.category.trim().isNotEmpty;
+      return craft.isActive && countryOk && parkOk && craft.category.trim().isNotEmpty;
     }).map((craft) => craft.category).toSet().toList()
       ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
     return categories;
@@ -826,7 +835,7 @@ class _RealCraftCarouselState extends State<_RealCraftCarousel> {
     return decoded.whereType<Map>().map((e) => _RealCraft.fromJson(Map<String, dynamic>.from(e))).where((craft) {
       final countryOk = craft.country.toLowerCase() == widget.country.toLowerCase();
       final parkOk = widget.park == null || craft.park.toLowerCase() == widget.park!.toLowerCase();
-      return countryOk && parkOk;
+      return craft.isActive && countryOk && parkOk;
     }).take(3).toList();
   }
 
