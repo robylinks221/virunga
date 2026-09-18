@@ -360,7 +360,19 @@ class _ProductCardState extends State<_ProductCard> {
                   const SizedBox(height: 4),
                   Text(product.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, height: 1.2, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 7),
-                  Row(children: [const Icon(Icons.location_on_outlined, size: 13, color: AppColors.textSecondary), const SizedBox(width: 3), Expanded(child: Text(product.country, style: const TextStyle(color: AppColors.textSecondary, fontSize: 10)))]),
+                  Row(children: [const Icon(Icons.location_on_outlined, size: 13, color: AppColors.textSecondary), const SizedBox(width: 3), Expanded(child: Text(product.country, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textSecondary, fontSize: 10)))]),
+                  const SizedBox(height: 7),
+                  Row(children: [
+                    Expanded(child: Text(_formatPrice(product.price), style: const TextStyle(color: AppColors.primary, fontSize: 11.5, fontWeight: FontWeight.w700))),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: product.inStock ? AppColors.mintSoft : AppColors.background,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(product.inStock ? 'IN STOCK' : 'OUT OF STOCK', style: TextStyle(color: product.inStock ? AppColors.success : AppColors.textSecondary, fontSize: 6.8, fontWeight: FontWeight.w700, letterSpacing: .25)),
+                    ),
+                  ]),
                 ],
               ),
             ),
@@ -546,8 +558,10 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
             Text(product.category.toUpperCase(), style: const TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1)),
             const SizedBox(height: 6),
             Text(product.name, style: const TextStyle(color: AppColors.textPrimary, fontSize: 27, height: 1.12, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 9),
+            Text(_formatPrice(product.price), style: const TextStyle(color: AppColors.primary, fontSize: 18, fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
-            Row(children: [const Icon(Icons.location_on_outlined, color: AppColors.primary, size: 17), const SizedBox(width: 5), Text(product.country, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12))]),
+            Row(children: [const Icon(Icons.location_on_outlined, color: AppColors.primary, size: 17), const SizedBox(width: 5), Expanded(child: Text(product.country, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)))]),
             const SizedBox(height: 18),
             const SizedBox(height: 14),
             const Row(children: [
@@ -788,6 +802,8 @@ class _MarketplaceCartPageState extends State<MarketplaceCartPage> {
                     Text(item.product.name, style: const TextStyle(color: AppColors.textPrimary, fontSize: 12.5, fontWeight: FontWeight.w700)),
                     const SizedBox(height: 4),
                     Text(item.product.country, style: const TextStyle(color: AppColors.textSecondary, fontSize: 10)),
+                    const SizedBox(height: 4),
+                    Text(_formatPrice(item.product.price * item.quantity), style: const TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.w700)),
                     const SizedBox(height: 7),
                     Row(children: [
                       _cartQty(Icons.remove_rounded, () => setState(() {
@@ -797,7 +813,9 @@ class _MarketplaceCartPageState extends State<MarketplaceCartPage> {
                         padding: const EdgeInsets.symmetric(horizontal: 10),
                         child: Text(item.quantity.toString(), style: const TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.w700)),
                       ),
-                      _cartQty(Icons.add_rounded, () => setState(() => item.quantity++)),
+                      _cartQty(Icons.add_rounded, () => setState(() {
+                        if (item.quantity < item.product.quantityAvailable) item.quantity++;
+                      })),
                     ]),
                   ])),
                   IconButton(onPressed: () => setState(() => _MarketplaceCart.remove(item)), icon: const Icon(Icons.delete_outline_rounded, color: AppColors.textSecondary)),
@@ -811,7 +829,16 @@ class _MarketplaceCartPageState extends State<MarketplaceCartPage> {
               child: Container(
                 padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
                 decoration: const BoxDecoration(color: Colors.white, border: Border(top: BorderSide(color: AppColors.cardBorder))),
-                child: SizedBox(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(children: [
+                      const Text('Cart total', style: TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+                      const Spacer(),
+                      Text(_formatPrice(_MarketplaceCart.totalPrice), style: const TextStyle(color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.w700)),
+                    ]),
+                    const SizedBox(height: 10),
+                    SizedBox(
                   height: 50,
                   child: FilledButton.icon(
                     onPressed: () => Navigator.of(context).pop(),
@@ -819,6 +846,8 @@ class _MarketplaceCartPageState extends State<MarketplaceCartPage> {
                     icon: const Icon(Icons.storefront_outlined, size: 18),
                     label: const Text('Continue Shopping', style: TextStyle(fontWeight: FontWeight.w700)),
                   ),
+                ),
+                  ],
                 ),
               ),
             ),
@@ -852,12 +881,16 @@ class _MarketplaceCart {
 
   static int get totalQuantity =>
       items.fold<int>(0, (total, item) => total + item.quantity);
+  static double get totalPrice =>
+      items.fold<double>(0, (total, item) => total + (item.product.price * item.quantity));
   static void add(_CraftProduct product, int quantity) {
+    if (!product.inStock || product.quantityAvailable <= 0) return;
+    final safeQuantity = quantity.clamp(1, product.quantityAvailable);
     final index = items.indexWhere((item) => item.product.id == product.id);
     if (index >= 0) {
-      items[index].quantity += quantity;
+      items[index].quantity = (items[index].quantity + safeQuantity).clamp(1, product.quantityAvailable);
     } else {
-      items.add(_CartItem(product, quantity));
+      items.add(_CartItem(product, safeQuantity));
     }
   }
   static void remove(_CartItem item) => items.remove(item);
@@ -867,6 +900,16 @@ class _CartItem {
   _CartItem(this.product, this.quantity);
   final _CraftProduct product;
   int quantity;
+}
+
+String _formatPrice(double price) {
+  final whole = price.round().toString();
+  final buffer = StringBuffer();
+  for (var i = 0; i < whole.length; i++) {
+    if (i > 0 && (whole.length - i) % 3 == 0) buffer.write(',');
+    buffer.write(whole[i]);
+  }
+  return 'UGX ' + buffer.toString();
 }
 
 class _MarketplaceCatalog {
