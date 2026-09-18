@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../community/community_page.dart';
-import '../marketplace/marketplace_page.dart';
+import '../marketplace/public_marketplace_page.dart';
 import '../auth/auth_service.dart';
 import 'explore_section_pages.dart';
 
@@ -168,7 +168,7 @@ class ExplorePage extends StatelessWidget {
                         _open(context, const PortersPage());
                         break;
                       case 'Crafts':
-                        _open(context, MarketplacePage(authService: authService));
+                        _open(context, const PublicMarketplacePage());
                         break;
                       case 'Community':
                         _open(context, const CommunityPage());
