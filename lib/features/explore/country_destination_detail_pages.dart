@@ -610,92 +610,246 @@ class _CountryCraft {
 }
 
 class DestinationDetailPage extends StatelessWidget {
-  const DestinationDetailPage({super.key, required this.name, required this.country, this.authService});
+  const DestinationDetailPage({
+    super.key,
+    required this.name,
+    required this.country,
+    this.authService,
+  });
+
   final String name;
   final String country;
   final AuthService? authService;
+
+  List<_CountryCraft> get crafts {
+    switch (country) {
+      case 'Uganda':
+        return const [
+          _CountryCraft('Handwoven Basket', 'Baskets & Weaving', 'assets/images/onboarding_community.jpg'),
+          _CountryCraft('Virunga Beadwork', 'Beadwork', 'assets/images/crafts_beaded_sandals.jpg'),
+          _CountryCraft('Heritage Textile', 'Textiles', 'assets/images/onboarding_landscape.jpg'),
+        ];
+      case 'Rwanda':
+        return const [
+          _CountryCraft('Handwoven Basket', 'Baskets & Weaving', 'assets/images/onboarding_community.jpg'),
+          _CountryCraft('Traditional Beadwork', 'Beadwork', 'assets/images/crafts_beaded_sandals.jpg'),
+          _CountryCraft('Heritage Textile', 'Textiles', 'assets/images/onboarding_landscape.jpg'),
+        ];
+      default:
+        return const [
+          _CountryCraft('Carved Wildlife Art', 'Wood Carvings', 'assets/images/onboarding_wildlife.jpg'),
+          _CountryCraft('Virunga Beadwork', 'Beadwork', 'assets/images/crafts_beaded_sandals.jpg'),
+          _CountryCraft('Community Weaving', 'Baskets & Weaving', 'assets/images/onboarding_community.jpg'),
+        ];
+    }
+  }
+
+  void _open(BuildContext context, Widget page) {
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: _appBar(),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 4, 20, 44),
-        children: [
-          _eyebrow(country.toUpperCase()),
-          const SizedBox(height: 7),
-          _title(name),
-          const SizedBox(height: 9),
-          _body('A protected Greater Virunga landscape shaped by wildlife, communities and conservation.'),
-          const SizedBox(height: 22),
-
-          _photoHero(
-            _destinationImage(name),
-            Icons.landscape_outlined,
-            'PROTECTED LANDSCAPE • ${country.toUpperCase()}',
-            name,
-          ),
-          const SizedBox(height: 27),
-
-          _sectionTitle('OVERVIEW'),
-          const SizedBox(height: 9),
-          _body('Discover the landscape, its natural character, conservation importance and the communities connected to it. Detailed verified destination content will connect here.'),
-          const SizedBox(height: 25),
-
-          _sectionTitle('THINGS TO DO'),
-          const SizedBox(height: 5),
-          const Text(
-            'Informational activities only',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 10),
-          ),
-          const SizedBox(height: 11),
-          _horizontalInfoCards(const [
-            ('Wildlife & Nature', Icons.pets_outlined),
-            ('Forest & Trails', Icons.forest_outlined),
-            ('Community Culture', Icons.diversity_3_outlined),
-          ]),
-          const SizedBox(height: 27),
-
-          _sectionTitle('CRAFTS FROM THIS DESTINATION'),
-          const SizedBox(height: 5),
-          _body('Explore craft categories made and sold by artisans connected to this destination.'),
-          const SizedBox(height: 14),
-          _craftCategories(
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const PublicMarketplacePage()),
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 300,
+            pinned: true,
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
+            surfaceTintColor: Colors.transparent,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.asset(_destinationImage(name), fit: BoxFit.cover),
+                  const DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Color(0x10000000), Color(0xED000000)],
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Spacer(),
+                        Text(
+                          country.toUpperCase(),
+                          style: const TextStyle(
+                            color: AppColors.accent,
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.3,
+                          ),
+                        ),
+                        const SizedBox(height: 7),
+                        Text(
+                          name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 28,
+                            height: 1.08,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'A protected Greater Virunga landscape shaped by nature, communities and conservation.',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(.78),
+                            fontSize: 11.5,
+                            height: 1.45,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: 27),
 
-          _sectionTitle('LIVING HERITAGE'),
-          const SizedBox(height: 5),
-          _body('Traditional arts and cultural expressions connected to local communities.'),
-          const SizedBox(height: 13),
-          _horizontalInfoCards(const [
-            ('Traditional Dance', Icons.groups_outlined),
-            ('Music & Performance', Icons.music_note_outlined),
-            ('Stories & Heritage', Icons.auto_stories_outlined),
-          ]),
-          const SizedBox(height: 27),
-
-          _sectionTitle('DESTINATION WORKFORCE'),
-          const SizedBox(height: 5),
-          _body('Verified totals will appear when live destination data is connected.'),
-          const SizedBox(height: 13),
-          Row(
-            children: [
-              Expanded(child: _statCard(Icons.backpack_outlined, 'PORTERS', '—')),
-              const SizedBox(width: 10),
-              Expanded(child: _statCard(Icons.shield_outlined, 'RANGERS', '—')),
-            ],
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 27, 20, 0),
+              child: _CountrySectionIntro(
+                eyebrow: 'OVERVIEW',
+                title: 'Discover $name',
+                body: 'Explore the natural character, conservation importance and communities connected to this Greater Virunga destination.',
+              ),
+            ),
           ),
-          const SizedBox(height: 27),
 
-          _sectionTitle('VISITOR INFORMATION'),
-          const SizedBox(height: 11),
-          _listCard(icon: Icons.info_outline_rounded, title: 'Practical Information', subtitle: 'Destination information and travel notes'),
-          _listCard(icon: Icons.location_on_outlined, title: 'Location', subtitle: 'View where this destination is located'),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 32, 20, 13),
+              child: _CountrySectionIntro(
+                eyebrow: 'CRAFT CATEGORIES',
+                title: 'Crafts connected to this destination',
+                body: 'Browse locally made craft categories from communities around $name.',
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: _craftCategories(
+              onTap: () => _open(context, const PublicMarketplacePage()),
+            ),
+          ),
+
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 30, 20, 13),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  const Expanded(
+                    child: _CountrySectionIntro(
+                      eyebrow: 'FEATURED CRAFTS',
+                      title: 'Made around this destination',
+                      body: 'A selection of local craft products.',
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => _open(context, const PublicMarketplacePage()),
+                    child: const Text(
+                      'See all',
+                      style: TextStyle(
+                        color: AppColors.accent,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 260,
+              child: ListView.separated(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                itemCount: crafts.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                itemBuilder: (context, index) => _CountryCraftCard(
+                  craft: crafts[index],
+                  country: country,
+                  onTap: () => _open(context, const PublicMarketplacePage()),
+                ),
+              ),
+            ),
+          ),
+
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 38),
+              child: InkWell(
+                onTap: () => _open(context, const PublicMarketplacePage()),
+                borderRadius: BorderRadius.circular(18),
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(18, 17, 16, 17),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Row(
+                    children: [
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'SUPPORT LOCAL ARTISANS',
+                              style: TextStyle(
+                                color: AppColors.accent,
+                                fontSize: 8.5,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                            SizedBox(height: 5),
+                            Text(
+                              'Discover more crafts from the region',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        width: 38,
+                        height: 38,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.arrow_outward_rounded,
+                          color: AppColors.primary,
+                          size: 18,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
