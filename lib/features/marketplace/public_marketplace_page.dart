@@ -466,12 +466,18 @@ class PublicCraftDetailPage extends StatefulWidget {
 
 class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
   int quantity = 1;
+  int imageIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _RecentlyViewed.add(widget.product);
+  }
 
   @override
   Widget build(BuildContext context) {
     final product = widget.product;
     final saved = _SavedCrafts.contains(product);
-    _RecentlyViewed.add(product);
     final recent = _RecentlyViewed.items.where((p) => p.name != product.name).take(3).toList();
     final sameCategory = _MarketplaceCatalog.products
         .where((p) => p.id != product.id && p.category == product.category && !recent.any((r) => r.id == p.id))
@@ -496,7 +502,39 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
             ),
             IconButton(onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MarketplaceCartPage())), icon: _cartIcon()),
           ],
-          flexibleSpace: FlexibleSpaceBar(background: _CraftImage(url: product.image, fit: BoxFit.cover)),
+          flexibleSpace: FlexibleSpaceBar(
+            background: Stack(
+              fit: StackFit.expand,
+              children: [
+                _CraftImage(
+                  url: product.images.isNotEmpty ? product.images[imageIndex.clamp(0, product.images.length - 1)] : product.image,
+                  fit: BoxFit.cover,
+                ),
+                if (product.images.length > 1)
+                  Positioned(
+                    left: 16,
+                    right: 16,
+                    bottom: 18,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(product.images.length, (index) => GestureDetector(
+                        onTap: () => setState(() => imageIndex = index),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 180),
+                          margin: const EdgeInsets.symmetric(horizontal: 3),
+                          width: index == imageIndex ? 22 : 7,
+                          height: 7,
+                          decoration: BoxDecoration(
+                            color: index == imageIndex ? Colors.white : Colors.white.withOpacity(.55),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      )),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
         SliverToBoxAdapter(child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 23, 20, 0),
@@ -513,13 +551,25 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
               SizedBox(width: 5),
               Text('200 views', style: TextStyle(color: AppColors.textSecondary, fontSize: 10.5, fontWeight: FontWeight.w500)),
             ]),
+            const SizedBox(height: 10),
+            Row(children: [
+              Icon(product.inStock ? Icons.check_circle_outline_rounded : Icons.inventory_2_outlined, color: product.inStock ? AppColors.success : AppColors.textSecondary, size: 15),
+              const SizedBox(width: 5),
+              Text(
+                product.inStock ? (product.quantityAvailable.toString() + ' available') : 'Currently out of stock',
+                style: TextStyle(color: product.inStock ? AppColors.success : AppColors.textSecondary, fontSize: 10.5, fontWeight: FontWeight.w600),
+              ),
+            ]),
             const SizedBox(height: 22),
             Row(children: [
               const Text('Quantity', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
               const Spacer(),
               _qty(Icons.remove_rounded, () { if (quantity > 1) setState(() => quantity--); }),
               SizedBox(width: 38, child: Text(quantity.toString(), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w700))),
-              _qty(Icons.add_rounded, () => setState(() => quantity++)),
+              _qty(Icons.add_rounded, () {
+                final max = product.quantityAvailable;
+                if (max <= 0 || quantity < max) setState(() => quantity++);
+              }),
             ]),
             const SizedBox(height: 18),
             SizedBox(width: double.infinity, height: 52, child: FilledButton.icon(
@@ -679,10 +729,10 @@ class _SavedCrafts {
   static final List<_CraftProduct> items = [];
 
   static bool contains(_CraftProduct product) =>
-      items.any((item) => item.name == product.name);
+      items.any((item) => item.id == product.id);
 
   static void toggle(_CraftProduct product) {
-    final index = items.indexWhere((item) => item.name == product.name);
+    final index = items.indexWhere((item) => item.id == product.id);
     if (index >= 0) {
       items.removeAt(index);
     } else {
@@ -781,7 +831,7 @@ class _RecentlyViewed {
   static final List<_CraftProduct> items = [];
 
   static void add(_CraftProduct product) {
-    items.removeWhere((item) => item.name == product.name);
+    items.removeWhere((item) => item.id == product.id);
     items.insert(0, product);
     if (items.length > 6) items.removeLast();
   }
@@ -793,7 +843,7 @@ class _MarketplaceCart {
   static int get totalQuantity =>
       items.fold<int>(0, (total, item) => total + item.quantity);
   static void add(_CraftProduct product, int quantity) {
-    final index = items.indexWhere((item) => item.product.name == product.name);
+    final index = items.indexWhere((item) => item.product.id == product.id);
     if (index >= 0) {
       items[index].quantity += quantity;
     } else {
