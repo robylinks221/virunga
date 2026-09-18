@@ -156,14 +156,6 @@ class ExplorePage extends StatelessWidget {
                 ),
               ),
             ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 22, 20, 0),
-                child: _RegionFeature(
-                  onTap: () => _open(context, const CountriesPage()),
-                ),
-              ),
-            ),
             const SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.fromLTRB(20, 27, 20, 14),
@@ -206,109 +198,6 @@ class ExplorePage extends StatelessWidget {
                   (context, index) => _ExploreCard(item: items[index]),
                   childCount: items.length,
                 ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _RegionFeature extends StatelessWidget {
-  const _RegionFeature({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        height: 190,
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Image.asset(
-              'assets/images/onboarding_landscape.jpg',
-              fit: BoxFit.cover,
-            ),
-            const DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0x12000000),
-                    Color(0xD9000000),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(.92),
-                      borderRadius: BorderRadius.circular(11),
-                    ),
-                    child: const Icon(
-                      Icons.public_outlined,
-                      color: AppColors.primary,
-                      size: 20,
-                    ),
-                  ),
-                  const Spacer(),
-                  const Text(
-                    'ONE REGION • THREE COUNTRIES',
-                    style: TextStyle(
-                      color: AppColors.accent,
-                      fontSize: 9,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  const Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Nature. People. Place.',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 21,
-                            height: 1.1,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                      Icon(
-                        Icons.arrow_outward_rounded,
-                        color: Colors.white,
-                        size: 23,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Uganda • Rwanda • DR Congo',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(.76),
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
               ),
             ),
           ],
