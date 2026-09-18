@@ -339,7 +339,7 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
           foregroundColor: Colors.white,
           actions: [
             IconButton(onPressed: () => setState(() => saved = !saved), icon: Icon(saved ? Icons.favorite_rounded : Icons.favorite_border_rounded)),
-            IconButton(onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MarketplaceCartPage())), icon: const Icon(Icons.shopping_bag_outlined)),
+            IconButton(onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MarketplaceCartPage())), icon: _cartIcon()),
           ],
           flexibleSpace: FlexibleSpaceBar(background: Image.asset(product.image, fit: BoxFit.cover)),
         ),
@@ -351,6 +351,18 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
             Text(product.name, style: const TextStyle(color: AppColors.textPrimary, fontSize: 27, height: 1.12, fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
             Row(children: [const Icon(Icons.location_on_outlined, color: AppColors.primary, size: 17), const SizedBox(width: 5), Text(product.country, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12))]),
+            const SizedBox(height: 18),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.cardBorder)),
+              child: const Row(children: [
+                Expanded(child: _CraftTrustItem(icon: Icons.handyman_outlined, label: 'Handmade')),
+                SizedBox(width: 8),
+                Expanded(child: _CraftTrustItem(icon: Icons.public_rounded, label: 'Greater Virunga')),
+                SizedBox(width: 8),
+                Expanded(child: _CraftTrustItem(icon: Icons.groups_2_outlined, label: 'Local makers')),
+              ]),
+            ),
             const SizedBox(height: 23),
             Row(children: [
               const Text('Quantity', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
@@ -381,6 +393,28 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
             const Text('About this craft', style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
             Text(product.description, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12.5, height: 1.6)),
+            const SizedBox(height: 22),
+            InkWell(
+              onTap: () {
+                final categoryProducts = _PublicMarketplacePageState._products.where((p) => p.category == product.category).toList();
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => CraftCategoryPage(category: product.category, products: categoryProducts)));
+              },
+              borderRadius: BorderRadius.circular(14),
+              child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.cardBorder)),
+                child: Row(children: [
+                  Container(width: 38, height: 38, decoration: BoxDecoration(color: AppColors.accentSoft, borderRadius: BorderRadius.circular(11)), child: const Icon(Icons.grid_view_rounded, color: AppColors.primary, size: 18)),
+                  const SizedBox(width: 11),
+                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    const Text('EXPLORE CATEGORY', style: TextStyle(color: AppColors.accent, fontSize: 8, fontWeight: FontWeight.w700, letterSpacing: .8)),
+                    const SizedBox(height: 3),
+                    Text(product.category, style: const TextStyle(color: AppColors.textPrimary, fontSize: 12.5, fontWeight: FontWeight.w700)),
+                  ])),
+                  const Icon(Icons.chevron_right_rounded, color: AppColors.primary),
+                ]),
+              ),
+            ),
             const SizedBox(height: 25),
             Container(width: double.infinity, padding: const EdgeInsets.all(18), decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(18)), child: const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text('ARTISAN STORY', style: TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1.1)),
@@ -417,6 +451,21 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
     onTap: onTap,
     borderRadius: BorderRadius.circular(10),
     child: Container(width: 36, height: 36, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.cardBorder)), child: Icon(icon, color: AppColors.primary, size: 18)),
+  );
+}
+
+class _CraftTrustItem extends StatelessWidget {
+  const _CraftTrustItem({required this.icon, required this.label});
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    children: [
+      Icon(icon, color: AppColors.primary, size: 18),
+      const SizedBox(height: 5),
+      Text(label, textAlign: TextAlign.center, maxLines: 2, style: const TextStyle(color: AppColors.textSecondary, fontSize: 8.5, fontWeight: FontWeight.w600, height: 1.15)),
+    ],
   );
 }
 
