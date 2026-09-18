@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 import '../auth/auth_service.dart';
-import '../marketplace/marketplace_page.dart';
+import '../marketplace/public_marketplace_page.dart';
 
 class CountryDetailPage extends StatelessWidget {
   const CountryDetailPage({super.key, required this.country});
@@ -22,13 +22,15 @@ class CountryDetailPage extends StatelessWidget {
   Widget build(BuildContext context) => _CountryPage(
     country: country,
     destinations: destinations,
+    image: _countryImage(country),
   );
 }
 
 class _CountryPage extends StatelessWidget {
-  const _CountryPage({required this.country, required this.destinations});
+  const _CountryPage({required this.country, required this.destinations, required this.image});
   final String country;
   final List<String> destinations;
+  final String image;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +46,7 @@ class _CountryPage extends StatelessWidget {
           const SizedBox(height: 8),
           _body('Explore protected landscapes, nature, community, culture and crafts.'),
           const SizedBox(height: 22),
-          _darkHero(Icons.public_outlined, 'THREE COUNTRIES • ONE REGION', country),
+          _photoHero(image, Icons.public_outlined, 'GREATER VIRUNGA', country),
           const SizedBox(height: 27),
           _sectionTitle('DESTINATIONS'),
           const SizedBox(height: 11),
@@ -93,47 +95,11 @@ class DestinationDetailPage extends StatelessWidget {
           _body('A protected Greater Virunga landscape shaped by wildlife, communities and conservation.'),
           const SizedBox(height: 22),
 
-          // Photo-ready premium hero. A verified/local destination image can replace
-          // this colour surface later without changing the layout.
-          Container(
-            height: 235,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    _roundIcon(Icons.landscape_outlined),
-                    const Spacer(),
-                    _roundIcon(Icons.favorite_border_rounded),
-                  ],
-                ),
-                const Spacer(),
-                const Text(
-                  'PROTECTED LANDSCAPE',
-                  style: TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w600, letterSpacing: 1),
-                ),
-                const SizedBox(height: 7),
-                Text(
-                  name,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: Colors.white, fontSize: 23, fontWeight: FontWeight.w700, height: 1.12),
-                ),
-                const SizedBox(height: 7),
-                Row(
-                  children: [
-                    const Icon(Icons.location_on_outlined, color: AppColors.accent, size: 15),
-                    const SizedBox(width: 5),
-                    Text(country, style: const TextStyle(color: Colors.white70, fontSize: 11)),
-                  ],
-                ),
-              ],
-            ),
+          _photoHero(
+            _destinationImage(name),
+            Icons.landscape_outlined,
+            'PROTECTED LANDSCAPE • ${country.toUpperCase()}',
+            name,
           ),
           const SizedBox(height: 27),
 
@@ -161,8 +127,8 @@ class DestinationDetailPage extends StatelessWidget {
           _body('Explore craft categories made and sold by artisans connected to this destination.'),
           const SizedBox(height: 14),
           _craftCategories(
-            onTap: authService == null ? null : () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => MarketplacePage(authService: authService!)),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const PublicMarketplacePage()),
             ),
           ),
           const SizedBox(height: 27),
@@ -201,16 +167,77 @@ class DestinationDetailPage extends StatelessWidget {
   }
 }
 
+
+String _countryImage(String country) {
+  switch (country) {
+    case 'Uganda':
+      return 'assets/images/onboarding_landscape.jpg';
+    case 'Rwanda':
+      return 'assets/images/onboarding_wildlife.jpg';
+    default:
+      return 'assets/images/onboarding_community.jpg';
+  }
+}
+
+String _destinationImage(String name) {
+  if (name.contains('Bwindi') || name.contains('Virunga')) {
+    return 'assets/images/onboarding_wildlife.jpg';
+  }
+  if (name.contains('Mgahinga') || name.contains('Volcanoes')) {
+    return 'assets/images/onboarding_landscape.jpg';
+  }
+  return 'assets/images/onboarding_community.jpg';
+}
+
+Widget _photoHero(String image, IconData icon, String eyebrow, String title) => Container(
+  height: 235,
+  clipBehavior: Clip.antiAlias,
+  decoration: BoxDecoration(borderRadius: BorderRadius.circular(22)),
+  child: Stack(
+    fit: StackFit.expand,
+    children: [
+      Image.asset(image, fit: BoxFit.cover),
+      const DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0x08000000), Color(0xE0000000)],
+          ),
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(color: Colors.white.withOpacity(.94), borderRadius: BorderRadius.circular(12)),
+              child: Icon(icon, color: AppColors.primary, size: 21),
+            ),
+            const Spacer(),
+            Text(eyebrow, style: const TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1)),
+            const SizedBox(height: 6),
+            Text(title, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: 21, height: 1.12, fontWeight: FontWeight.w700)),
+          ],
+        ),
+      ),
+    ],
+  ),
+);
+
 PreferredSizeWidget _appBar() => AppBar(
-  backgroundColor: AppColors.background,
+  backgroundColor: AppColors.primary,
   surfaceTintColor: Colors.transparent,
-  foregroundColor: AppColors.primary,
+  foregroundColor: Colors.white,
   elevation: 0,
 );
 
 Widget _eyebrow(String value) => Text(
   value,
-  style: const TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.w600, letterSpacing: 1.1),
+  style: const TextStyle(color: AppColors.accent, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.1),
 );
 
 Widget _title(String value) => Text(
@@ -228,7 +255,7 @@ Widget _sectionTitle(String value) => Text(
   style: const TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.w600, letterSpacing: 1),
 );
 
-Widget _darkHero(IconData icon, String eyebrow, String title) => Container(
+Widget _oldDarkHero(IconData icon, String eyebrow, String title) => Container(
   height: 155,
   padding: const EdgeInsets.all(20),
   decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(22)),
