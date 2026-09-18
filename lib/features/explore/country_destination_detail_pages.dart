@@ -6,6 +6,10 @@ import '../../core/theme/app_theme.dart';
 import '../auth/auth_service.dart';
 import '../marketplace/public_marketplace_page.dart';
 
+void _open(BuildContext context, Widget page) {
+  Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
+}
+
 class CountryDetailPage extends StatelessWidget {
   const CountryDetailPage({super.key, required this.country});
   final String country;
