@@ -13,6 +13,7 @@ class _PublicMarketplacePageState extends State<PublicMarketplacePage> {
   final _search = TextEditingController();
   String _query = '';
   String _category = 'All';
+  String _country = 'All';
 
   static const _categories = [
     'All',
@@ -40,11 +41,12 @@ class _PublicMarketplacePageState extends State<PublicMarketplacePage> {
     final q = _query.trim().toLowerCase();
     return _products.where((p) {
       final categoryOk = _category == 'All' || p.category == _category;
+      final countryOk = _country == 'All' || p.country == _country;
       final queryOk = q.isEmpty ||
           p.name.toLowerCase().contains(q) ||
           p.category.toLowerCase().contains(q) ||
           p.country.toLowerCase().contains(q);
-      return categoryOk && queryOk;
+      return categoryOk && countryOk && queryOk;
     }).toList();
   }
 
@@ -144,17 +146,48 @@ class _PublicMarketplacePageState extends State<PublicMarketplacePage> {
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 5, 20, 5),
-                child: Row(children: [
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   const Text('Shop by country', style: TextStyle(color: AppColors.textSecondary, fontSize: 10.5, fontWeight: FontWeight.w600)),
-                  const Spacer(),
-                  _CountryFilter(label: 'Uganda', onTap: () => setState(() => _query = 'Uganda')),
-                  const SizedBox(width: 6),
-                  _CountryFilter(label: 'Rwanda', onTap: () => setState(() => _query = 'Rwanda')),
-                  const SizedBox(width: 6),
-                  _CountryFilter(label: 'DR Congo', onTap: () => setState(() => _query = 'DR Congo')),
+                  const SizedBox(height: 9),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(children: [
+                      _CountryFilter(label: 'All', selected: _country == 'All', onTap: () => setState(() => _country = 'All')),
+                      const SizedBox(width: 6),
+                      _CountryFilter(label: 'Uganda', selected: _country == 'Uganda', onTap: () => setState(() => _country = 'Uganda')),
+                      const SizedBox(width: 6),
+                      _CountryFilter(label: 'Rwanda', selected: _country == 'Rwanda', onTap: () => setState(() => _country = 'Rwanda')),
+                      const SizedBox(width: 6),
+                      _CountryFilter(label: 'DR Congo', selected: _country == 'DR Congo', onTap: () => setState(() => _country = 'DR Congo')),
+                    ]),
+                  ),
                 ]),
               ),
             ),
+            if (_country != 'All' || _query.trim().isNotEmpty)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                  child: Row(children: [
+                    Expanded(
+                      child: Text(
+                        _country != 'All' ? 'Showing crafts from ' + _country : 'Search results',
+                        style: const TextStyle(color: AppColors.textPrimary, fontSize: 11, fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        _search.clear();
+                        setState(() {
+                          _query = '';
+                          _country = 'All';
+                        });
+                      },
+                      child: const Text('Clear', style: TextStyle(color: AppColors.accent, fontSize: 10, fontWeight: FontWeight.w700)),
+                    ),
+                  ]),
+                ),
+              ),
             const SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.fromLTRB(20, 12, 20, 14),
@@ -192,8 +225,9 @@ class _PublicMarketplacePageState extends State<PublicMarketplacePage> {
 }
 
 class _CountryFilter extends StatelessWidget {
-  const _CountryFilter({required this.label, required this.onTap});
+  const _CountryFilter({required this.label, required this.selected, required this.onTap});
   final String label;
+  final bool selected;
   final VoidCallback onTap;
 
   @override
@@ -202,8 +236,8 @@ class _CountryFilter extends StatelessWidget {
     borderRadius: BorderRadius.circular(10),
     child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.cardBorder)),
-      child: Text(label, style: const TextStyle(color: AppColors.primary, fontSize: 8.5, fontWeight: FontWeight.w700)),
+      decoration: BoxDecoration(color: selected ? AppColors.primary : Colors.white, borderRadius: BorderRadius.circular(10), border: Border.all(color: selected ? AppColors.primary : AppColors.cardBorder)),
+      child: Text(label, style: TextStyle(color: selected ? Colors.white : AppColors.primary, fontSize: 8.5, fontWeight: FontWeight.w700)),
     ),
   );
 }
