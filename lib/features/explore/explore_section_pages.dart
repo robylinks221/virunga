@@ -824,24 +824,147 @@ class ConservationPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const _PeopleLandscapePage(
-      eyebrow: 'PROTECTING THE REGION',
-      title: 'Conservation',
-      subtitle: 'Explore the wildlife, habitats and protected landscapes that make Greater Virunga extraordinary.',
-      heroImage: 'assets/images/onboarding_wildlife.jpg',
-      heroLabel: 'A SHARED WILD LANDSCAPE',
-      heroTitle: 'Protecting nature across borders.',
-      introTitle: 'Conservation Focus',
-      introText: 'Discover the natural systems and people at the heart of conservation across the region.',
-      icon: Icons.eco_outlined,
-      entries: [
-        _PeopleEntry('Wildlife', 'Greater Virunga', 'Species and biodiversity'),
-        _PeopleEntry('Habitats', 'Greater Virunga', 'Forests, mountains and savannah'),
-        _PeopleEntry('Protected Landscapes', 'Uganda • Rwanda • DR Congo', 'Connected places across the region'),
-        _PeopleEntry('Rangers', 'Greater Virunga', 'Protection and verified statistics'),
-      ],
+    const focus = [
+      _ConservationFocus('Wildlife', 'Species that depend on connected habitats across Greater Virunga.', Icons.pets_outlined),
+      _ConservationFocus('Habitats', 'Mountain forests, volcanoes, wetlands and savannah landscapes.', Icons.forest_outlined),
+      _ConservationFocus('Protected Landscapes', 'Protected areas across Uganda, Rwanda and DR Congo.', Icons.landscape_outlined),
+      _ConservationFocus('Rangers', 'The people working across protected landscapes to safeguard nature.', Icons.shield_outlined),
+    ];
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        title: const Text('Conservation', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+      ),
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          SliverToBoxAdapter(
+            child: Container(
+              color: AppColors.primary,
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 25),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                const Text('GREATER VIRUNGA', style: TextStyle(color: AppColors.accent, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.35)),
+                const SizedBox(height: 7),
+                const Text('One landscape.\nShared protection.', style: TextStyle(color: Colors.white, fontSize: 28, height: 1.08, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 9),
+                Text('Discover the wildlife, habitats and people connected by conservation across the region.', style: TextStyle(color: Colors.white.withOpacity(.72), fontSize: 12, height: 1.5)),
+              ]),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 22, 20, 0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(22),
+                child: SizedBox(
+                  height: 250,
+                  child: Stack(fit: StackFit.expand, children: [
+                    Image.asset('assets/images/onboarding_wildlife.jpg', fit: BoxFit.cover),
+                    const DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0x10000000), Color(0xE6000000)]))),
+                    const Padding(
+                      padding: EdgeInsets.all(18),
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Spacer(),
+                        Text('CONNECTED BY NATURE', style: TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1.1)),
+                        SizedBox(height: 6),
+                        Text('Protection does not stop at borders.', style: TextStyle(color: Colors.white, fontSize: 21, height: 1.15, fontWeight: FontWeight.w700)),
+                        SizedBox(height: 6),
+                        Text('The Greater Virunga landscape links protected places, wildlife and communities across three countries.', style: TextStyle(color: Colors.white70, fontSize: 11, height: 1.45)),
+                      ]),
+                    ),
+                  ]),
+                ),
+              ),
+            ),
+          ),
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(20, 28, 20, 14),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('CONSERVATION FOCUS', style: TextStyle(color: AppColors.accent, fontSize: 9.5, fontWeight: FontWeight.w700, letterSpacing: 1.2)),
+                SizedBox(height: 5),
+                Text('What the region protects', style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
+              ]),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+            sliver: SliverGrid(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, crossAxisSpacing: 11, mainAxisSpacing: 11, childAspectRatio: .92),
+              delegate: SliverChildBuilderDelegate((context, index) => _ConservationFocusCard(item: focus[index]), childCount: focus.length),
+            ),
+          ),
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(20, 30, 20, 14),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('ACROSS THREE COUNTRIES', style: TextStyle(color: AppColors.accent, fontSize: 9.5, fontWeight: FontWeight.w700, letterSpacing: 1.2)),
+                SizedBox(height: 5),
+                Text('A connected region', style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
+                SizedBox(height: 6),
+                Text('Conservation across Greater Virunga is understood through the landscapes of Uganda, Rwanda and DR Congo.', style: TextStyle(color: AppColors.textSecondary, fontSize: 11.5, height: 1.5)),
+              ]),
+            ),
+          ),
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(20, 0, 20, 34),
+              child: Row(children: [
+                Expanded(child: _ConservationCountry(name: 'Uganda')),
+                SizedBox(width: 8),
+                Expanded(child: _ConservationCountry(name: 'Rwanda')),
+                SizedBox(width: 8),
+                Expanded(child: _ConservationCountry(name: 'DR Congo')),
+              ]),
+            ),
+          ),
+        ],
+      ),
     );
   }
+}
+
+class _ConservationFocusCard extends StatelessWidget {
+  const _ConservationFocusCard({required this.item});
+  final _ConservationFocus item;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18), border: Border.all(color: AppColors.cardBorder)),
+    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Container(width: 42, height: 42, decoration: BoxDecoration(color: AppColors.accentSoft, borderRadius: BorderRadius.circular(12)), child: Icon(item.icon, color: AppColors.primary, size: 20)),
+      const Spacer(),
+      Text(item.title, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w700)),
+      const SizedBox(height: 5),
+      Text(item.description, maxLines: 3, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textSecondary, fontSize: 9.5, height: 1.35)),
+    ]),
+  );
+}
+
+class _ConservationCountry extends StatelessWidget {
+  const _ConservationCountry({required this.name});
+  final String name;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    height: 54,
+    alignment: Alignment.center,
+    decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(14)),
+    child: Text(name, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700)),
+  );
+}
+
+class _ConservationFocus {
+  const _ConservationFocus(this.title, this.description, this.icon);
+  final String title;
+  final String description;
+  final IconData icon;
 }
 
 class RangersPage extends StatelessWidget {
