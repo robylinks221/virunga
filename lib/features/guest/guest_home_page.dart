@@ -1194,6 +1194,16 @@ class _HomeCraft {
   factory _HomeCraft.fromJson(Map<String, dynamic> json) {
     final category = json['category'] is Map ? Map<String, dynamic>.from(json['category']) : <String, dynamic>{};
     var image = json['featured_image']?.toString().trim() ?? '';
+    if (image.isEmpty || image.toLowerCase() == 'null') {
+      image = json['image']?.toString().trim() ?? '';
+    }
+    if (image.startsWith('//')) {
+      image = 'https:$image';
+    } else if (image.startsWith('/')) {
+      image = 'https://backend.redrocksafrica.com$image';
+    } else if (image.isNotEmpty && !image.startsWith('http://') && !image.startsWith('https://')) {
+      image = 'https://backend.redrocksafrica.com/$image';
+    }
     if (image.startsWith('http://backend.redrocksafrica.com/')) {
       image = image.replaceFirst('http://backend.redrocksafrica.com/', 'https://backend.redrocksafrica.com/');
     }
