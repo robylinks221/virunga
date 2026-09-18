@@ -212,6 +212,20 @@ class _CountryPage extends StatelessWidget {
 
           SliverToBoxAdapter(
             child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 25, 20, 13),
+              child: _CountrySectionIntro(
+                eyebrow: 'PORTERS & COMMUNITIES',
+                title: 'Porters of $country',
+                body: 'Porters belong to groups connected to communities around national parks in the Greater Virunga region.',
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: _PorterCarousel(porters: _portersForCountry(country)),
+          ),
+
+          SliverToBoxAdapter(
+            child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 24, 20, 13),
               child: _CountrySectionIntro(
                 eyebrow: 'CRAFT CATEGORIES',
@@ -732,6 +746,20 @@ class DestinationDetailPage extends StatelessWidget {
 
           SliverToBoxAdapter(
             child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 30, 20, 13),
+              child: _CountrySectionIntro(
+                eyebrow: 'PORTERS',
+                title: 'Porters connected to this park',
+                body: 'Porters are organised under groups. Each group belongs to a community connected to $name.',
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: _PorterCarousel(porters: _portersForPark(name)),
+          ),
+
+          SliverToBoxAdapter(
+            child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 32, 20, 13),
               child: _CountrySectionIntro(
                 eyebrow: 'CRAFT CATEGORIES',
@@ -856,6 +884,107 @@ class DestinationDetailPage extends StatelessWidget {
   }
 }
 
+
+const _porterAvatar = 'assets/images/onboarding_community.jpg';
+
+List<_PorterProfile> _portersForCountry(String country) {
+  switch (country) {
+    case 'Uganda':
+      return const [
+        _PorterProfile('Porter', 'Bwindi Porter Group', 'Bwindi Community', 'Bwindi Impenetrable National Park'),
+        _PorterProfile('Porter', 'Mgahinga Porter Group', 'Mgahinga Community', 'Mgahinga Gorilla National Park'),
+      ];
+    case 'Rwanda':
+      return const [
+        _PorterProfile('Porter', 'Volcanoes Porter Group', 'Volcanoes Community', 'Volcanoes National Park'),
+      ];
+    default:
+      return const [
+        _PorterProfile('Porter', 'Virunga Porter Group', 'Virunga Community', 'Virunga National Park'),
+        _PorterProfile('Porter', 'Kahuzi-Biega Porter Group', 'Kahuzi-Biega Community', 'Kahuzi-Biega National Park'),
+      ];
+  }
+}
+
+List<_PorterProfile> _portersForPark(String park) {
+  if (park.contains('Bwindi')) {
+    return const [_PorterProfile('Porter', 'Bwindi Porter Group', 'Bwindi Community', 'Bwindi Impenetrable National Park')];
+  }
+  if (park.contains('Mgahinga')) {
+    return const [_PorterProfile('Porter', 'Mgahinga Porter Group', 'Mgahinga Community', 'Mgahinga Gorilla National Park')];
+  }
+  if (park.contains('Volcanoes')) {
+    return const [_PorterProfile('Porter', 'Volcanoes Porter Group', 'Volcanoes Community', 'Volcanoes National Park')];
+  }
+  if (park.contains('Virunga')) {
+    return const [_PorterProfile('Porter', 'Virunga Porter Group', 'Virunga Community', 'Virunga National Park')];
+  }
+  if (park.contains('Kahuzi-Biega')) {
+    return const [_PorterProfile('Porter', 'Kahuzi-Biega Porter Group', 'Kahuzi-Biega Community', 'Kahuzi-Biega National Park')];
+  }
+  return const [];
+}
+
+class _PorterProfile {
+  const _PorterProfile(this.name, this.group, this.community, this.park);
+  final String name;
+  final String group;
+  final String community;
+  final String park;
+}
+
+class _PorterCarousel extends StatelessWidget {
+  const _PorterCarousel({required this.porters});
+  final List<_PorterProfile> porters;
+
+  @override
+  Widget build(BuildContext context) {
+    if (porters.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.fromLTRB(20, 0, 20, 4),
+        child: Text('Porter information for this destination will appear here.', style: TextStyle(color: AppColors.textSecondary, fontSize: 11.5)),
+      );
+    }
+    return SizedBox(
+      height: 184,
+      child: ListView.separated(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        itemCount: porters.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 11),
+        itemBuilder: (_, index) => _PorterCard(porter: porters[index]),
+      ),
+    );
+  }
+}
+
+class _PorterCard extends StatelessWidget {
+  const _PorterCard({required this.porter});
+  final _PorterProfile porter;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 252,
+    padding: const EdgeInsets.all(14),
+    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18), border: Border.all(color: AppColors.cardBorder)),
+    child: Row(children: [
+      ClipOval(child: Image.asset(_porterAvatar, width: 64, height: 64, fit: BoxFit.cover)),
+      const SizedBox(width: 13),
+      Expanded(
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
+          Text(porter.name, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13.5, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 5),
+          Text(porter.group, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 4),
+          Text(porter.community, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textSecondary, fontSize: 9.5)),
+          const SizedBox(height: 4),
+          Text(porter.park, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.accent, fontSize: 8.5, height: 1.25, fontWeight: FontWeight.w600)),
+        ]),
+      ),
+    ]),
+  );
+}
 
 String _countryImage(String country) {
   switch (country) {
