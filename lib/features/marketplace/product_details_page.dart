@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_theme.dart';
+
 import 'marketplace_models.dart';
 
 class ProductDetailsPage extends StatefulWidget {
@@ -15,9 +17,9 @@ class ProductDetailsPage extends StatefulWidget {
 }
 
 class _ProductDetailsPageState extends State<ProductDetailsPage> {
-  static const Color _forest = Color(0xFF0B3B2E);
-  static const Color _cream = Color(0xFFF6F3EC);
-  static const Color _gold = Color(0xFFE2B84B);
+  static const Color _forest = AppColors.primary;
+  static const Color _cream = AppColors.background;
+  static const Color _gold = AppColors.accent;
 
   int _selectedImage = 0;
 
@@ -109,7 +111,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                                   border: Border.all(
                                     color: _selectedImage == index
                                         ? _gold
-                                        : const Color(0xFFE2DED4),
+                                        : AppColors.cardBorder,
                                     width: _selectedImage == index ? 2 : 1,
                                   ),
                                 ),
@@ -139,7 +141,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                     Text(
                       product.name,
                       style: const TextStyle(
-                        color: Color(0xFF17251F),
+                        color: AppColors.textPrimary,
                         fontSize: 28,
                         height: 1.08,
                         fontWeight: FontWeight.w800,
@@ -195,7 +197,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                       Text(
                         product.description,
                         style: const TextStyle(
-                          color: Color(0xFF68716C),
+                          color: AppColors.textSecondary,
                           fontSize: 14,
                           height: 1.6,
                         ),
@@ -217,7 +219,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
             width: double.infinity,
             height: 54,
             child: FilledButton(
-              onPressed: product.inStock ? () {} : null,
+              onPressed: null,
               style: FilledButton.styleFrom(
                 backgroundColor: _forest,
                 shape: RoundedRectangleBorder(
@@ -225,7 +227,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                 ),
               ),
               child: Text(
-                product.inStock ? 'Add to Cart' : 'Currently Unavailable',
+                product.inStock ? 'Available in Marketplace' : 'Currently Unavailable',
                 style: const TextStyle(fontWeight: FontWeight.w800),
               ),
             ),
