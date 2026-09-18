@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import '../../core/theme/app_theme.dart';
 import '../auth/auth_service.dart';
 import '../marketplace/public_marketplace_page.dart';
@@ -253,20 +256,9 @@ class _CountryPage extends StatelessWidget {
             ),
           ),
           SliverToBoxAdapter(
-            child: SizedBox(
-              height: 260,
-              child: ListView.separated(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                itemCount: crafts.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 12),
-                itemBuilder: (context, index) => _CountryCraftCard(
-                  craft: crafts[index],
-                  country: country,
-                  onTap: () => _open(context, const PublicMarketplacePage()),
-                ),
-              ),
+            child: _RealCraftCarousel(
+              country: country,
+              onTap: () => _open(context, const PublicMarketplacePage()),
             ),
           ),
 
@@ -789,20 +781,10 @@ class DestinationDetailPage extends StatelessWidget {
             ),
           ),
           SliverToBoxAdapter(
-            child: SizedBox(
-              height: 260,
-              child: ListView.separated(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                itemCount: crafts.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 12),
-                itemBuilder: (context, index) => _CountryCraftCard(
-                  craft: crafts[index],
-                  country: country,
-                  onTap: () => _open(context, const PublicMarketplacePage()),
-                ),
-              ),
+            child: _RealCraftCarousel(
+              country: country,
+              park: name,
+              onTap: () => _open(context, const PublicMarketplacePage()),
             ),
           ),
 
@@ -870,6 +852,103 @@ class DestinationDetailPage extends StatelessWidget {
   }
 }
 
+
+class _RealCraft {
+  const _RealCraft(this.name, this.category, this.country, this.park, this.image);
+  final String name, category, country, park, image;
+
+  factory _RealCraft.fromJson(Map<String, dynamic> json) {
+    final category = json['category'] is Map ? Map<String, dynamic>.from(json['category']) : <String, dynamic>{};
+    final images = json['images'] is Map ? Map<String, dynamic>.from(json['images']) : <String, dynamic>{};
+    final seller = json['seller'] is Map ? Map<String, dynamic>.from(json['seller']) : <String, dynamic>{};
+    final community = seller['community'] is Map ? Map<String, dynamic>.from(seller['community']) : <String, dynamic>{};
+    final park = community['national_park'] is Map ? Map<String, dynamic>.from(community['national_park']) : <String, dynamic>{};
+    final country = community['country'] is Map ? Map<String, dynamic>.from(community['country']) : <String, dynamic>{};
+    var image = images['featured']?.toString() ?? '';
+    if (image.startsWith('http://backend.redrocksafrica.com/')) image = image.replaceFirst('http://', 'https://');
+    return _RealCraft(json['name']?.toString() ?? '', category['name']?.toString() ?? '', country['name']?.toString() ?? '', park['name']?.toString() ?? '', image);
+  }
+}
+
+class _RealCraftCarousel extends StatefulWidget {
+  const _RealCraftCarousel({required this.country, required this.onTap, this.park});
+  final String country;
+  final String? park;
+  final VoidCallback onTap;
+
+  @override
+  State<_RealCraftCarousel> createState() => _RealCraftCarouselState();
+}
+
+class _RealCraftCarouselState extends State<_RealCraftCarousel> {
+  late final Future<List<_RealCraft>> _future = _load();
+
+  Future<List<_RealCraft>> _load() async {
+    final response = await http.get(Uri.parse('https://backend.redrocksafrica.com/api/web/crafts/all/'));
+    if (response.statusCode < 200 || response.statusCode >= 300) throw Exception('Could not load crafts');
+    final decoded = jsonDecode(response.body);
+    if (decoded is! List) return const [];
+    return decoded.whereType<Map>().map((e) => _RealCraft.fromJson(Map<String, dynamic>.from(e))).where((craft) {
+      final countryOk = craft.country.toLowerCase() == widget.country.toLowerCase();
+      final parkOk = widget.park == null || craft.park.toLowerCase() == widget.park!.toLowerCase();
+      return countryOk && parkOk;
+    }).take(3).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) => FutureBuilder<List<_RealCraft>>(
+    future: _future,
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const SizedBox(height: 220, child: Center(child: CircularProgressIndicator(color: AppColors.primary)));
+      }
+      final crafts = snapshot.data ?? const <_RealCraft>[];
+      if (crafts.isEmpty) {
+        return const Padding(
+          padding: EdgeInsets.fromLTRB(20, 8, 20, 20),
+          child: Text('No crafts are currently connected to this location.', style: TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+        );
+      }
+      return SizedBox(
+        height: 260,
+        child: ListView.separated(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          itemCount: crafts.length,
+          separatorBuilder: (_, __) => const SizedBox(width: 12),
+          itemBuilder: (_, index) {
+            final craft = crafts[index];
+            return InkWell(
+              onTap: widget.onTap,
+              borderRadius: BorderRadius.circular(18),
+              child: Container(
+                width: 184,
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18), border: Border.all(color: AppColors.cardBorder)),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Expanded(
+                    child: craft.image.isEmpty
+                      ? Container(color: AppColors.accentSoft, child: const Center(child: Icon(Icons.image_outlined, color: AppColors.primary)))
+                      : Image.network(craft.image, width: double.infinity, fit: BoxFit.cover, errorBuilder: (_, __, ___) => Container(color: AppColors.accentSoft, child: const Center(child: Icon(Icons.broken_image_outlined, color: AppColors.primary)))),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text(craft.category.toUpperCase(), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.accent, fontSize: 8, fontWeight: FontWeight.w700)),
+                      const SizedBox(height: 4),
+                      Text(craft.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textPrimary, fontSize: 12.5, fontWeight: FontWeight.w700)),
+                    ]),
+                  ),
+                ]),
+              ),
+            );
+          },
+        ),
+      );
+    },
+  );
+}
 
 const _porterAvatar = 'assets/images/onboarding_community.jpg';
 
