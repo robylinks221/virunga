@@ -765,7 +765,7 @@ class _ApiCraftCategoriesState extends State<_ApiCraftCategories> {
     final categories = decoded.whereType<Map>().map((e) => _RealCraft.fromJson(Map<String, dynamic>.from(e))).where((craft) {
       final countryOk = craft.country.toLowerCase() == widget.country.toLowerCase();
       final parkOk = widget.park == null || craft.park.toLowerCase() == widget.park!.toLowerCase();
-      return craft.isActive && countryOk && parkOk && craft.category.trim().isNotEmpty;
+      return countryOk && parkOk && craft.category.trim().isNotEmpty;
     }).map((craft) => craft.category).toSet().toList()
       ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
     return categories;
@@ -839,7 +839,7 @@ class _RealCraftCarouselState extends State<_RealCraftCarousel> {
     return decoded.whereType<Map>().map((e) => _RealCraft.fromJson(Map<String, dynamic>.from(e))).where((craft) {
       final countryOk = craft.country.toLowerCase() == widget.country.toLowerCase();
       final parkOk = widget.park == null || craft.park.toLowerCase() == widget.park!.toLowerCase();
-      return craft.isActive && countryOk && parkOk;
+      return countryOk && parkOk;
     }).take(3).toList();
   }
 
