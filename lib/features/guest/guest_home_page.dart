@@ -14,7 +14,7 @@ import '../explore/explore_section_pages.dart';
 import '../explore/virunga_search_page.dart';
 import '../dashboard/nav_pages/account_profile_page.dart';
 import '../explore/country_destination_detail_pages.dart' as connected;
-import '../marketplace/public_marketplace_page.dart';
+import '../marketplace/public_marketplace_page.dart' as market;
 
 class GuestHomePage extends StatefulWidget {
   const GuestHomePage({
@@ -119,7 +119,7 @@ class _GuestHomePageState extends State<GuestHomePage> {
   }
 
   void _openMarketplace() {
-    _open(const PublicMarketplacePage());
+    _open(const market.PublicMarketplacePage());
   }
 
   void _nav(int index) {
@@ -1186,53 +1186,26 @@ class _CraftFeatureCard extends StatelessWidget {
 }
 
 
-class CraftProduct {
-  const CraftProduct({required this.name, required this.category, required this.image, required this.price});
-  final String name, category, image;
-  final double price;
-
-  factory CraftProduct.fromJson(Map<String, dynamic> json) {
-    final category = json['category'] is Map ? Map<String, dynamic>.from(json['category']) : <String, dynamic>{};
-    var image = json['featured_image']?.toString().trim() ?? '';
-    if (image.isEmpty || image.toLowerCase() == 'null') {
-      image = json['image']?.toString().trim() ?? '';
-    }
-    if (image.startsWith('//')) {
-      image = 'https:$image';
-    } else if (image.startsWith('/')) {
-      image = 'https://backend.redrocksafrica.com$image';
-    } else if (image.isNotEmpty && !image.startsWith('http://') && !image.startsWith('https://')) {
-      image = 'https://backend.redrocksafrica.com/$image';
-    }
-    if (image.startsWith('http://backend.redrocksafrica.com/')) {
-      image = image.replaceFirst('http://backend.redrocksafrica.com/', 'https://backend.redrocksafrica.com/');
-    }
-    return CraftProduct(
-      name: json['name']?.toString() ?? 'Craft',
-      category: category['name']?.toString() ?? '',
-      image: image,
-      price: double.tryParse(json['price']?.toString() ?? '') ?? 0,
-    );
-  }
-}
-
-class CraftProductCarousel extends StatefulWidget {
-  const CraftProductCarousel({required this.onViewAll});
+class _HomeCraftCarousel extends StatefulWidget {
+  const _HomeCraftCarousel({required this.onViewAll});
   final VoidCallback onViewAll;
 
   @override
-  State<CraftProductCarousel> createState() => CraftProductCarouselState();
+  State<_HomeCraftCarousel> createState() => _HomeCraftCarouselState();
 }
 
-class CraftProductCarouselState extends State<CraftProductCarousel> {
-  late final Future<List<CraftProduct>> _future = _load();
+class _HomeCraftCarouselState extends State<_HomeCraftCarousel> {
+  late final Future<List<market.CraftProduct>> _future = _load();
 
-  Future<List<CraftProduct>> _load() async {
+  Future<List<market.CraftProduct>> _load() async {
     final response = await http.get(Uri.parse('https://backend.redrocksafrica.com/api/web/crafts/all/'));
     if (response.statusCode < 200 || response.statusCode >= 300) throw Exception('Crafts unavailable');
     final decoded = jsonDecode(response.body);
     if (decoded is! List) return const [];
-    final crafts = decoded.whereType<Map>().map((item) => CraftProduct.fromJson(Map<String, dynamic>.from(item))).toList();
+    final crafts = decoded
+        .whereType<Map>()
+        .map((item) => market.CraftProduct.fromJson(Map<String, dynamic>.from(item)))
+        .toList();
     crafts.shuffle();
     return crafts.take(8).toList();
   }
@@ -1248,13 +1221,13 @@ class CraftProductCarouselState extends State<CraftProductCarousel> {
   }
 
   @override
-  Widget build(BuildContext context) => FutureBuilder<List<CraftProduct>>(
+  Widget build(BuildContext context) => FutureBuilder<List<market.CraftProduct>>(
     future: _future,
     builder: (context, snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
         return const SizedBox(height: 225, child: Center(child: CircularProgressIndicator(color: AppColors.primary)));
       }
-      final crafts = snapshot.data ?? const <CraftProduct>[];
+      final crafts = snapshot.data ?? const <market.CraftProduct>[];
       if (crafts.isEmpty) return const SizedBox.shrink();
       return SizedBox(
         height: 232,
@@ -1271,7 +1244,9 @@ class CraftProductCarouselState extends State<CraftProductCarousel> {
               borderRadius: BorderRadius.circular(19),
               clipBehavior: Clip.antiAlias,
               child: InkWell(
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => PublicCraftDetailPage(product: craft))),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => market.PublicCraftDetailPage(product: craft)),
+                ),
                 child: Container(
                   width: 178,
                   decoration: BoxDecoration(border: Border.all(color: AppColors.cardBorder), borderRadius: BorderRadius.circular(19)),
