@@ -1186,12 +1186,12 @@ class _CraftFeatureCard extends StatelessWidget {
 }
 
 
-class _HomeCraft {
-  const _HomeCraft({required this.name, required this.category, required this.image, required this.price});
+class CraftProduct {
+  const CraftProduct({required this.name, required this.category, required this.image, required this.price});
   final String name, category, image;
   final double price;
 
-  factory _HomeCraft.fromJson(Map<String, dynamic> json) {
+  factory CraftProduct.fromJson(Map<String, dynamic> json) {
     final category = json['category'] is Map ? Map<String, dynamic>.from(json['category']) : <String, dynamic>{};
     var image = json['featured_image']?.toString().trim() ?? '';
     if (image.isEmpty || image.toLowerCase() == 'null') {
@@ -1207,7 +1207,7 @@ class _HomeCraft {
     if (image.startsWith('http://backend.redrocksafrica.com/')) {
       image = image.replaceFirst('http://backend.redrocksafrica.com/', 'https://backend.redrocksafrica.com/');
     }
-    return _HomeCraft(
+    return CraftProduct(
       name: json['name']?.toString() ?? 'Craft',
       category: category['name']?.toString() ?? '',
       image: image,
@@ -1216,23 +1216,23 @@ class _HomeCraft {
   }
 }
 
-class _HomeCraftCarousel extends StatefulWidget {
-  const _HomeCraftCarousel({required this.onViewAll});
+class CraftProductCarousel extends StatefulWidget {
+  const CraftProductCarousel({required this.onViewAll});
   final VoidCallback onViewAll;
 
   @override
-  State<_HomeCraftCarousel> createState() => _HomeCraftCarouselState();
+  State<CraftProductCarousel> createState() => CraftProductCarouselState();
 }
 
-class _HomeCraftCarouselState extends State<_HomeCraftCarousel> {
-  late final Future<List<_HomeCraft>> _future = _load();
+class CraftProductCarouselState extends State<CraftProductCarousel> {
+  late final Future<List<CraftProduct>> _future = _load();
 
-  Future<List<_HomeCraft>> _load() async {
+  Future<List<CraftProduct>> _load() async {
     final response = await http.get(Uri.parse('https://backend.redrocksafrica.com/api/web/crafts/all/'));
     if (response.statusCode < 200 || response.statusCode >= 300) throw Exception('Crafts unavailable');
     final decoded = jsonDecode(response.body);
     if (decoded is! List) return const [];
-    final crafts = decoded.whereType<Map>().map((item) => _HomeCraft.fromJson(Map<String, dynamic>.from(item))).toList();
+    final crafts = decoded.whereType<Map>().map((item) => CraftProduct.fromJson(Map<String, dynamic>.from(item))).toList();
     crafts.shuffle();
     return crafts.take(8).toList();
   }
@@ -1248,13 +1248,13 @@ class _HomeCraftCarouselState extends State<_HomeCraftCarousel> {
   }
 
   @override
-  Widget build(BuildContext context) => FutureBuilder<List<_HomeCraft>>(
+  Widget build(BuildContext context) => FutureBuilder<List<CraftProduct>>(
     future: _future,
     builder: (context, snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
         return const SizedBox(height: 225, child: Center(child: CircularProgressIndicator(color: AppColors.primary)));
       }
-      final crafts = snapshot.data ?? const <_HomeCraft>[];
+      final crafts = snapshot.data ?? const <CraftProduct>[];
       if (crafts.isEmpty) return const SizedBox.shrink();
       return SizedBox(
         height: 232,
@@ -1271,7 +1271,7 @@ class _HomeCraftCarouselState extends State<_HomeCraftCarousel> {
               borderRadius: BorderRadius.circular(19),
               clipBehavior: Clip.antiAlias,
               child: InkWell(
-                onTap: widget.onViewAll,
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => PublicCraftDetailPage(product: craft))),
                 child: Container(
                   width: 178,
                   decoration: BoxDecoration(border: Border.all(color: AppColors.cardBorder), borderRadius: BorderRadius.circular(19)),
