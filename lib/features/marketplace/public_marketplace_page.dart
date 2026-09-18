@@ -141,6 +141,20 @@ class _PublicMarketplacePageState extends State<PublicMarketplacePage> {
                 ),
               ),
             ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 5, 20, 5),
+                child: Row(children: [
+                  const Text('Shop by country', style: TextStyle(color: AppColors.textSecondary, fontSize: 10.5, fontWeight: FontWeight.w600)),
+                  const Spacer(),
+                  _CountryFilter(label: 'Uganda', onTap: () => setState(() => _query = 'Uganda')),
+                  const SizedBox(width: 6),
+                  _CountryFilter(label: 'Rwanda', onTap: () => setState(() => _query = 'Rwanda')),
+                  const SizedBox(width: 6),
+                  _CountryFilter(label: 'DR Congo', onTap: () => setState(() => _query = 'DR Congo')),
+                ]),
+              ),
+            ),
             const SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.fromLTRB(20, 12, 20, 14),
@@ -177,6 +191,23 @@ class _PublicMarketplacePageState extends State<PublicMarketplacePage> {
   }
 }
 
+class _CountryFilter extends StatelessWidget {
+  const _CountryFilter({required this.label, required this.onTap});
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(10),
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.cardBorder)),
+      child: Text(label, style: const TextStyle(color: AppColors.primary, fontSize: 8.5, fontWeight: FontWeight.w700)),
+    ),
+  );
+}
+
 Widget _cartIcon() => Stack(
   clipBehavior: Clip.none,
   children: [
@@ -199,12 +230,19 @@ Widget _cartIcon() => Stack(
   ],
 );
 
-class _ProductCard extends StatelessWidget {
+class _ProductCard extends StatefulWidget {
   const _ProductCard({required this.product});
   final _CraftProduct product;
 
   @override
+  State<_ProductCard> createState() => _ProductCardState();
+}
+
+class _ProductCardState extends State<_ProductCard> {
+  @override
   Widget build(BuildContext context) {
+    final product = widget.product;
+    final saved = _SavedCrafts.contains(product);
     return InkWell(
       borderRadius: BorderRadius.circular(18),
       onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => PublicCraftDetailPage(product: product))),
@@ -222,11 +260,18 @@ class _ProductCard extends StatelessWidget {
                   Positioned(
                     top: 10,
                     right: 10,
-                    child: Container(
-                      width: 34,
-                      height: 34,
-                      decoration: BoxDecoration(color: Colors.white.withOpacity(.94), shape: BoxShape.circle),
-                      child: const Icon(Icons.arrow_outward_rounded, size: 17, color: AppColors.primary),
+                    child: Material(
+                      color: Colors.white.withOpacity(.94),
+                      shape: const CircleBorder(),
+                      child: InkWell(
+                        customBorder: const CircleBorder(),
+                        onTap: () => setState(() => _SavedCrafts.toggle(product)),
+                        child: SizedBox(
+                          width: 34,
+                          height: 34,
+                          child: Icon(saved ? Icons.favorite_rounded : Icons.favorite_border_rounded, size: 17, color: saved ? AppColors.accent : AppColors.primary),
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -281,6 +326,16 @@ class CraftCategoryPage extends StatelessWidget {
           Text(category, style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w700)),
           const SizedBox(height: 7),
           Text('Handmade pieces from makers across Greater Virunga.', style: TextStyle(color: Colors.white.withOpacity(.72), fontSize: 11.5)),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 7,
+            runSpacing: 7,
+            children: const [
+              _RegionPill('Uganda'),
+              _RegionPill('Rwanda'),
+              _RegionPill('DR Congo'),
+            ],
+          ),
         ]),
       )),
       SliverToBoxAdapter(
@@ -312,6 +367,18 @@ class CraftCategoryPage extends StatelessWidget {
             ),
       ),
     ]),
+  );
+}
+
+class _RegionPill extends StatelessWidget {
+  const _RegionPill(this.label);
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+    decoration: BoxDecoration(color: Colors.white.withOpacity(.09), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white.withOpacity(.14))),
+    child: Text(label, style: const TextStyle(color: Colors.white, fontSize: 8.5, fontWeight: FontWeight.w600)),
   );
 }
 
