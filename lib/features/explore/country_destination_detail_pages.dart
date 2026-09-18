@@ -179,11 +179,16 @@ class _CountryPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _countryHeading('Discover $country', 'Nature, people and living heritage'),
+                  _countryHeading('Discover $country', 'A quick look at the character of the country'),
                   const SizedBox(height: 13),
-                  _countryFeatureGrid(context),
+                  _countryEditorialFeature(
+                    image: 'assets/images/onboarding_community.jpg',
+                    eyebrow: 'NATURE • CULTURE • HERITAGE',
+                    title: 'More than a destination',
+                    subtitle: 'Discover wildlife, communities, conservation and the living heritage that shapes $country.',
+                  ),
                   const SizedBox(height: 28),
-                  _countryHeading('Things to do', 'Experiences are shown as destination information'),
+                  _countryHeading('Things to do', 'Signature ways to experience the landscape'),
                   const SizedBox(height: 13),
                   _countryActivityStrip(),
                   const SizedBox(height: 28),
@@ -193,33 +198,13 @@ class _CountryPage extends StatelessWidget {
                     onTap: () => _open(context, const PublicMarketplacePage()),
                   ),
                   const SizedBox(height: 28),
-                  _countryHeading('People of the landscape', 'Tourism support and conservation'),
+                  _countryHeading('People of the landscape', 'The people supporting tourism and conservation'),
                   const SizedBox(height: 13),
-                  Row(
-                    children: [
-                      Expanded(child: _countryPeopleCard(Icons.backpack_outlined, 'Porters', 'Supporting journeys')),
-                      const SizedBox(width: 10),
-                      Expanded(child: _countryPeopleCard(Icons.shield_outlined, 'Rangers', 'Protecting landscapes')),
-                    ],
-                  ),
+                  _countryPeopleFeature(country),
                   const SizedBox(height: 28),
-                  _countryHeading('Plan your discovery', 'Useful country information'),
+                  _countryHeading('Plan your journey', 'Everything useful in one simple place'),
                   const SizedBox(height: 13),
-                  _listCard(
-                    icon: Icons.info_outline_rounded,
-                    title: 'Visitor Information',
-                    subtitle: 'Practical country and destination information',
-                  ),
-                  _listCard(
-                    icon: Icons.location_on_outlined,
-                    title: 'Explore Locations',
-                    subtitle: 'Discover protected places across $country',
-                  ),
-                  _listCard(
-                    icon: Icons.eco_outlined,
-                    title: 'Conservation',
-                    subtitle: 'Learn about nature and landscape protection',
-                  ),
+                  _countryJourneyPanel(country),
                   const SizedBox(height: 34),
                 ],
               ),
@@ -230,51 +215,6 @@ class _CountryPage extends StatelessWidget {
     );
   }
 
-  Widget _countryFeatureGrid(BuildContext context) {
-    const items = [
-      ('Wildlife & Nature', Icons.pets_outlined),
-      ('Community & Culture', Icons.diversity_3_outlined),
-      ('Conservation', Icons.eco_outlined),
-      ('Porters', Icons.backpack_outlined),
-    ];
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: items.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        childAspectRatio: 1.45,
-      ),
-      itemBuilder: (_, index) {
-        final item = items[index];
-        return Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: AppColors.cardBorder),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(item.$2, color: AppColors.primary, size: 23),
-              const Spacer(),
-              Text(
-                item.$1,
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 }
 
 Widget _countryQuickLink(IconData icon, String label) => Container(
@@ -465,6 +405,156 @@ Widget _countryPeopleCard(IconData icon, String title, String subtitle) => Conta
     ],
   ),
 );
+
+Widget _countryEditorialFeature({
+  required String image,
+  required String eyebrow,
+  required String title,
+  required String subtitle,
+}) => Container(
+  height: 210,
+  clipBehavior: Clip.antiAlias,
+  decoration: BoxDecoration(borderRadius: BorderRadius.circular(22)),
+  child: Stack(
+    fit: StackFit.expand,
+    children: [
+      Image.asset(image, fit: BoxFit.cover),
+      const DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0x10000000), Color(0xE8000000)],
+          ),
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.all(17),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Spacer(),
+            Text(eyebrow, style: const TextStyle(color: AppColors.accent, fontSize: 8.5, fontWeight: FontWeight.w700, letterSpacing: .9)),
+            const SizedBox(height: 5),
+            Text(title, style: const TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 5),
+            Text(subtitle, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.white.withOpacity(.78), fontSize: 10.5, height: 1.35)),
+          ],
+        ),
+      ),
+    ],
+  ),
+);
+
+Widget _countryPeopleFeature(String country) => Container(
+  padding: const EdgeInsets.all(18),
+  decoration: BoxDecoration(
+    color: AppColors.primary,
+    borderRadius: BorderRadius.circular(22),
+  ),
+  child: Column(
+    children: [
+      Row(
+        children: [
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(color: Colors.white.withOpacity(.10), borderRadius: BorderRadius.circular(15)),
+            child: const Icon(Icons.backpack_outlined, color: AppColors.accent, size: 24),
+          ),
+          const SizedBox(width: 13),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Porters', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
+                SizedBox(height: 3),
+                Text('Supporting journeys and local livelihoods', style: TextStyle(color: Colors.white70, fontSize: 10)),
+              ],
+            ),
+          ),
+          const Icon(Icons.arrow_outward_rounded, color: Colors.white, size: 18),
+        ],
+      ),
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        child: Divider(height: 1, color: Colors.white.withOpacity(.12)),
+      ),
+      Row(
+        children: [
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(color: Colors.white.withOpacity(.10), borderRadius: BorderRadius.circular(15)),
+            child: const Icon(Icons.shield_outlined, color: AppColors.accent, size: 24),
+          ),
+          const SizedBox(width: 13),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Rangers', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
+                SizedBox(height: 3),
+                Text('Protecting wildlife and protected landscapes', style: TextStyle(color: Colors.white70, fontSize: 10)),
+              ],
+            ),
+          ),
+          const Icon(Icons.arrow_outward_rounded, color: Colors.white, size: 18),
+        ],
+      ),
+    ],
+  ),
+);
+
+Widget _countryJourneyPanel(String country) => Container(
+  padding: const EdgeInsets.all(6),
+  decoration: BoxDecoration(
+    color: Colors.white,
+    borderRadius: BorderRadius.circular(22),
+    border: Border.all(color: AppColors.cardBorder),
+  ),
+  child: Column(
+    children: [
+      _journeyRow(Icons.info_outline_rounded, 'Visitor information', 'Practical travel information'),
+      _journeyDivider(),
+      _journeyRow(Icons.location_on_outlined, 'Places to explore', 'Protected landscapes across $country'),
+      _journeyDivider(),
+      _journeyRow(Icons.eco_outlined, 'Conservation', 'Nature and landscape protection'),
+    ],
+  ),
+);
+
+Widget _journeyRow(IconData icon, String title, String subtitle) => Padding(
+  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 11),
+  child: Row(
+    children: [
+      Container(
+        width: 42,
+        height: 42,
+        decoration: BoxDecoration(color: AppColors.accentSoft, borderRadius: BorderRadius.circular(12)),
+        child: Icon(icon, color: AppColors.primary, size: 20),
+      ),
+      const SizedBox(width: 12),
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: const TextStyle(color: AppColors.textPrimary, fontSize: 12.5, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 2),
+            Text(subtitle, style: const TextStyle(color: AppColors.textSecondary, fontSize: 9.5)),
+          ],
+        ),
+      ),
+      const Icon(Icons.chevron_right_rounded, color: AppColors.primary, size: 20),
+    ],
+  ),
+);
+
+Widget _journeyDivider() => const Padding(
+  padding: EdgeInsets.symmetric(horizontal: 10),
+  child: Divider(height: 1, color: AppColors.cardBorder),
+);
+
 
 class DestinationDetailPage extends StatelessWidget {
   const DestinationDetailPage({super.key, required this.name, required this.country, this.authService});
