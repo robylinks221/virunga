@@ -206,6 +206,7 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
       _ => GuestHomePage(
           authService: widget.authService,
+          showBottomNavigation: false,
         ),
     };
 
