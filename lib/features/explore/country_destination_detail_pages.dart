@@ -212,20 +212,6 @@ class _CountryPage extends StatelessWidget {
 
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 25, 20, 13),
-              child: _CountrySectionIntro(
-                eyebrow: 'PORTERS & COMMUNITIES',
-                title: 'Porters of $country',
-                body: 'Porters belong to groups connected to communities around national parks in the Greater Virunga region.',
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: _PorterCarousel(porters: _portersForCountry(country)),
-          ),
-
-          SliverToBoxAdapter(
-            child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 24, 20, 13),
               child: _CountrySectionIntro(
                 eyebrow: 'CRAFT CATEGORIES',
@@ -748,14 +734,14 @@ class DestinationDetailPage extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 30, 20, 13),
               child: _CountrySectionIntro(
-                eyebrow: 'PORTERS',
-                title: 'Porters connected to this park',
-                body: 'Porters are organised under groups. Each group belongs to a community connected to $name.',
+                eyebrow: 'PORTER GROUPS',
+                title: 'Porter groups around this park',
+                body: 'Explore porter groups connected to communities around $name. Each porter belongs to a group, and each group belongs to a community.',
               ),
             ),
           ),
           SliverToBoxAdapter(
-            child: _PorterCarousel(porters: _portersForPark(name)),
+            child: _PorterGroupCarousel(groups: _porterGroupsForPark(name)),
           ),
 
           SliverToBoxAdapter(
@@ -887,102 +873,139 @@ class DestinationDetailPage extends StatelessWidget {
 
 const _porterAvatar = 'assets/images/onboarding_community.jpg';
 
-List<_PorterProfile> _portersForCountry(String country) {
-  switch (country) {
-    case 'Uganda':
-      return const [
-        _PorterProfile('Porter', 'Bwindi Porter Group', 'Bwindi Community', 'Bwindi Impenetrable National Park'),
-        _PorterProfile('Porter', 'Mgahinga Porter Group', 'Mgahinga Community', 'Mgahinga Gorilla National Park'),
-      ];
-    case 'Rwanda':
-      return const [
-        _PorterProfile('Porter', 'Volcanoes Porter Group', 'Volcanoes Community', 'Volcanoes National Park'),
-      ];
-    default:
-      return const [
-        _PorterProfile('Porter', 'Virunga Porter Group', 'Virunga Community', 'Virunga National Park'),
-        _PorterProfile('Porter', 'Kahuzi-Biega Porter Group', 'Kahuzi-Biega Community', 'Kahuzi-Biega National Park'),
-      ];
-  }
-}
-
-List<_PorterProfile> _portersForPark(String park) {
+List<_PorterGroup> _porterGroupsForPark(String park) {
   if (park.contains('Bwindi')) {
-    return const [_PorterProfile('Porter', 'Bwindi Porter Group', 'Bwindi Community', 'Bwindi Impenetrable National Park')];
+    return const [
+      _PorterGroup('Buhoma Porter Group', 'Buhoma Community', 'Bwindi Impenetrable National Park'),
+      _PorterGroup('Ruhija Porter Group', 'Ruhija Community', 'Bwindi Impenetrable National Park'),
+      _PorterGroup('Rushaga Porter Group', 'Rushaga Community', 'Bwindi Impenetrable National Park'),
+    ];
   }
   if (park.contains('Mgahinga')) {
-    return const [_PorterProfile('Porter', 'Mgahinga Porter Group', 'Mgahinga Community', 'Mgahinga Gorilla National Park')];
+    return const [
+      _PorterGroup('Mgahinga Porter Group', 'Mgahinga Community', 'Mgahinga Gorilla National Park'),
+    ];
   }
   if (park.contains('Volcanoes')) {
-    return const [_PorterProfile('Porter', 'Volcanoes Porter Group', 'Volcanoes Community', 'Volcanoes National Park')];
+    return const [
+      _PorterGroup('Volcanoes Porter Group', 'Volcanoes Community', 'Volcanoes National Park'),
+    ];
   }
   if (park.contains('Virunga')) {
-    return const [_PorterProfile('Porter', 'Virunga Porter Group', 'Virunga Community', 'Virunga National Park')];
+    return const [
+      _PorterGroup('Virunga Porter Group', 'Virunga Community', 'Virunga National Park'),
+    ];
   }
   if (park.contains('Kahuzi-Biega')) {
-    return const [_PorterProfile('Porter', 'Kahuzi-Biega Porter Group', 'Kahuzi-Biega Community', 'Kahuzi-Biega National Park')];
+    return const [
+      _PorterGroup('Kahuzi-Biega Porter Group', 'Kahuzi-Biega Community', 'Kahuzi-Biega National Park'),
+    ];
   }
   return const [];
 }
 
-class _PorterProfile {
-  const _PorterProfile(this.name, this.group, this.community, this.park);
+class _PorterGroup {
+  const _PorterGroup(this.name, this.community, this.park);
   final String name;
-  final String group;
   final String community;
   final String park;
 }
 
-class _PorterCarousel extends StatelessWidget {
-  const _PorterCarousel({required this.porters});
-  final List<_PorterProfile> porters;
+class _PorterGroupCarousel extends StatelessWidget {
+  const _PorterGroupCarousel({required this.groups});
+  final List<_PorterGroup> groups;
 
   @override
   Widget build(BuildContext context) {
-    if (porters.isEmpty) {
+    if (groups.isEmpty) {
       return const Padding(
         padding: EdgeInsets.fromLTRB(20, 0, 20, 4),
-        child: Text('Porter information for this destination will appear here.', style: TextStyle(color: AppColors.textSecondary, fontSize: 11.5)),
+        child: Text('Porter groups for this park will appear here.', style: TextStyle(color: AppColors.textSecondary, fontSize: 11.5)),
       );
     }
+
     return SizedBox(
-      height: 184,
+      height: 238,
       child: ListView.separated(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
-        itemCount: porters.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 11),
-        itemBuilder: (_, index) => _PorterCard(porter: porters[index]),
+        itemCount: groups.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        itemBuilder: (_, index) => _PorterGroupCard(group: groups[index]),
       ),
     );
   }
 }
 
-class _PorterCard extends StatelessWidget {
-  const _PorterCard({required this.porter});
-  final _PorterProfile porter;
+class _PorterGroupCard extends StatelessWidget {
+  const _PorterGroupCard({required this.group});
+  final _PorterGroup group;
 
   @override
   Widget build(BuildContext context) => Container(
-    width: 252,
-    padding: const EdgeInsets.all(14),
-    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18), border: Border.all(color: AppColors.cardBorder)),
-    child: Row(children: [
-      ClipOval(child: Image.asset(_porterAvatar, width: 64, height: 64, fit: BoxFit.cover)),
-      const SizedBox(width: 13),
-      Expanded(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
-          Text(porter.name, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13.5, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 5),
-          Text(porter.group, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 4),
-          Text(porter.community, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textSecondary, fontSize: 9.5)),
-          const SizedBox(height: 4),
-          Text(porter.park, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.accent, fontSize: 8.5, height: 1.25, fontWeight: FontWeight.w600)),
-        ]),
-      ),
-    ]),
+    width: 286,
+    clipBehavior: Clip.antiAlias,
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: AppColors.cardBorder),
+    ),
+    child: Column(
+      children: [
+        Container(
+          color: AppColors.primary,
+          padding: const EdgeInsets.fromLTRB(15, 14, 15, 14),
+          child: Row(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: Image.asset(_porterAvatar, fit: BoxFit.cover),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  const Text('PORTER GROUP', style: TextStyle(color: AppColors.accent, fontSize: 8, fontWeight: FontWeight.w700, letterSpacing: .9)),
+                  const SizedBox(height: 4),
+                  Text(group.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.15, fontWeight: FontWeight.w700)),
+                ]),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(15, 13, 15, 13),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [
+                const Icon(Icons.groups_2_outlined, size: 16, color: AppColors.primary),
+                const SizedBox(width: 7),
+                Expanded(child: Text(group.community, style: const TextStyle(color: AppColors.textPrimary, fontSize: 11, fontWeight: FontWeight.w700))),
+              ]),
+              const SizedBox(height: 9),
+              Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                const Icon(Icons.park_outlined, size: 16, color: AppColors.accent),
+                const SizedBox(width: 7),
+                Expanded(child: Text(group.park, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textSecondary, fontSize: 9.5, height: 1.35))),
+              ]),
+              const Spacer(),
+              const Row(children: [
+                Text('View group', style: TextStyle(color: AppColors.primary, fontSize: 9.5, fontWeight: FontWeight.w700)),
+                SizedBox(width: 4),
+                Icon(Icons.arrow_forward_rounded, color: AppColors.primary, size: 15),
+              ]),
+            ]),
+          ),
+        ),
+      ],
+    ),
   );
 }
 
