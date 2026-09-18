@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_theme.dart';
+
 import '../auth/auth_service.dart';
 import 'marketplace_models.dart';
 import 'marketplace_service.dart';
@@ -19,9 +21,9 @@ class MarketplacePage extends StatefulWidget {
 }
 
 class _MarketplacePageState extends State<MarketplacePage> {
-  static const Color _forest = Color(0xFF0B3B2E);
-  static const Color _cream = Color(0xFFF6F3EC);
-  static const Color _gold = Color(0xFFE2B84B);
+  static const Color _forest = AppColors.primary;
+  static const Color _cream = AppColors.background;
+  static const Color _gold = AppColors.accent;
 
   final TextEditingController _searchController = TextEditingController();
 
@@ -194,9 +196,9 @@ class _MarketplacePageState extends State<MarketplacePage> {
                               ),
                               SizedBox(height: 4),
                               Text(
-                                'Local Crafts',
+                                'Crafts & Artisans',
                                 style: TextStyle(
-                                  color: Color(0xFF17251F),
+                                  color: AppColors.textPrimary,
                                   fontSize: 24,
                                   height: 1,
                                   fontWeight: FontWeight.w800,
@@ -208,7 +210,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
                         Text(
                           '${products.length} product${products.length == 1 ? '' : 's'}',
                           style: const TextStyle(
-                            color: Color(0xFF737A75),
+                            color: AppColors.textSecondary,
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                           ),
@@ -296,7 +298,7 @@ class _MarketplaceHeader extends StatelessWidget {
           ),
           const SizedBox(height: 5),
           Text(
-            'Authentic crafts from local communities',
+            'Authentic crafts. Local artisans. Living culture.',
             style: TextStyle(
               color: Colors.white.withOpacity(.72),
               fontSize: 13,
@@ -310,12 +312,12 @@ class _MarketplaceHeader extends StatelessWidget {
             decoration: InputDecoration(
               hintText: 'Search handmade products...',
               hintStyle: const TextStyle(
-                color: Color(0xFF7C837F),
+                color: AppColors.textSecondary,
                 fontSize: 13,
               ),
               prefixIcon: const Icon(
                 Icons.search_rounded,
-                color: Color(0xFF55625C),
+                color: AppColors.primary,
               ),
               filled: true,
               fillColor: Colors.white,
@@ -359,10 +361,10 @@ class _CategoryChip extends StatelessWidget {
       side: BorderSide(
         color: selected
             ? _MarketplacePageState._forest
-            : const Color(0xFFE0DCD2),
+            : AppColors.cardBorder,
       ),
       labelStyle: TextStyle(
-        color: selected ? Colors.white : const Color(0xFF3D4843),
+        color: selected ? Colors.white : AppColors.textPrimary,
         fontSize: 12,
         fontWeight: FontWeight.w700,
       ),
@@ -405,14 +407,14 @@ class _ErrorState extends StatelessWidget {
           const Icon(
             Icons.cloud_off_outlined,
             size: 48,
-            color: Color(0xFF7D857F),
+            color: AppColors.textMuted,
           ),
           const SizedBox(height: 15),
           const Text(
             'Could not load products',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Color(0xFF24342D),
+              color: AppColors.textPrimary,
               fontSize: 18,
               fontWeight: FontWeight.w800,
             ),
@@ -422,7 +424,7 @@ class _ErrorState extends StatelessWidget {
             message,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              color: Color(0xFF777E79),
+              color: AppColors.textSecondary,
               fontSize: 13,
               height: 1.45,
             ),
@@ -459,7 +461,7 @@ class _EmptyState extends StatelessWidget {
           const Icon(
             Icons.storefront_outlined,
             size: 54,
-            color: Color(0xFF8D958F),
+            color: AppColors.textMuted,
           ),
           const SizedBox(height: 16),
           Text(
