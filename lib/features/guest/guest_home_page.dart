@@ -15,9 +15,14 @@ import '../explore/country_destination_detail_pages.dart' as connected;
 import '../marketplace/public_marketplace_page.dart';
 
 class GuestHomePage extends StatefulWidget {
-  const GuestHomePage({super.key, required this.authService});
+  const GuestHomePage({
+    super.key,
+    required this.authService,
+    this.showBottomNavigation = true,
+  });
 
   final AuthService authService;
+  final bool showBottomNavigation;
 
   @override
   State<GuestHomePage> createState() => _GuestHomePageState();
@@ -292,10 +297,12 @@ class _GuestHomePageState extends State<GuestHomePage> {
           ],
         ),
       ),
-      bottomNavigationBar: _BottomNav(
-        index: _navIndex,
-        onTap: _nav,
-      ),
+      bottomNavigationBar: widget.showBottomNavigation
+          ? _BottomNav(
+              index: _navIndex,
+              onTap: _nav,
+            )
+          : null,
     );
   }
 }
