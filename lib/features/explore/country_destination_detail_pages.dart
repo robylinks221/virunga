@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
+import '../auth/auth_service.dart';
+import '../marketplace/marketplace_page.dart';
 
 class CountryDetailPage extends StatelessWidget {
   const CountryDetailPage({super.key, required this.country});
@@ -71,9 +73,10 @@ class _CountryPage extends StatelessWidget {
 }
 
 class DestinationDetailPage extends StatelessWidget {
-  const DestinationDetailPage({super.key, required this.name, required this.country});
+  const DestinationDetailPage({super.key, required this.name, required this.country, this.authService});
   final String name;
   final String country;
+  final AuthService? authService;
 
   @override
   Widget build(BuildContext context) {
@@ -157,7 +160,11 @@ class DestinationDetailPage extends StatelessWidget {
           const SizedBox(height: 5),
           _body('Explore craft categories made and sold by artisans connected to this destination.'),
           const SizedBox(height: 14),
-          _craftCategories(),
+          _craftCategories(
+            onTap: authService == null ? null : () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => MarketplacePage(authService: authService!)),
+            ),
+          ),
           const SizedBox(height: 27),
 
           _sectionTitle('LIVING HERITAGE'),
@@ -332,7 +339,7 @@ Widget _horizontalInfoCards(List<(String, IconData)> items) => SizedBox(
   ),
 );
 
-Widget _craftCategories() {
+Widget _craftCategories({VoidCallback? onTap}) {
   const items = [
     ('Baskets & Weaving', Icons.shopping_basket_outlined),
     ('Wood Carvings', Icons.handyman_outlined),
@@ -351,7 +358,10 @@ Widget _craftCategories() {
       separatorBuilder: (_, __) => const SizedBox(width: 12),
       itemBuilder: (context, index) {
         final item = items[index];
-        return SizedBox(
+        return InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(40),
+          child: SizedBox(
           width: 76,
           child: Column(
             children: [
@@ -364,6 +374,7 @@ Widget _craftCategories() {
               const SizedBox(height: 7),
               Text(item.$1, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textPrimary, fontSize: 8.5, fontWeight: FontWeight.w500, height: 1.2)),
             ],
+          ),
           ),
         );
       },
