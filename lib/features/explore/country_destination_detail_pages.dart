@@ -597,7 +597,7 @@ class DestinationDetailPage extends StatelessWidget {
             ),
           ),
           SliverToBoxAdapter(
-            child: _PorterGroupCarousel(groups: _porterGroupsForPark(name)),
+            child: _ApiPorterGroups(park: name),
           ),
 
           SliverToBoxAdapter(
@@ -899,43 +899,133 @@ class _RealCraftCarouselState extends State<_RealCraftCarousel> {
 }
 
 const _porterAvatar = 'assets/images/onboarding_community.jpg';
+const _portersEndpoint = 'https://backend.redrocksafrica.com/api/web/porters/all/';
 
-List<_PorterGroup> _porterGroupsForPark(String park) {
-  if (park.contains('Bwindi')) {
-    return const [
-      _PorterGroup('Buhoma Porter Group', 'Buhoma Community', 'Bwindi Impenetrable National Park'),
-      _PorterGroup('Ruhija Porter Group', 'Ruhija Community', 'Bwindi Impenetrable National Park'),
-      _PorterGroup('Rushaga Porter Group', 'Rushaga Community', 'Bwindi Impenetrable National Park'),
-    ];
+class _Porter {
+  const _Porter({
+    required this.id,
+    required this.name,
+    required this.isActive,
+    required this.groupId,
+    required this.group,
+    required this.isGroupLeader,
+    required this.communityId,
+    required this.community,
+    required this.park,
+    required this.country,
+    required this.countryCode,
+  });
+
+  final int id, groupId, communityId;
+  final String name, group, community, park, country, countryCode;
+  final bool isActive, isGroupLeader;
+
+  factory _Porter.fromJson(Map<String, dynamic> json) {
+    final group = json['group'] is Map ? Map<String, dynamic>.from(json['group']) : <String, dynamic>{};
+    final community = json['community'] is Map ? Map<String, dynamic>.from(json['community']) : <String, dynamic>{};
+    final park = community['national_park'] is Map ? Map<String, dynamic>.from(community['national_park']) : <String, dynamic>{};
+    final country = community['country'] is Map ? Map<String, dynamic>.from(community['country']) : <String, dynamic>{};
+    return _Porter(
+      id: int.tryParse(json['id']?.toString() ?? '') ?? 0,
+      name: json['name']?.toString() ?? '',
+      isActive: json['is_active'] == true,
+      groupId: int.tryParse(group['id']?.toString() ?? '') ?? 0,
+      group: group['name']?.toString() ?? '',
+      isGroupLeader: group['is_group_leader'] == true,
+      communityId: int.tryParse(community['id']?.toString() ?? '') ?? 0,
+      community: community['name']?.toString() ?? '',
+      park: park['name']?.toString() ?? '',
+      country: country['name']?.toString() ?? '',
+      countryCode: country['code']?.toString() ?? '',
+    );
   }
-  if (park.contains('Mgahinga')) {
-    return const [
-      _PorterGroup('Mgahinga Porter Group', 'Mgahinga Community', 'Mgahinga Gorilla National Park'),
-    ];
+}
+
+Future<List<_Porter>> _loadPorters() async {
+  final response = await http.get(Uri.parse(_portersEndpoint));
+  if (response.statusCode < 200 || response.statusCode >= 300) {
+    throw Exception('Could not load porters');
   }
-  if (park.contains('Volcanoes')) {
-    return const [
-      _PorterGroup('Volcanoes Porter Group', 'Volcanoes Community', 'Volcanoes National Park'),
-    ];
-  }
-  if (park.contains('Virunga')) {
-    return const [
-      _PorterGroup('Virunga Porter Group', 'Virunga Community', 'Virunga National Park'),
-    ];
-  }
-  if (park.contains('Kahuzi-Biega')) {
-    return const [
-      _PorterGroup('Kahuzi-Biega Porter Group', 'Kahuzi-Biega Community', 'Kahuzi-Biega National Park'),
-    ];
-  }
-  return const [];
+  final decoded = jsonDecode(response.body);
+  if (decoded is! List) return const [];
+  return decoded
+      .whereType<Map>()
+      .map((item) => _Porter.fromJson(Map<String, dynamic>.from(item)))
+      .toList();
+}
+
+class _ApiPorterGroups extends StatefulWidget {
+  const _ApiPorterGroups({required this.park});
+  final String park;
+
+  @override
+  State<_ApiPorterGroups> createState() => _ApiPorterGroupsState();
+}
+
+class _ApiPorterGroupsState extends State<_ApiPorterGroups> {
+  late final Future<List<_Porter>> _future = _loadPorters();
+
+  @override
+  Widget build(BuildContext context) => FutureBuilder<List<_Porter>>(
+    future: _future,
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const SizedBox(height: 120, child: Center(child: CircularProgressIndicator(color: AppColors.primary)));
+      }
+      if (snapshot.hasError) {
+        return const Padding(
+          padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
+          child: Text('Porter information could not be loaded.', style: TextStyle(color: AppColors.textSecondary, fontSize: 11.5)),
+        );
+      }
+      final porters = (snapshot.data ?? const <_Porter>[])
+          .where((porter) => porter.park.toLowerCase() == widget.park.toLowerCase())
+          .toList();
+      final grouped = <int, List<_Porter>>{};
+      for (final porter in porters) {
+        grouped.putIfAbsent(porter.groupId, () => []).add(porter);
+      }
+      final groups = grouped.values
+          .where((members) => members.isNotEmpty)
+          .map((members) => _PorterGroup.fromPorters(members))
+          .toList();
+
+      if (groups.isEmpty) {
+        return const Padding(
+          padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
+          child: Text('No porter groups are currently connected to this park.', style: TextStyle(color: AppColors.textSecondary, fontSize: 11.5)),
+        );
+      }
+      return _PorterGroupCarousel(groups: groups);
+    },
+  );
 }
 
 class _PorterGroup {
-  const _PorterGroup(this.name, this.community, this.park);
-  final String name;
-  final String community;
-  final String park;
+  const _PorterGroup({
+    required this.id,
+    required this.name,
+    required this.community,
+    required this.park,
+    required this.country,
+    required this.porters,
+  });
+
+  final int id;
+  final String name, community, park, country;
+  final List<_Porter> porters;
+
+  factory _PorterGroup.fromPorters(List<_Porter> porters) {
+    final first = porters.first;
+    return _PorterGroup(
+      id: first.groupId,
+      name: first.group,
+      community: first.community,
+      park: first.park,
+      country: first.country,
+      porters: List<_Porter>.unmodifiable(porters),
+    );
+  }
 }
 
 class _PorterGroupCarousel extends StatelessWidget {
@@ -943,31 +1033,22 @@ class _PorterGroupCarousel extends StatelessWidget {
   final List<_PorterGroup> groups;
 
   @override
-  Widget build(BuildContext context) {
-    if (groups.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.fromLTRB(20, 0, 20, 4),
-        child: Text('Porter groups for this park will appear here.', style: TextStyle(color: AppColors.textSecondary, fontSize: 11.5)),
-      );
-    }
-
-    return SizedBox(
-      height: 238,
-      child: ListView.separated(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        itemCount: groups.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
-        itemBuilder: (context, index) => _PorterGroupCard(
-          group: groups[index],
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => PorterGroupDetailPage(group: groups[index])),
-          ),
+  Widget build(BuildContext context) => SizedBox(
+    height: 238,
+    child: ListView.separated(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      itemCount: groups.length,
+      separatorBuilder: (_, __) => const SizedBox(width: 12),
+      itemBuilder: (context, index) => _PorterGroupCard(
+        group: groups[index],
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => PorterGroupDetailPage(group: groups[index])),
         ),
       ),
-    );
-  }
+    ),
+  );
 }
 
 class _PorterGroupCard extends StatelessWidget {
@@ -980,136 +1061,129 @@ class _PorterGroupCard extends StatelessWidget {
     onTap: onTap,
     borderRadius: BorderRadius.circular(20),
     child: Container(
-    width: 286,
-    clipBehavior: Clip.antiAlias,
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(20),
-      border: Border.all(color: AppColors.cardBorder),
-    ),
-    child: Column(
-      children: [
+      width: 286,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.cardBorder)),
+      child: Column(children: [
         Container(
           color: AppColors.primary,
           padding: const EdgeInsets.fromLTRB(15, 14, 15, 14),
-          child: Row(
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: Image.asset(_porterAvatar, fit: BoxFit.cover),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Text('PORTER GROUP', style: TextStyle(color: AppColors.accent, fontSize: 8, fontWeight: FontWeight.w700, letterSpacing: .9)),
-                  const SizedBox(height: 4),
-                  Text(group.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.15, fontWeight: FontWeight.w700)),
-                ]),
-              ),
-            ],
-          ),
+          child: Row(children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
+              clipBehavior: Clip.antiAlias,
+              child: Image.asset(_porterAvatar, fit: BoxFit.cover),
+            ),
+            const SizedBox(width: 12),
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const Text('PORTER GROUP', style: TextStyle(color: AppColors.accent, fontSize: 8, fontWeight: FontWeight.w700, letterSpacing: .9)),
+              const SizedBox(height: 4),
+              Text(group.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.15, fontWeight: FontWeight.w700)),
+            ])),
+          ]),
         ),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(15, 13, 15, 13),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Row(children: [
-                const Icon(Icons.groups_2_outlined, size: 16, color: AppColors.primary),
-                const SizedBox(width: 7),
-                Expanded(child: Text(group.community, style: const TextStyle(color: AppColors.textPrimary, fontSize: 11, fontWeight: FontWeight.w700))),
-              ]),
-              const SizedBox(height: 9),
-              Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Icon(Icons.park_outlined, size: 16, color: AppColors.accent),
-                const SizedBox(width: 7),
-                Expanded(child: Text(group.park, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textSecondary, fontSize: 9.5, height: 1.35))),
-              ]),
-              const Spacer(),
-              const Row(children: [
-                Text('View group', style: TextStyle(color: AppColors.primary, fontSize: 9.5, fontWeight: FontWeight.w700)),
-                SizedBox(width: 4),
-                Icon(Icons.arrow_forward_rounded, color: AppColors.primary, size: 15),
-              ]),
+        Expanded(child: Padding(
+          padding: const EdgeInsets.fromLTRB(15, 13, 15, 13),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              const Icon(Icons.groups_2_outlined, size: 16, color: AppColors.primary),
+              const SizedBox(width: 7),
+              Expanded(child: Text(group.community, style: const TextStyle(color: AppColors.textPrimary, fontSize: 11, fontWeight: FontWeight.w700))),
             ]),
-          ),
-        ),
-      ],
+            const SizedBox(height: 9),
+            Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const Icon(Icons.park_outlined, size: 16, color: AppColors.accent),
+              const SizedBox(width: 7),
+              Expanded(child: Text(group.park, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textSecondary, fontSize: 9.5, height: 1.35))),
+            ]),
+            const Spacer(),
+            Row(children: [
+              Text(group.porters.length.toString() + (group.porters.length == 1 ? ' porter' : ' porters'), style: const TextStyle(color: AppColors.textSecondary, fontSize: 9)),
+              const Spacer(),
+              const Text('View group', style: TextStyle(color: AppColors.primary, fontSize: 9.5, fontWeight: FontWeight.w700)),
+              const SizedBox(width: 4),
+              const Icon(Icons.arrow_forward_rounded, color: AppColors.primary, size: 15),
+            ]),
+          ]),
+        )),
+      ]),
     ),
-  ),
   );
 }
 
 class PorterGroupDetailPage extends StatelessWidget {
   const PorterGroupDetailPage({super.key, required this.group});
   final _PorterGroup group;
+
   @override
-  Widget build(BuildContext context) {
-    final porters = List.generate(5, (index) => 'Porter ${index + 1}');
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(backgroundColor: AppColors.primary, foregroundColor: Colors.white, surfaceTintColor: Colors.transparent, title: const Text('Porter Group', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700))),
-      body: ListView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(20, 22, 20, 38),
-        children: [
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(22)),
-            child: Row(children: [
-              Container(width: 72, height: 72, padding: const EdgeInsets.all(3), decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle), child: ClipOval(child: Image.asset(_porterAvatar, fit: BoxFit.cover))),
-              const SizedBox(width: 15),
-              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Text('PORTER GROUP', style: TextStyle(color: AppColors.accent, fontSize: 8.5, fontWeight: FontWeight.w700, letterSpacing: 1)),
-                const SizedBox(height: 5),
-                Text(group.name, style: const TextStyle(color: Colors.white, fontSize: 19, height: 1.15, fontWeight: FontWeight.w700)),
-                const SizedBox(height: 7),
-                Text(group.community, style: TextStyle(color: Colors.white.withOpacity(.72), fontSize: 10.5)),
-              ])),
-            ]),
-          ),
-          const SizedBox(height: 26),
-          const Text('COMMUNITY', style: TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1.1)),
-          const SizedBox(height: 6),
-          Text(group.community, style: const TextStyle(color: AppColors.textPrimary, fontSize: 21, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 6),
-          Text('This porter group is connected to ${group.community}, a community associated with ${group.park}.', style: const TextStyle(color: AppColors.textSecondary, fontSize: 11.5, height: 1.5)),
-          const SizedBox(height: 28),
-          const Text('GROUP MEMBERS', style: TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1.1)),
-          const SizedBox(height: 6),
-          const Text('Porters in this group', style: TextStyle(color: AppColors.textPrimary, fontSize: 21, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 5),
-          const Text('One standard porter avatar is used for all porter profiles.', style: TextStyle(color: AppColors.textSecondary, fontSize: 11)),
-          const SizedBox(height: 14),
-          ...porters.map((porter) => _PorterMemberCard(name: porter, group: group)),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: AppColors.background,
+    appBar: AppBar(backgroundColor: AppColors.primary, foregroundColor: Colors.white, surfaceTintColor: Colors.transparent, title: const Text('Porter Group', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700))),
+    body: ListView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(20, 22, 20, 38),
+      children: [
+        Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(22)),
+          child: Row(children: [
+            Container(width: 72, height: 72, padding: const EdgeInsets.all(3), decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle), child: ClipOval(child: Image.asset(_porterAvatar, fit: BoxFit.cover))),
+            const SizedBox(width: 15),
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const Text('PORTER GROUP', style: TextStyle(color: AppColors.accent, fontSize: 8.5, fontWeight: FontWeight.w700, letterSpacing: 1)),
+              const SizedBox(height: 5),
+              Text(group.name, style: const TextStyle(color: Colors.white, fontSize: 19, height: 1.15, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 7),
+              Text(group.community, style: TextStyle(color: Colors.white.withOpacity(.72), fontSize: 10.5)),
+            ])),
+          ]),
+        ),
+        const SizedBox(height: 26),
+        const Text('COMMUNITY', style: TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1.1)),
+        const SizedBox(height: 6),
+        Text(group.community, style: const TextStyle(color: AppColors.textPrimary, fontSize: 21, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 6),
+        Text('This porter group is connected to ${group.community}, a community associated with ${group.park}.', style: const TextStyle(color: AppColors.textSecondary, fontSize: 11.5, height: 1.5)),
+        const SizedBox(height: 28),
+        const Text('GROUP MEMBERS', style: TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1.1)),
+        const SizedBox(height: 6),
+        Text(group.porters.length.toString() + (group.porters.length == 1 ? ' porter in this group' : ' porters in this group'), style: const TextStyle(color: AppColors.textPrimary, fontSize: 21, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 14),
+        ...group.porters.map((porter) => _PorterMemberCard(porter: porter, group: group)),
+      ],
+    ),
+  );
 }
+
 class _PorterMemberCard extends StatelessWidget {
-  const _PorterMemberCard({required this.name, required this.group});
-  final String name;
+  const _PorterMemberCard({required this.porter, required this.group});
+  final _Porter porter;
   final _PorterGroup group;
+
   @override
   Widget build(BuildContext context) => Container(
-    margin: const EdgeInsets.only(bottom: 10), padding: const EdgeInsets.all(12),
+    margin: const EdgeInsets.only(bottom: 10),
+    padding: const EdgeInsets.all(12),
     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(17), border: Border.all(color: AppColors.cardBorder)),
     child: Row(children: [
       ClipOval(child: Image.asset(_porterAvatar, width: 52, height: 52, fit: BoxFit.cover)),
       const SizedBox(width: 12),
       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(name, style: const TextStyle(color: AppColors.textPrimary, fontSize: 12.5, fontWeight: FontWeight.w700)),
+        Row(children: [
+          Expanded(child: Text(porter.name, style: const TextStyle(color: AppColors.textPrimary, fontSize: 12.5, fontWeight: FontWeight.w700))),
+          if (porter.isGroupLeader)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+              decoration: BoxDecoration(color: AppColors.accentSoft, borderRadius: BorderRadius.circular(8)),
+              child: const Text('GROUP LEADER', style: TextStyle(color: AppColors.primary, fontSize: 6.8, fontWeight: FontWeight.w700, letterSpacing: .3)),
+            ),
+        ]),
         const SizedBox(height: 4),
         Text(group.name, style: const TextStyle(color: AppColors.primary, fontSize: 9.5, fontWeight: FontWeight.w600)),
         const SizedBox(height: 3),
-        Text(group.community, style: const TextStyle(color: AppColors.textSecondary, fontSize: 9)),
+        Text(group.community + ' · ' + group.country, style: const TextStyle(color: AppColors.textSecondary, fontSize: 9)),
       ])),
     ]),
   );
