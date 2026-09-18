@@ -10,6 +10,8 @@ import '../destinations/destination_detail_page.dart';
 import '../community/community_page.dart';
 import '../explore/explore_page.dart';
 import '../explore/explore_section_pages.dart';
+import '../explore/virunga_search_page.dart';
+import '../dashboard/nav_pages/account_profile_page.dart';
 import '../explore/country_destination_detail_pages.dart' as connected;
 import '../marketplace/public_marketplace_page.dart';
 
@@ -127,7 +129,11 @@ class _GuestHomePageState extends State<GuestHomePage> {
         _openMarketplace();
         break;
       case 4:
-        _login();
+        if (_authenticated) {
+          _open(AccountProfilePage(authService: widget.authService, title: 'Account'));
+        } else {
+          _login();
+        }
         break;
     }
 
@@ -161,12 +167,14 @@ class _GuestHomePageState extends State<GuestHomePage> {
                 greeting: greeting,
                 authenticated: _authenticated,
                 onNotifications: () => _message('Notifications'),
-                onProfile: _authenticated ? () => _message('Profile') : _login,
+                onProfile: _authenticated
+                    ? () => _open(AccountProfilePage(authService: widget.authService, title: 'Account'))
+                    : _login,
               ),
             ),
             SliverToBoxAdapter(
               child: _Search(
-                onSearch: () => _open(ExplorePage(authService: widget.authService)),
+                onSearch: () => _open(const VirungaSearchPage()),
                 onFilter: () => _open(ExplorePage(authService: widget.authService)),
               ),
             ),
