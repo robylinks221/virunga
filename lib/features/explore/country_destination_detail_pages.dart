@@ -932,18 +932,27 @@ class _PorterGroupCarousel extends StatelessWidget {
         physics: const BouncingScrollPhysics(),
         itemCount: groups.length,
         separatorBuilder: (_, __) => const SizedBox(width: 12),
-        itemBuilder: (_, index) => _PorterGroupCard(group: groups[index]),
+        itemBuilder: (context, index) => _PorterGroupCard(
+          group: groups[index],
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => PorterGroupDetailPage(group: groups[index])),
+          ),
+        ),
       ),
     );
   }
 }
 
 class _PorterGroupCard extends StatelessWidget {
-  const _PorterGroupCard({required this.group});
+  const _PorterGroupCard({required this.group, required this.onTap});
   final _PorterGroup group;
+  final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(20),
+    child: Container(
     width: 286,
     clipBehavior: Clip.antiAlias,
     decoration: BoxDecoration(
@@ -1006,6 +1015,76 @@ class _PorterGroupCard extends StatelessWidget {
         ),
       ],
     ),
+  ),
+  );
+}
+
+class PorterGroupDetailPage extends StatelessWidget {
+  const PorterGroupDetailPage({super.key, required this.group});
+  final _PorterGroup group;
+  @override
+  Widget build(BuildContext context) {
+    final porters = List.generate(5, (index) => 'Porter ${index + 1}');
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(backgroundColor: AppColors.primary, foregroundColor: Colors.white, surfaceTintColor: Colors.transparent, title: const Text('Porter Group', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700))),
+      body: ListView(
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(20, 22, 20, 38),
+        children: [
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(22)),
+            child: Row(children: [
+              Container(width: 72, height: 72, padding: const EdgeInsets.all(3), decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle), child: ClipOval(child: Image.asset(_porterAvatar, fit: BoxFit.cover))),
+              const SizedBox(width: 15),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                const Text('PORTER GROUP', style: TextStyle(color: AppColors.accent, fontSize: 8.5, fontWeight: FontWeight.w700, letterSpacing: 1)),
+                const SizedBox(height: 5),
+                Text(group.name, style: const TextStyle(color: Colors.white, fontSize: 19, height: 1.15, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 7),
+                Text(group.community, style: TextStyle(color: Colors.white.withOpacity(.72), fontSize: 10.5)),
+              ])),
+            ]),
+          ),
+          const SizedBox(height: 26),
+          const Text('COMMUNITY', style: TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1.1)),
+          const SizedBox(height: 6),
+          Text(group.community, style: const TextStyle(color: AppColors.textPrimary, fontSize: 21, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 6),
+          Text('This porter group is connected to ${group.community}, a community associated with ${group.park}.', style: const TextStyle(color: AppColors.textSecondary, fontSize: 11.5, height: 1.5)),
+          const SizedBox(height: 28),
+          const Text('GROUP MEMBERS', style: TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1.1)),
+          const SizedBox(height: 6),
+          const Text('Porters in this group', style: TextStyle(color: AppColors.textPrimary, fontSize: 21, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 5),
+          const Text('One standard porter avatar is used for all porter profiles.', style: TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+          const SizedBox(height: 14),
+          ...porters.map((porter) => _PorterMemberCard(name: porter, group: group)),
+        ],
+      ),
+    );
+  }
+}
+class _PorterMemberCard extends StatelessWidget {
+  const _PorterMemberCard({required this.name, required this.group});
+  final String name;
+  final _PorterGroup group;
+  @override
+  Widget build(BuildContext context) => Container(
+    margin: const EdgeInsets.only(bottom: 10), padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(17), border: Border.all(color: AppColors.cardBorder)),
+    child: Row(children: [
+      ClipOval(child: Image.asset(_porterAvatar, width: 52, height: 52, fit: BoxFit.cover)),
+      const SizedBox(width: 12),
+      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(name, style: const TextStyle(color: AppColors.textPrimary, fontSize: 12.5, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 4),
+        Text(group.name, style: const TextStyle(color: AppColors.primary, fontSize: 9.5, fontWeight: FontWeight.w600)),
+        const SizedBox(height: 3),
+        Text(group.community, style: const TextStyle(color: AppColors.textSecondary, fontSize: 9)),
+      ])),
+    ]),
   );
 }
 
