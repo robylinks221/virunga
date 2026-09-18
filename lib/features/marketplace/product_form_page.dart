@@ -42,8 +42,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
   List<MarketplaceCategory> _categories = const [];
   MarketplaceCategory? _category;
   XFile? _featured;
-  XFile? _image2;
-  XFile? _image3;
+
   bool _loadingCategories = true;
   bool _saving = false;
   String? _categoryError;
@@ -119,8 +118,6 @@ class _ProductFormPageState extends State<ProductFormPage> {
     if (!mounted) return;
     setState(() {
       if (slot == 1) _featured = image;
-      if (slot == 2) _image2 = image;
-      if (slot == 3) _image3 = image;
     });
   }
 
@@ -149,8 +146,6 @@ class _ProductFormPageState extends State<ProductFormPage> {
               price: amount.toStringAsFixed(2),
               quantityAvailable: qty,
               featuredImagePath: _featured?.path,
-              image2Path: _image2?.path,
-              image3Path: _image3?.path,
             )
           : await _service.createProduct(
               categoryId: _category!.id,
@@ -159,8 +154,6 @@ class _ProductFormPageState extends State<ProductFormPage> {
               price: amount.toStringAsFixed(2),
               quantityAvailable: qty,
               featuredImagePath: _featured!.path,
-              image2Path: _image2?.path,
-              image3Path: _image3?.path,
             );
 
       if (!mounted) return;
@@ -279,7 +272,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
             const SizedBox(height: 24),
             const Text('Product Photos', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
             const SizedBox(height: 5),
-            const Text('Main photo is required. Extra photos are optional.', style: TextStyle(color: _muted)),
+            const Text('Each craft uses one clear product photo.', style: TextStyle(color: _muted)),
             const SizedBox(height: 14),
             _PhotoTile(
               title: 'Main Photo *',
@@ -287,30 +280,6 @@ class _ProductFormPageState extends State<ProductFormPage> {
               local: _featured,
               network: _featured == null ? widget.product?.featuredImage : null,
               onTap: _saving ? null : () => _pick(1),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _PhotoTile(
-                    title: 'Photo 2',
-                    height: 145,
-                    local: _image2,
-                    network: _image2 == null ? widget.product?.image2 : null,
-                    onTap: _saving ? null : () => _pick(2),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _PhotoTile(
-                    title: 'Photo 3',
-                    height: 145,
-                    local: _image3,
-                    network: _image3 == null ? widget.product?.image3 : null,
-                    onTap: _saving ? null : () => _pick(3),
-                  ),
-                ),
-              ],
             ),
             const SizedBox(height: 28),
             const Text('Product Details', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
