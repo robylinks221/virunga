@@ -153,22 +153,21 @@ class _DashboardPageState extends State<DashboardPage> {
   /// A user's marketplace role belongs to /api/auth/me/, not the dashboard
   /// scope. The dashboard scope only tells us member/leader/admin.
   bool _isCraftSeller(DashboardBundle data) {
-    final authoritativeRole = data.currentUser?.role.trim().toLowerCase();
+    final candidates = <String?>[
+      data.currentUser?.role,
+      data.dashboard.stringValue(['role_name']),
+      data.dashboard.stringValue(['role']),
+      data.dashboard.stringValue(['user_role']),
+      data.dashboard.stringValue(['user_role_name']),
+      data.dashboard.stringValue(['group_role_name']),
+      data.dashboard.stringValue(['group_role']),
+      data.dashboard.stringValue(['marketplace_role']),
+      data.dashboard.stringValue(['account_type']),
+    ];
 
-    if (authoritativeRole != null && authoritativeRole.isNotEmpty) {
-      return _matchesCraftSellerRole(authoritativeRole);
-    }
-
-    final dashboardRole = data.dashboard.stringValue([
-      'role_name',
-      'role',
-      'group_role_name',
-      'group_role',
-    ]);
-
-    if (dashboardRole == null) return false;
-
-    return _matchesCraftSellerRole(dashboardRole.trim().toLowerCase());
+    return candidates
+        .whereType<String>()
+        .any((role) => _matchesCraftSellerRole(role));
   }
 
   bool _matchesCraftSellerRole(String role) {
@@ -180,8 +179,13 @@ class _DashboardPageState extends State<DashboardPage> {
     return normalised == 'craft_seller' ||
         normalised == 'craftseller' ||
         normalised == 'craft_vendor' ||
+        normalised == 'craftvendor' ||
         normalised == 'artisan' ||
+        normalised == 'seller' ||
         normalised.contains('craft_seller') ||
+        normalised.contains('craftseller') ||
+        normalised.contains('craft_vendor') ||
+        normalised.contains('craftvendor') ||
         (normalised.contains('craft') &&
             (normalised.contains('seller') ||
                 normalised.contains('vendor') ||
@@ -358,11 +362,18 @@ class _DashboardPageState extends State<DashboardPage> {
         icon: Icons.home_outlined,
         selectedIcon: Icons.home_rounded,
       ),
-      const DashboardNavItem(
-        label: 'Explore',
-        icon: Icons.explore_outlined,
-        selectedIcon: Icons.explore_rounded,
-      ),
+      if (isCraftSeller)
+        const DashboardNavItem(
+          label: 'Products',
+          icon: Icons.inventory_2_outlined,
+          selectedIcon: Icons.inventory_2_rounded,
+        )
+      else
+        const DashboardNavItem(
+          label: 'Explore',
+          icon: Icons.explore_outlined,
+          selectedIcon: Icons.explore_rounded,
+        ),
       const DashboardNavItem(
         label: 'Community',
         icon: Icons.diversity_3_outlined,
