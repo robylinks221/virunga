@@ -5,6 +5,7 @@ import '../auth/auth_service.dart';
 import '../community/community_page.dart';
 import '../marketplace/public_marketplace_page.dart';
 import 'explore_section_pages.dart';
+import 'virunga_search_page.dart';
 
 class ExplorePage extends StatelessWidget {
   const ExplorePage({
@@ -16,17 +17,6 @@ class ExplorePage extends StatelessWidget {
 
   void _open(BuildContext context, Widget page) {
     Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
-  }
-
-  void _comingSoon(BuildContext context, String title) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text('$title will connect to its full page next.'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
   }
 
   @override
@@ -127,7 +117,7 @@ class ExplorePage extends StatelessWidget {
                     const SizedBox(height: 20),
                     TextField(
                       readOnly: true,
-                      onTap: () => _comingSoon(context, 'Search'),
+                      onTap: () => _open(context, const VirungaSearchPage()),
                       decoration: InputDecoration(
                         hintText: 'Where do you want to explore?',
                         hintStyle: const TextStyle(
