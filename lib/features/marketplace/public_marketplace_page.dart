@@ -60,6 +60,12 @@ class _PublicMarketplacePageState extends State<PublicMarketplacePage> {
         title: const Text('Marketplace', style: TextStyle(fontWeight: FontWeight.w700)),
         actions: [
           IconButton(
+            tooltip: 'Saved crafts',
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SavedCraftsPage())),
+            icon: const Icon(Icons.favorite_border_rounded),
+          ),
+          IconButton(
+            tooltip: 'Cart',
             onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MarketplaceCartPage())),
             icon: _cartIcon(),
           ),
@@ -261,7 +267,7 @@ class CraftCategoryPage extends StatelessWidget {
       actions: [
         IconButton(
           onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MarketplaceCartPage())),
-          icon: const Icon(Icons.shopping_bag_outlined),
+          icon: _cartIcon(),
         ),
       ],
     ),
@@ -318,11 +324,11 @@ class PublicCraftDetailPage extends StatefulWidget {
 
 class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
   int quantity = 1;
-  bool saved = false;
 
   @override
   Widget build(BuildContext context) {
     final product = widget.product;
+    final saved = _SavedCrafts.contains(product);
     _RecentlyViewed.add(product);
     final recent = _RecentlyViewed.items.where((p) => p.name != product.name).take(3).toList();
     final related = _PublicMarketplacePageState._products
@@ -338,7 +344,11 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           actions: [
-            IconButton(onPressed: () => setState(() => saved = !saved), icon: Icon(saved ? Icons.favorite_rounded : Icons.favorite_border_rounded)),
+            IconButton(
+              tooltip: saved ? 'Remove from saved' : 'Save craft',
+              onPressed: () => setState(() => _SavedCrafts.toggle(product)),
+              icon: Icon(saved ? Icons.favorite_rounded : Icons.favorite_border_rounded),
+            ),
             IconButton(onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MarketplaceCartPage())), icon: _cartIcon()),
           ],
           flexibleSpace: FlexibleSpaceBar(background: Image.asset(product.image, fit: BoxFit.cover)),
@@ -467,6 +477,93 @@ class _CraftTrustItem extends StatelessWidget {
       Text(label, textAlign: TextAlign.center, maxLines: 2, style: const TextStyle(color: AppColors.textSecondary, fontSize: 8.5, fontWeight: FontWeight.w600, height: 1.15)),
     ],
   );
+}
+
+class SavedCraftsPage extends StatefulWidget {
+  const SavedCraftsPage({super.key});
+
+  @override
+  State<SavedCraftsPage> createState() => _SavedCraftsPageState();
+}
+
+class _SavedCraftsPageState extends State<SavedCraftsPage> {
+  @override
+  Widget build(BuildContext context) {
+    final products = _SavedCrafts.items;
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        title: const Text('Saved Crafts', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+        actions: [
+          IconButton(
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MarketplaceCartPage())),
+            icon: _cartIcon(),
+          ),
+        ],
+      ),
+      body: products.isEmpty
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(30),
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  Container(
+                    width: 68,
+                    height: 68,
+                    decoration: const BoxDecoration(color: AppColors.accentSoft, shape: BoxShape.circle),
+                    child: const Icon(Icons.favorite_border_rounded, color: AppColors.primary, size: 30),
+                  ),
+                  const SizedBox(height: 17),
+                  const Text('No saved crafts yet', style: TextStyle(color: AppColors.textPrimary, fontSize: 19, fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 6),
+                  const Text('Save crafts you would like to come back to.', textAlign: TextAlign.center, style: TextStyle(color: AppColors.textSecondary, fontSize: 11.5, height: 1.45)),
+                  const SizedBox(height: 20),
+                  OutlinedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: OutlinedButton.styleFrom(foregroundColor: AppColors.primary, side: const BorderSide(color: AppColors.primary), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                    child: const Text('Explore Marketplace', style: TextStyle(fontWeight: FontWeight.w700)),
+                  ),
+                ]),
+              ),
+            )
+          : CustomScrollView(slivers: [
+              const SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(20, 22, 20, 14),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('YOUR COLLECTION', style: TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1.1)),
+                    SizedBox(height: 4),
+                    Text('Crafts to revisit', style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
+                  ]),
+                ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 34),
+                sliver: SliverGrid(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: .66),
+                  delegate: SliverChildBuilderDelegate((_, i) => _ProductCard(product: products[i]), childCount: products.length),
+                ),
+              ),
+            ]),
+    );
+  }
+}
+
+class _SavedCrafts {
+  static final List<_CraftProduct> items = [];
+
+  static bool contains(_CraftProduct product) =>
+      items.any((item) => item.name == product.name);
+
+  static void toggle(_CraftProduct product) {
+    final index = items.indexWhere((item) => item.name == product.name);
+    if (index >= 0) {
+      items.removeAt(index);
+    } else {
+      items.insert(0, product);
+    }
+  }
 }
 
 class MarketplaceCartPage extends StatefulWidget {
