@@ -540,16 +540,21 @@ class PortersPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const ExploreSectionPage(
-      title: 'Porters',
+    return const _PeopleLandscapePage(
       eyebrow: 'DESTINATION SUPPORT',
-      subtitle: 'View porter information by destination. Verified totals will be shown when connected to live data.',
+      title: 'Porters',
+      subtitle: 'Meet the people who support journeys across the mountain and forest destinations of Greater Virunga.',
+      heroImage: 'assets/images/onboarding_community.jpg',
+      heroLabel: 'PEOPLE OF THE LANDSCAPE',
+      heroTitle: 'Local knowledge. Strength. Support.',
+      introTitle: 'Porters by Destination',
+      introText: 'Verified porter information will appear by destination when live data is connected.',
       icon: Icons.backpack_outlined,
-      items: [
-        ExploreSectionItem(Icons.backpack_outlined, 'Bwindi', 'Porters —'),
-        ExploreSectionItem(Icons.backpack_outlined, 'Mgahinga', 'Porters —'),
-        ExploreSectionItem(Icons.backpack_outlined, 'Volcanoes', 'Porters —'),
-        ExploreSectionItem(Icons.backpack_outlined, 'Virunga', 'Porters —'),
+      entries: [
+        _PeopleEntry('Bwindi', 'Uganda', 'Porters —'),
+        _PeopleEntry('Mgahinga', 'Uganda', 'Porters —'),
+        _PeopleEntry('Volcanoes', 'Rwanda', 'Porters —'),
+        _PeopleEntry('Virunga', 'DR Congo', 'Porters —'),
       ],
     );
   }
@@ -560,16 +565,21 @@ class ConservationPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const ExploreSectionPage(
-      title: 'Conservation',
+    return const _PeopleLandscapePage(
       eyebrow: 'PROTECTING THE REGION',
-      subtitle: 'Learn about wildlife, habitats, protected landscapes and the people supporting conservation.',
+      title: 'Conservation',
+      subtitle: 'Explore the wildlife, habitats and protected landscapes that make Greater Virunga extraordinary.',
+      heroImage: 'assets/images/onboarding_wildlife.jpg',
+      heroLabel: 'A SHARED WILD LANDSCAPE',
+      heroTitle: 'Protecting nature across borders.',
+      introTitle: 'Conservation Focus',
+      introText: 'Discover the natural systems and people at the heart of conservation across the region.',
       icon: Icons.eco_outlined,
-      items: [
-        ExploreSectionItem(Icons.pets_outlined, 'Wildlife', 'Species and biodiversity'),
-        ExploreSectionItem(Icons.forest_outlined, 'Habitats', 'Forests, mountains and savannah'),
-        ExploreSectionItem(Icons.landscape_outlined, 'Protected Landscapes', 'Places across the region'),
-        ExploreSectionItem(Icons.shield_outlined, 'Rangers', 'Protection and verified statistics'),
+      entries: [
+        _PeopleEntry('Wildlife', 'Greater Virunga', 'Species and biodiversity'),
+        _PeopleEntry('Habitats', 'Greater Virunga', 'Forests, mountains and savannah'),
+        _PeopleEntry('Protected Landscapes', 'Uganda • Rwanda • DR Congo', 'Connected places across the region'),
+        _PeopleEntry('Rangers', 'Greater Virunga', 'Protection and verified statistics'),
       ],
     );
   }
@@ -580,18 +590,188 @@ class RangersPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const ExploreSectionPage(
-      title: 'Rangers',
+    return const _PeopleLandscapePage(
       eyebrow: 'PROTECTION',
-      subtitle: 'Ranger statistics by destination. The app will show verified totals rather than estimates.',
+      title: 'Rangers',
+      subtitle: 'Explore ranger information across the protected landscapes of Greater Virunga.',
+      heroImage: 'assets/images/onboarding_landscape.jpg',
+      heroLabel: 'PROTECTING THE WILD',
+      heroTitle: 'People on the front line of conservation.',
+      introTitle: 'Rangers by Destination',
+      introText: 'Only verified ranger totals will be displayed when live information is connected.',
       icon: Icons.shield_outlined,
-      items: [
-        ExploreSectionItem(Icons.shield_outlined, 'Bwindi', 'Rangers —'),
-        ExploreSectionItem(Icons.shield_outlined, 'Mgahinga', 'Rangers —'),
-        ExploreSectionItem(Icons.shield_outlined, 'Volcanoes', 'Rangers —'),
-        ExploreSectionItem(Icons.shield_outlined, 'Virunga', 'Rangers —'),
-        ExploreSectionItem(Icons.shield_outlined, 'Kahuzi-Biega', 'Rangers —'),
+      entries: [
+        _PeopleEntry('Bwindi', 'Uganda', 'Rangers —'),
+        _PeopleEntry('Mgahinga', 'Uganda', 'Rangers —'),
+        _PeopleEntry('Volcanoes', 'Rwanda', 'Rangers —'),
+        _PeopleEntry('Virunga', 'DR Congo', 'Rangers —'),
+        _PeopleEntry('Kahuzi-Biega', 'DR Congo', 'Rangers —'),
       ],
     );
   }
+}
+
+class _PeopleLandscapePage extends StatelessWidget {
+  const _PeopleLandscapePage({
+    required this.eyebrow,
+    required this.title,
+    required this.subtitle,
+    required this.heroImage,
+    required this.heroLabel,
+    required this.heroTitle,
+    required this.introTitle,
+    required this.introText,
+    required this.icon,
+    required this.entries,
+  });
+
+  final String eyebrow;
+  final String title;
+  final String subtitle;
+  final String heroImage;
+  final String heroLabel;
+  final String heroTitle;
+  final String introTitle;
+  final String introText;
+  final IconData icon;
+  final List<_PeopleEntry> entries;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          Container(
+            color: AppColors.primary,
+            padding: const EdgeInsets.fromLTRB(20, 3, 20, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(eyebrow, style: const TextStyle(color: AppColors.accent, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.3)),
+                const SizedBox(height: 6),
+                Text(title, style: const TextStyle(color: Colors.white, fontSize: 27, height: 1.1, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 8),
+                Text(subtitle, style: TextStyle(color: Colors.white.withOpacity(.72), fontSize: 12, height: 1.5)),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 22, 20, 0),
+            child: Container(
+              height: 215,
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.asset(heroImage, fit: BoxFit.cover),
+                  const DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Color(0x08000000), Color(0xD9000000)],
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(18),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(color: Colors.white.withOpacity(.94), borderRadius: BorderRadius.circular(12)),
+                          child: Icon(icon, color: AppColors.primary, size: 21),
+                        ),
+                        const Spacer(),
+                        Text(heroLabel, style: const TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1.1)),
+                        const SizedBox(height: 5),
+                        Text(heroTitle, style: const TextStyle(color: Colors.white, fontSize: 20, height: 1.15, fontWeight: FontWeight.w700)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 27, 20, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('EXPLORE', style: TextStyle(color: AppColors.accent, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.3)),
+                const SizedBox(height: 5),
+                Text(introTitle, style: const TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 6),
+                Text(introText, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12, height: 1.5)),
+              ],
+            ),
+          ),
+          ...entries.map((entry) => _PeopleEntryCard(entry: entry, icon: icon)),
+          const SizedBox(height: 28),
+        ],
+      ),
+    );
+  }
+}
+
+class _PeopleEntryCard extends StatelessWidget {
+  const _PeopleEntryCard({required this.entry, required this.icon});
+
+  final _PeopleEntry entry;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(20, 0, 20, 11),
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(17),
+        border: Border.all(color: AppColors.cardBorder),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 47,
+            height: 47,
+            decoration: BoxDecoration(color: AppColors.accentSoft, borderRadius: BorderRadius.circular(13)),
+            child: Icon(icon, color: AppColors.primary, size: 21),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(entry.title, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 3),
+                Text(entry.location, style: const TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 4),
+                Text(entry.value, style: const TextStyle(color: AppColors.textSecondary, fontSize: 10.5, height: 1.3)),
+              ],
+            ),
+          ),
+          const Icon(Icons.arrow_outward_rounded, color: AppColors.primary, size: 18),
+        ],
+      ),
+    );
+  }
+}
+
+class _PeopleEntry {
+  const _PeopleEntry(this.title, this.location, this.value);
+  final String title;
+  final String location;
+  final String value;
 }
