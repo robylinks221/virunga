@@ -54,7 +54,11 @@ class _PublicMarketplacePageState extends State<PublicMarketplacePage> {
       if (response.statusCode < 200 || response.statusCode >= 300) throw Exception('Server error');
       final decoded = jsonDecode(response.body);
       if (decoded is! List) throw Exception('Unexpected crafts response');
-      final products = decoded.whereType<Map>().map((item) => _CraftProduct.fromJson(Map<String, dynamic>.from(item))).toList();
+      final products = decoded
+          .whereType<Map>()
+          .map((item) => _CraftProduct.fromJson(Map<String, dynamic>.from(item)))
+          .where((product) => product.isActive)
+          .toList();
       if (!mounted) return;
       setState(() { _products = products; _MarketplaceCatalog.products = products; _loading = false; });
     } catch (e) {
@@ -383,90 +387,109 @@ class _ProductCardState extends State<_ProductCard> {
   }
 }
 
-class CraftCategoryPage extends StatelessWidget {
+class CraftCategoryPage extends StatefulWidget {
   const CraftCategoryPage({super.key, required this.category, required this.products});
   final String category;
   final List<_CraftProduct> products;
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: AppColors.background,
-    appBar: AppBar(
-      backgroundColor: AppColors.primary,
-      foregroundColor: Colors.white,
-      title: const Text('Craft Category', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-      actions: [
-        IconButton(
-          onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MarketplaceCartPage())),
-          icon: _cartIcon(),
-        ),
-      ],
-    ),
-    body: CustomScrollView(slivers: [
-      SliverToBoxAdapter(child: Container(
-        color: AppColors.primary,
-        padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Text('CRAFT CATEGORY', style: TextStyle(color: AppColors.accent, fontSize: 9.5, fontWeight: FontWeight.w700, letterSpacing: 1.3)),
-          const SizedBox(height: 6),
-          Text(category, style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 7),
-          Text('Handmade pieces from makers across Greater Virunga.', style: TextStyle(color: Colors.white.withOpacity(.72), fontSize: 11.5)),
-          const SizedBox(height: 14),
-          Wrap(
-            spacing: 7,
-            runSpacing: 7,
-            children: products
-                .map((product) => product.country)
-                .where((country) => country.trim().isNotEmpty)
-                .toSet()
-                .map((country) => _RegionPill(country))
-                .toList(),
-          ),
-        ]),
-      )),
-      SliverToBoxAdapter(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 14),
-          child: Row(children: [
-            Expanded(
-              child: Text(
-                products.isEmpty ? 'Crafts' : products.length.toString() + ' crafts',
-                style: const TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w700),
-              ),
-            ),
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.cardBorder)),
-              child: const Icon(Icons.tune_rounded, color: AppColors.primary, size: 19),
-            ),
-          ]),
-        ),
-      ),
-      SliverPadding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 34),
-        sliver: products.isEmpty
-          ? const SliverToBoxAdapter(child: Padding(padding: EdgeInsets.only(top: 70), child: Center(child: Text('Products will appear here.', style: TextStyle(color: AppColors.textSecondary)))))
-          : SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: .66),
-              delegate: SliverChildBuilderDelegate((_, i) => _ProductCard(product: products[i]), childCount: products.length),
-            ),
-      ),
-    ]),
-  );
+  State<CraftCategoryPage> createState() => _CraftCategoryPageState();
 }
 
-class _RegionPill extends StatelessWidget {
-  const _RegionPill(this.label);
-  final String label;
+class _CraftCategoryPageState extends State<CraftCategoryPage> {
+  String country = 'All';
+
+  List<String> get countries {
+    final values = widget.products
+        .map((product) => product.country.trim())
+        .where((value) => value.isNotEmpty)
+        .toSet()
+        .toList()
+      ..sort();
+    return ['All', ...values];
+  }
+
+  List<_CraftProduct> get visible =>
+      country == 'All' ? widget.products : widget.products.where((product) => product.country == country).toList();
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-    decoration: BoxDecoration(color: Colors.white.withOpacity(.09), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white.withOpacity(.14))),
-    child: Text(label, style: const TextStyle(color: Colors.white, fontSize: 8.5, fontWeight: FontWeight.w600)),
-  );
+  Widget build(BuildContext context) {
+    final products = visible;
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        title: const Text('Craft Category', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+        actions: [
+          IconButton(
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MarketplaceCartPage())),
+            icon: _cartIcon(),
+          ),
+        ],
+      ),
+      body: CustomScrollView(slivers: [
+        SliverToBoxAdapter(child: Container(
+          color: AppColors.primary,
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const Text('CRAFT CATEGORY', style: TextStyle(color: AppColors.accent, fontSize: 9.5, fontWeight: FontWeight.w700, letterSpacing: 1.3)),
+            const SizedBox(height: 6),
+            Text(widget.category, style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 7),
+            Text('Discover crafts available in this category across Greater Virunga.', style: TextStyle(color: Colors.white.withOpacity(.72), fontSize: 11.5)),
+            const SizedBox(height: 16),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: countries.asMap().entries.expand((entry) {
+                  final value = entry.value;
+                  final selected = value == country;
+                  return [
+                    if (entry.key > 0) const SizedBox(width: 7),
+                    ChoiceChip(
+                      label: Text(value),
+                      selected: selected,
+                      showCheckmark: false,
+                      onSelected: (_) => setState(() => country = value),
+                      selectedColor: AppColors.accent,
+                      backgroundColor: Colors.white.withOpacity(.08),
+                      side: BorderSide(color: selected ? AppColors.accent : Colors.white.withOpacity(.15)),
+                      labelStyle: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w600),
+                    ),
+                  ];
+                }).toList(),
+              ),
+            ),
+          ]),
+        )),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 14),
+            child: Row(children: [
+              Expanded(
+                child: Text(
+                  products.isEmpty ? 'No crafts' : products.length.toString() + (products.length == 1 ? ' craft' : ' crafts'),
+                  style: const TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w700),
+                ),
+              ),
+              if (country != 'All')
+                TextButton(onPressed: () => setState(() => country = 'All'), child: const Text('Clear')),
+            ]),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 34),
+          sliver: products.isEmpty
+              ? const SliverToBoxAdapter(child: Padding(padding: EdgeInsets.only(top: 70), child: Center(child: Text('No crafts available for this filter.', style: TextStyle(color: AppColors.textSecondary)))))
+              : SliverGrid(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: .61),
+                  delegate: SliverChildBuilderDelegate((_, i) => _ProductCard(product: products[i]), childCount: products.length),
+                ),
+        ),
+      ]),
+    );
+  }
 }
 
 class PublicCraftDetailPage extends StatefulWidget {
