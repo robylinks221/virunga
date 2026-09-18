@@ -19,7 +19,7 @@ class _PublicMarketplacePageState extends State<PublicMarketplacePage> {
   String _country = 'All';
   bool _loading = true;
   String? _loadError;
-  List<_CraftProduct> _products = [];
+  List<CraftProduct> _products = [];
 
   List<String> get _categories {
     final values = _products
@@ -56,7 +56,7 @@ class _PublicMarketplacePageState extends State<PublicMarketplacePage> {
       if (decoded is! List) throw Exception('Unexpected crafts response');
       final products = decoded
           .whereType<Map>()
-          .map((item) => _CraftProduct.fromJson(Map<String, dynamic>.from(item)))
+          .map((item) => CraftProduct.fromJson(Map<String, dynamic>.from(item)))
           .toList();
       if (!mounted) return;
       setState(() { _products = products; _MarketplaceCatalog.products = products; _loading = false; });
@@ -72,7 +72,7 @@ class _PublicMarketplacePageState extends State<PublicMarketplacePage> {
     super.dispose();
   }
 
-  List<_CraftProduct> get _visible {
+  List<CraftProduct> get _visible {
     final q = _query.trim().toLowerCase();
     return _products.where((p) {
       final categoryOk = _category == 'All' || p.category == _category;
@@ -309,7 +309,7 @@ Widget _cartIcon() => Stack(
 
 class _ProductCard extends StatefulWidget {
   const _ProductCard({required this.product});
-  final _CraftProduct product;
+  final CraftProduct product;
 
   @override
   State<_ProductCard> createState() => _ProductCardState();
@@ -389,7 +389,7 @@ class _ProductCardState extends State<_ProductCard> {
 class CraftCategoryPage extends StatefulWidget {
   const CraftCategoryPage({super.key, required this.category, required this.products});
   final String category;
-  final List<_CraftProduct> products;
+  final List<CraftProduct> products;
 
   @override
   State<CraftCategoryPage> createState() => _CraftCategoryPageState();
@@ -408,7 +408,7 @@ class _CraftCategoryPageState extends State<CraftCategoryPage> {
     return ['All', ...values];
   }
 
-  List<_CraftProduct> get visible =>
+  List<CraftProduct> get visible =>
       country == 'All' ? widget.products : widget.products.where((product) => product.country == country).toList();
 
   @override
@@ -493,7 +493,7 @@ class _CraftCategoryPageState extends State<CraftCategoryPage> {
 
 class PublicCraftDetailPage extends StatefulWidget {
   const PublicCraftDetailPage({super.key, required this.product});
-  final _CraftProduct product;
+  final CraftProduct product;
   @override
   State<PublicCraftDetailPage> createState() => _PublicCraftDetailPageState();
 }
@@ -772,12 +772,12 @@ class _SavedCraftsPageState extends State<SavedCraftsPage> {
 }
 
 class _SavedCrafts {
-  static final List<_CraftProduct> items = [];
+  static final List<CraftProduct> items = [];
 
-  static bool contains(_CraftProduct product) =>
+  static bool contains(CraftProduct product) =>
       items.any((item) => item.id == product.id);
 
-  static void toggle(_CraftProduct product) {
+  static void toggle(CraftProduct product) {
     final index = items.indexWhere((item) => item.id == product.id);
     if (index >= 0) {
       items.removeAt(index);
@@ -889,9 +889,9 @@ class _MarketplaceCartPageState extends State<MarketplaceCartPage> {
 }
 
 class _RecentlyViewed {
-  static final List<_CraftProduct> items = [];
+  static final List<CraftProduct> items = [];
 
-  static void add(_CraftProduct product) {
+  static void add(CraftProduct product) {
     items.removeWhere((item) => item.id == product.id);
     items.insert(0, product);
     if (items.length > 6) items.removeLast();
@@ -905,7 +905,7 @@ class _MarketplaceCart {
       items.fold<int>(0, (total, item) => total + item.quantity);
   static double get totalPrice =>
       items.fold<double>(0, (total, item) => total + (item.product.price * item.quantity));
-  static void add(_CraftProduct product, int quantity) {
+  static void add(CraftProduct product, int quantity) {
     if (!product.inStock || product.quantityAvailable <= 0) return;
     final safeQuantity = quantity.clamp(1, product.quantityAvailable);
     final index = items.indexWhere((item) => item.product.id == product.id);
@@ -920,7 +920,7 @@ class _MarketplaceCart {
 
 class _CartItem {
   _CartItem(this.product, this.quantity);
-  final _CraftProduct product;
+  final CraftProduct product;
   int quantity;
 }
 
@@ -935,11 +935,11 @@ String _formatPrice(double price) {
 }
 
 class _MarketplaceCatalog {
-  static List<_CraftProduct> products = [];
+  static List<CraftProduct> products = [];
 }
 
-class _CraftProduct {
-  const _CraftProduct({required this.id, required this.name, required this.category, required this.country, required this.description, required this.image, required this.images, required this.price, required this.quantityAvailable, required this.inStock, required this.isActive, required this.seller, required this.community, required this.park});
+class CraftProduct {
+  const CraftProduct({required this.id, required this.name, required this.category, required this.country, required this.description, required this.image, required this.images, required this.price, required this.quantityAvailable, required this.inStock, required this.isActive, required this.seller, required this.community, required this.park});
   final int id;
   final String name, category, country, description, image, seller, community, park;
   final List<String> images;
@@ -947,7 +947,7 @@ class _CraftProduct {
   final int quantityAvailable;
   final bool inStock, isActive;
 
-  factory _CraftProduct.fromJson(Map<String, dynamic> json) {
+  factory CraftProduct.fromJson(Map<String, dynamic> json) {
     final category = json['category'] is Map ? Map<String, dynamic>.from(json['category']) : <String, dynamic>{};
     final imagesJson = json['images'] is Map ? Map<String, dynamic>.from(json['images']) : <String, dynamic>{};
     final seller = json['seller'] is Map ? Map<String, dynamic>.from(json['seller']) : <String, dynamic>{};
@@ -955,7 +955,7 @@ class _CraftProduct {
     final park = community['national_park'] is Map ? Map<String, dynamic>.from(community['national_park']) : <String, dynamic>{};
     final country = community['country'] is Map ? Map<String, dynamic>.from(community['country']) : <String, dynamic>{};
     final allImages = ['featured','image_2','image_3'].map((key) => _secureImageUrl(imagesJson[key]?.toString() ?? '')).where((url) => url.isNotEmpty).toList();
-    return _CraftProduct(
+    return CraftProduct(
       id: int.tryParse(json['id']?.toString() ?? '') ?? 0,
       name: json['name']?.toString() ?? '',
       category: category['name']?.toString() ?? '',
