@@ -21,14 +21,25 @@ class _PublicMarketplacePageState extends State<PublicMarketplacePage> {
   String? _loadError;
   List<_CraftProduct> _products = [];
 
-  static const _categories = [
-    'All',
-    'Baskets & Weaving',
-    'Beadwork & Jewellery',
-    'Wood Carvings',
-    'Textiles & Clothing',
-    'Pottery & Ceramics',
-  ];
+  List<String> get _categories {
+    final values = _products
+        .map((product) => product.category.trim())
+        .where((category) => category.isNotEmpty)
+        .toSet()
+        .toList()
+      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    return ['All', ...values];
+  }
+
+  List<String> get _countries {
+    final values = _products
+        .map((product) => product.country.trim())
+        .where((country) => country.isNotEmpty)
+        .toSet()
+        .toList()
+      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    return ['All', ...values];
+  }
 
   @override
   void initState() {
@@ -66,7 +77,10 @@ class _PublicMarketplacePageState extends State<PublicMarketplacePage> {
       final queryOk = q.isEmpty ||
           p.name.toLowerCase().contains(q) ||
           p.category.toLowerCase().contains(q) ||
-          p.country.toLowerCase().contains(q);
+          p.country.toLowerCase().contains(q) ||
+          p.seller.toLowerCase().contains(q) ||
+          p.community.toLowerCase().contains(q) ||
+          p.park.toLowerCase().contains(q);
       return categoryOk && countryOk && queryOk;
     }).toList();
   }
@@ -172,15 +186,19 @@ class _PublicMarketplacePageState extends State<PublicMarketplacePage> {
                   const SizedBox(height: 9),
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
-                    child: Row(children: [
-                      _CountryFilter(label: 'All', selected: _country == 'All', onTap: () => setState(() => _country = 'All')),
-                      const SizedBox(width: 6),
-                      _CountryFilter(label: 'Uganda', selected: _country == 'Uganda', onTap: () => setState(() => _country = 'Uganda')),
-                      const SizedBox(width: 6),
-                      _CountryFilter(label: 'Rwanda', selected: _country == 'Rwanda', onTap: () => setState(() => _country = 'Rwanda')),
-                      const SizedBox(width: 6),
-                      _CountryFilter(label: 'DR Congo', selected: _country == 'DR Congo', onTap: () => setState(() => _country = 'DR Congo')),
-                    ]),
+                    child: Row(
+                      children: _countries.asMap().entries.expand((entry) {
+                        final country = entry.value;
+                        return [
+                          if (entry.key > 0) const SizedBox(width: 6),
+                          _CountryFilter(
+                            label: country,
+                            selected: _country == country,
+                            onTap: () => setState(() => _country = country),
+                          ),
+                        ];
+                      }).toList(),
+                    ),
                   ),
                 ]),
               ),
@@ -386,11 +404,12 @@ class CraftCategoryPage extends StatelessWidget {
           Wrap(
             spacing: 7,
             runSpacing: 7,
-            children: const [
-              _RegionPill('Uganda'),
-              _RegionPill('Rwanda'),
-              _RegionPill('DR Congo'),
-            ],
+            children: products
+                .map((product) => product.country)
+                .where((country) => country.trim().isNotEmpty)
+                .toSet()
+                .map((country) => _RegionPill(country))
+                .toList(),
           ),
         ]),
       )),
@@ -454,10 +473,13 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
     final saved = _SavedCrafts.contains(product);
     _RecentlyViewed.add(product);
     final recent = _RecentlyViewed.items.where((p) => p.name != product.name).take(3).toList();
-    final related = _MarketplaceCatalog.products
-        .where((p) => p.name != product.name && !recent.any((r) => r.name == p.name))
-        .take(3)
+    final sameCategory = _MarketplaceCatalog.products
+        .where((p) => p.id != product.id && p.category == product.category && !recent.any((r) => r.id == p.id))
         .toList();
+    final otherCrafts = _MarketplaceCatalog.products
+        .where((p) => p.id != product.id && p.category != product.category && !recent.any((r) => r.id == p.id))
+        .toList();
+    final related = [...sameCategory, ...otherCrafts].take(3).toList();
     return Scaffold(
       backgroundColor: AppColors.background,
       body: CustomScrollView(slivers: [
