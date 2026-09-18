@@ -799,24 +799,167 @@ class PortersPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const _PeopleLandscapePage(
-      eyebrow: 'DESTINATION SUPPORT',
-      title: 'Porters',
-      subtitle: 'Meet the people who support journeys across the mountain and forest destinations of Greater Virunga.',
-      heroImage: 'assets/images/onboarding_community.jpg',
-      heroLabel: 'PEOPLE OF THE LANDSCAPE',
-      heroTitle: 'Local knowledge. Strength. Support.',
-      introTitle: 'Porters by Destination',
-      introText: 'Verified porter information will appear by destination when live data is connected.',
-      icon: Icons.backpack_outlined,
-      entries: [
-        _PeopleEntry('Bwindi', 'Uganda', 'Porters —'),
-        _PeopleEntry('Mgahinga', 'Uganda', 'Porters —'),
-        _PeopleEntry('Volcanoes', 'Rwanda', 'Porters —'),
-        _PeopleEntry('Virunga', 'DR Congo', 'Porters —'),
-      ],
+    const destinations = [
+      _PorterDestination('Bwindi', 'Uganda', 'Mountain forest', 'assets/images/onboarding_wildlife.jpg'),
+      _PorterDestination('Mgahinga', 'Uganda', 'Volcanoes and forest', 'assets/images/onboarding_landscape.jpg'),
+      _PorterDestination('Volcanoes', 'Rwanda', 'Mountain landscape', 'assets/images/onboarding_community.jpg'),
+      _PorterDestination('Virunga', 'DR Congo', 'Forest and mountain terrain', 'assets/images/onboarding_wildlife.jpg'),
+    ];
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        title: const Text('Porters', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+      ),
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          SliverToBoxAdapter(
+            child: Container(
+              color: AppColors.primary,
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 25),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                const Text('PEOPLE OF THE LANDSCAPE', style: TextStyle(color: AppColors.accent, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.3)),
+                const SizedBox(height: 7),
+                const Text('Strength behind\nevery journey.', style: TextStyle(color: Colors.white, fontSize: 28, height: 1.08, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 9),
+                Text('Discover the role of porters across the mountain and forest destinations of Greater Virunga.', style: TextStyle(color: Colors.white.withOpacity(.72), fontSize: 12, height: 1.5)),
+              ]),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 22, 20, 0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(22),
+                child: SizedBox(
+                  height: 245,
+                  child: Stack(fit: StackFit.expand, children: [
+                    Image.asset('assets/images/onboarding_community.jpg', fit: BoxFit.cover),
+                    const DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0x08000000), Color(0xE6000000)]))),
+                    const Padding(
+                      padding: EdgeInsets.all(18),
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Spacer(),
+                        Text('LOCAL KNOWLEDGE', style: TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1.1)),
+                        SizedBox(height: 6),
+                        Text('Supporting journeys through demanding landscapes.', style: TextStyle(color: Colors.white, fontSize: 20, height: 1.15, fontWeight: FontWeight.w700)),
+                      ]),
+                    ),
+                  ]),
+                ),
+              ),
+            ),
+          ),
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(20, 27, 20, 13),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('WHY PORTERS MATTER', style: TextStyle(color: AppColors.accent, fontSize: 9.5, fontWeight: FontWeight.w700, letterSpacing: 1.2)),
+                SizedBox(height: 5),
+                Text('Local support on the trail', style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
+                SizedBox(height: 7),
+                Text('Porters support visitors through challenging terrain while bringing practical knowledge of the landscapes and communities around protected areas.', style: TextStyle(color: AppColors.textSecondary, fontSize: 11.5, height: 1.55)),
+              ]),
+            ),
+          ),
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(20, 2, 20, 25),
+              child: Row(children: [
+                Expanded(child: _PorterRole(icon: Icons.backpack_outlined, title: 'Trail Support')),
+                SizedBox(width: 9),
+                Expanded(child: _PorterRole(icon: Icons.terrain_outlined, title: 'Local Knowledge')),
+                SizedBox(width: 9),
+                Expanded(child: _PorterRole(icon: Icons.groups_2_outlined, title: 'Community')),
+              ]),
+            ),
+          ),
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(20, 3, 20, 13),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('ACROSS THE REGION', style: TextStyle(color: AppColors.accent, fontSize: 9.5, fontWeight: FontWeight.w700, letterSpacing: 1.2)),
+                SizedBox(height: 5),
+                Text('Porters by destination', style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
+              ]),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 218,
+              child: ListView.separated(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 25),
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                itemCount: destinations.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 11),
+                itemBuilder: (_, index) => _PorterDestinationCard(item: destinations[index]),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
+}
+
+class _PorterRole extends StatelessWidget {
+  const _PorterRole({required this.icon, required this.title});
+  final IconData icon;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    height: 92,
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 13),
+    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.cardBorder)),
+    child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+      Icon(icon, color: AppColors.primary, size: 21),
+      const SizedBox(height: 8),
+      Text(title, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textPrimary, fontSize: 9.5, fontWeight: FontWeight.w700)),
+    ]),
+  );
+}
+
+class _PorterDestinationCard extends StatelessWidget {
+  const _PorterDestinationCard({required this.item});
+  final _PorterDestination item;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    width: 165,
+    child: ClipRRect(
+      borderRadius: BorderRadius.circular(18),
+      child: Stack(fit: StackFit.expand, children: [
+        Image.asset(item.image, fit: BoxFit.cover),
+        const DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0x00000000), Color(0xE6000000)]))),
+        Padding(
+          padding: const EdgeInsets.all(13),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const Spacer(),
+            Text(item.country.toUpperCase(), style: const TextStyle(color: AppColors.accent, fontSize: 8, fontWeight: FontWeight.w700, letterSpacing: .7)),
+            const SizedBox(height: 4),
+            Text(item.name, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 3),
+            Text(item.landscape, style: const TextStyle(color: Colors.white70, fontSize: 9.5)),
+          ]),
+        ),
+      ]),
+    ),
+  );
+}
+
+class _PorterDestination {
+  const _PorterDestination(this.name, this.country, this.landscape, this.image);
+  final String name;
+  final String country;
+  final String landscape;
+  final String image;
 }
 
 class ConservationPage extends StatelessWidget {
