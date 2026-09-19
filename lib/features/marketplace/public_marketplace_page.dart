@@ -636,7 +636,9 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
                           ),
                           const SizedBox(height: 28),
                           _CraftProductSection(
-                            title: 'Other Products from this Seller',
+                            title: 'Other Products from the Seller',
+                            subtitle: 'More crafts created by the same artisan',
+                            icon: Icons.storefront_outlined,
                             products: _MarketplaceCatalog.products
                                 .where((x) => x.id != p.id && x.seller.trim().toLowerCase() == p.seller.trim().toLowerCase())
                                 .take(6)
@@ -644,7 +646,9 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
                           ),
                           const SizedBox(height: 24),
                           _CraftProductSection(
-                            title: 'Recently Viewed',
+                            title: 'Recently Viewed Products',
+                            subtitle: 'Continue exploring crafts you opened recently',
+                            icon: Icons.history_rounded,
                             products: _RecentlyViewed.items
                                 .where((x) => x.id != p.id)
                                 .take(6)
@@ -1105,41 +1109,106 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
 class _CraftProductSection extends StatelessWidget {
   const _CraftProductSection({
     required this.title,
+    required this.subtitle,
+    required this.icon,
     required this.products,
   });
 
   final String title;
+  final String subtitle;
+  final IconData icon;
   final List<CraftProduct> products;
 
   @override
   Widget build(BuildContext context) {
     if (products.isEmpty) return const SizedBox.shrink();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            color: AppColors.primary,
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(15, 16, 15, 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: AppColors.cardBorder),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(.045),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
-        ),
-        const SizedBox(height: 11),
-        SizedBox(
-          height: 225,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: products.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 11),
-            itemBuilder: (_, i) => SizedBox(
-              width: 154,
-              child: _ProductCard(product: products[i]),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: const BoxDecoration(
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: Colors.white, size: 20),
+              ),
+              const SizedBox(width: 11),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 17,
+                        height: 1.15,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 9.5,
+                        height: 1.25,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                width: 30,
+                height: 30,
+                decoration: const BoxDecoration(
+                  color: AppColors.accentSoft,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.arrow_forward_rounded,
+                  color: AppColors.accent,
+                  size: 16,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            height: 225,
+            child: ListView.separated(
+              clipBehavior: Clip.none,
+              scrollDirection: Axis.horizontal,
+              itemCount: products.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 11),
+              itemBuilder: (_, i) => SizedBox(
+                width: 154,
+                child: _ProductCard(product: products[i]),
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
