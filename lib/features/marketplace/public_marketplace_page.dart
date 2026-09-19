@@ -113,7 +113,11 @@ class _PublicMarketplacePageState extends State<PublicMarketplacePage> {
         actions: [
           IconButton(
             tooltip: 'Saved crafts',
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SavedCraftsPage())),
+            onPressed: () async {
+              if(!await _requireMarketplaceLogin(context))return;
+              if(!context.mounted)return;
+              Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SavedCraftsPage()));
+            },
             icon: const Icon(Icons.favorite_border_rounded),
           ),
           IconButton(
@@ -438,7 +442,11 @@ class _CraftCategoryPageState extends State<CraftCategoryPage> {
         title: const Text('Craft Category', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
         actions: [
           IconButton(
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MarketplaceCartPage())),
+            onPressed: () async {
+              if(!await _requireMarketplaceLogin(context))return;
+              if(!context.mounted)return;
+              Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MarketplaceCartPage()));
+            },
             icon: _cartIcon(),
           ),
         ],
@@ -577,7 +585,11 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
                     saved
                         ? Icons.favorite_rounded
                         : Icons.favorite_border_rounded,
-                    () => setState(() => _SavedCrafts.toggle(p)),
+                    () async {
+                      if(!await _requireMarketplaceLogin(context))return;
+                      if(!mounted)return;
+                      setState(() => _SavedCrafts.toggle(p));
+                    },
                     accent: true,
                   ),
                 ],
@@ -1018,7 +1030,9 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
                                 child: SizedBox(
                                   height: 50,
                                   child: FilledButton.icon(
-                                    onPressed: () {
+                                    onPressed: () async {
+                                      if(!await _requireMarketplaceLogin(context))return;
+                                      if(!mounted)return;
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
                                         const SnackBar(
@@ -1053,9 +1067,11 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
                                 child: SizedBox(
                                   height: 50,
                                   child: FilledButton.icon(
-                                    onPressed: () => setState(
-                                      () => _SavedCrafts.toggle(p),
-                                    ),
+                                    onPressed: () async {
+                                      if(!await _requireMarketplaceLogin(context))return;
+                                      if(!mounted)return;
+                                      setState(() => _SavedCrafts.toggle(p));
+                                    },
                                     style: FilledButton.styleFrom(
                                       backgroundColor: AppColors.primary,
                                       foregroundColor: Colors.white,
