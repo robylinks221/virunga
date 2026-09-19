@@ -690,6 +690,7 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
           ),
         ),
       ]),
+    ),
     );
   }
 
