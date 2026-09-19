@@ -914,11 +914,13 @@ class _Porter {
     required this.park,
     required this.country,
     required this.countryCode,
+    required this.joinedAt,
   });
 
   final int id, groupId, communityId;
   final String name, group, community, park, country, countryCode;
   final bool isActive, isGroupLeader;
+  final DateTime? joinedAt;
 
   factory _Porter.fromJson(Map<String, dynamic> json) {
     final group = json['group'] is Map ? Map<String, dynamic>.from(json['group']) : <String, dynamic>{};
@@ -937,6 +939,7 @@ class _Porter {
       park: park['name']?.toString() ?? '',
       country: country['name']?.toString() ?? '',
       countryCode: country['code']?.toString() ?? '',
+      joinedAt: DateTime.tryParse(json['created_at']?.toString() ?? ''),
     );
   }
 }
@@ -957,48 +960,100 @@ Future<List<_Porter>> _loadPorters() async {
 class _ApiPorterGroups extends StatefulWidget {
   const _ApiPorterGroups({required this.park});
   final String park;
-
   @override
   State<_ApiPorterGroups> createState() => _ApiPorterGroupsState();
 }
-
 class _ApiPorterGroupsState extends State<_ApiPorterGroups> {
   late final Future<List<_Porter>> _future = _loadPorters();
-
   @override
   Widget build(BuildContext context) => FutureBuilder<List<_Porter>>(
     future: _future,
     builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return const SizedBox(height: 120, child: Center(child: CircularProgressIndicator(color: AppColors.primary)));
-      }
-      if (snapshot.hasError) {
-        return const Padding(
-          padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
-          child: Text('Porter information could not be loaded.', style: TextStyle(color: AppColors.textSecondary, fontSize: 11.5)),
-        );
-      }
-      final porters = (snapshot.data ?? const <_Porter>[])
-          .where((porter) => porter.park.toLowerCase() == widget.park.toLowerCase())
-          .toList();
-      final grouped = <int, List<_Porter>>{};
-      for (final porter in porters) {
-        grouped.putIfAbsent(porter.groupId, () => []).add(porter);
-      }
-      final groups = grouped.values
-          .where((members) => members.isNotEmpty)
-          .map((members) => _PorterGroup.fromPorters(members))
-          .toList();
-
-      if (groups.isEmpty) {
-        return const Padding(
-          padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
-          child: Text('No porter groups are currently connected to this park.', style: TextStyle(color: AppColors.textSecondary, fontSize: 11.5)),
-        );
-      }
-      return _PorterGroupCarousel(groups: groups);
+      if (snapshot.connectionState == ConnectionState.waiting) return const SizedBox(height: 150, child: Center(child: CircularProgressIndicator(color: AppColors.primary)));
+      if (snapshot.hasError) return const Padding(padding: EdgeInsets.fromLTRB(20,0,20,8), child: Text('Porter information could not be loaded.', style: TextStyle(color: AppColors.textSecondary,fontSize:11.5)));
+      final porters=(snapshot.data??const <_Porter>[]).where((x)=>x.park.toLowerCase()==widget.park.toLowerCase()).toList();
+      if(porters.isEmpty) return const Padding(padding: EdgeInsets.fromLTRB(20,0,20,8),child:Text('No porters are currently connected to this park.',style:TextStyle(color:AppColors.textSecondary,fontSize:11.5)));
+      return SizedBox(height:228,child:ListView.separated(padding:const EdgeInsets.fromLTRB(20,0,20,16),scrollDirection:Axis.horizontal,physics:const BouncingScrollPhysics(),itemCount:porters.length,separatorBuilder:(_,__)=>const SizedBox(width:12),itemBuilder:(context,index)=>_ParkPorterCard(porter:porters[index])));
     },
   );
+}
+class _ParkPorterCard extends StatelessWidget {
+  const _ParkPorterCard({required this.porter});
+  final _Porter porter;
+  @override
+  Widget build(BuildContext context) {
+    final location=[porter.community,porter.park,porter.country].where((x)=>x.trim().isNotEmpty).join(', ');
+    return InkWell(
+      onTap:()=>Navigator.of(context).push(MaterialPageRoute(builder:(_)=>PorterDetailPage(porter:porter))),
+      borderRadius:BorderRadius.circular(22),
+      child:Container(width:282,clipBehavior:Clip.antiAlias,decoration:BoxDecoration(color:Colors.white,borderRadius:BorderRadius.circular(22),border:Border.all(color:AppColors.cardBorder),boxShadow:[BoxShadow(color:AppColors.primary.withOpacity(.05),blurRadius:18,offset:const Offset(0,8))]),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
+        Container(height:82,padding:const EdgeInsets.symmetric(horizontal:15),color:AppColors.primary,child:Row(children:[
+          Container(width:58,height:58,padding:const EdgeInsets.all(2.5),decoration:const BoxDecoration(color:Colors.white,shape:BoxShape.circle),child:ClipOval(child:Image.asset(_porterAvatar,fit:BoxFit.cover))),
+          const SizedBox(width:12),
+          Expanded(child:Column(mainAxisAlignment:MainAxisAlignment.center,crossAxisAlignment:CrossAxisAlignment.start,children:[
+            const Text('COMMUNITY PORTER',style:TextStyle(color:AppColors.accent,fontSize:7.5,fontWeight:FontWeight.w800,letterSpacing:.9)),
+            const SizedBox(height:4),
+            Text(porter.name,maxLines:2,overflow:TextOverflow.ellipsis,style:const TextStyle(color:Colors.white,fontSize:15,height:1.15,fontWeight:FontWeight.w800)),
+          ])),
+        ])),
+        Expanded(child:Padding(padding:const EdgeInsets.fromLTRB(15,13,15,13),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
+          const Text('LOCATION',style:TextStyle(color:AppColors.textMuted,fontSize:7.5,fontWeight:FontWeight.w800,letterSpacing:.8)),
+          const SizedBox(height:4),
+          Text(location,maxLines:2,overflow:TextOverflow.ellipsis,style:const TextStyle(color:AppColors.textPrimary,fontSize:10.5,height:1.3,fontWeight:FontWeight.w600)),
+          const SizedBox(height:10),
+          const Text('JOINED',style:TextStyle(color:AppColors.textMuted,fontSize:7.5,fontWeight:FontWeight.w800,letterSpacing:.8)),
+          const SizedBox(height:3),
+          Text(_porterJoined(porter.joinedAt),style:const TextStyle(color:AppColors.primary,fontSize:10.5,fontWeight:FontWeight.w700)),
+          const Spacer(),
+          Row(children:[
+            if(porter.isGroupLeader) Container(padding:const EdgeInsets.symmetric(horizontal:8,vertical:4),decoration:BoxDecoration(color:AppColors.accentSoft,borderRadius:BorderRadius.circular(12)),child:const Text('GROUP LEADER',style:TextStyle(color:AppColors.primary,fontSize:7,fontWeight:FontWeight.w800))),
+            const Spacer(),
+            const Text('View Profile',style:TextStyle(color:AppColors.accent,fontSize:9.5,fontWeight:FontWeight.w800)),
+            const SizedBox(width:4),const Icon(Icons.arrow_forward_rounded,color:AppColors.accent,size:15),
+          ]),
+        ]))),
+      ])),
+    );
+  }
+}
+class PorterDetailPage extends StatelessWidget {
+  const PorterDetailPage({super.key,required this.porter});
+  final _Porter porter;
+  @override
+  Widget build(BuildContext context) {
+    final location=[porter.community,porter.park,porter.country].where((x)=>x.trim().isNotEmpty).join(', ');
+    return Scaffold(backgroundColor:AppColors.background,appBar:AppBar(backgroundColor:AppColors.primary,foregroundColor:Colors.white,surfaceTintColor:Colors.transparent,elevation:0,title:const Text('Porter Profile',style:TextStyle(fontSize:17,fontWeight:FontWeight.w800))),body:ListView(physics:const BouncingScrollPhysics(),padding:const EdgeInsets.fromLTRB(20,22,20,38),children:[
+      Container(padding:const EdgeInsets.all(20),decoration:BoxDecoration(color:AppColors.primary,borderRadius:BorderRadius.circular(26)),child:Column(children:[
+        Container(width:104,height:104,padding:const EdgeInsets.all(4),decoration:const BoxDecoration(color:Colors.white,shape:BoxShape.circle),child:ClipOval(child:Image.asset(_porterAvatar,fit:BoxFit.cover))),
+        const SizedBox(height:14),Text(porter.name,textAlign:TextAlign.center,style:const TextStyle(color:Colors.white,fontSize:23,height:1.15,fontWeight:FontWeight.w800)),
+        const SizedBox(height:6),Text(porter.isGroupLeader?'Community Porter · Group Leader':'Community Porter',style:const TextStyle(color:AppColors.accent,fontSize:10,fontWeight:FontWeight.w700)),
+      ])),
+      const SizedBox(height:22),
+      Container(padding:const EdgeInsets.all(18),decoration:BoxDecoration(color:Colors.white,borderRadius:BorderRadius.circular(22),border:Border.all(color:AppColors.cardBorder)),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
+        const Text('PORTER DETAILS',style:TextStyle(color:AppColors.accent,fontSize:9,fontWeight:FontWeight.w800,letterSpacing:1)),
+        const SizedBox(height:17),
+        _porterDetailRow('Location',location),_porterDetailDivider(),
+        _porterDetailRow('Community',porter.community),_porterDetailDivider(),
+        _porterDetailRow('National Park',porter.park),_porterDetailDivider(),
+        _porterDetailRow('Country',porter.country),_porterDetailDivider(),
+        _porterDetailRow('Porter Group',porter.group),_porterDetailDivider(),
+        _porterDetailRow('Joined',_porterJoined(porter.joinedAt)),_porterDetailDivider(),
+        _porterDetailRow('Status',porter.isActive?'Active':'Inactive'),
+      ])),
+      const SizedBox(height:18),
+      Container(padding:const EdgeInsets.all(18),decoration:BoxDecoration(color:AppColors.accentSoft,borderRadius:BorderRadius.circular(22)),child:const Text('Porters support visitors and local communities around the Greater Virunga landscape. Profile information shown here comes from the porter directory.',style:TextStyle(color:AppColors.textPrimary,fontSize:11.5,height:1.5))),
+    ]));
+  }
+}
+Widget _porterDetailRow(String label,String value)=>Padding(padding:const EdgeInsets.symmetric(vertical:3),child:Row(crossAxisAlignment:CrossAxisAlignment.start,children:[
+  SizedBox(width:92,child:Text(label.toUpperCase(),style:const TextStyle(color:AppColors.textMuted,fontSize:7.5,fontWeight:FontWeight.w800,letterSpacing:.6))),
+  Expanded(child:Text(value.trim().isEmpty?'Not provided':value,style:const TextStyle(color:AppColors.textPrimary,fontSize:11,height:1.35,fontWeight:FontWeight.w600))),
+]));
+Widget _porterDetailDivider()=>const Padding(padding:EdgeInsets.symmetric(vertical:10),child:Divider(height:1,color:AppColors.divider));
+String _porterJoined(DateTime? date) {
+  if(date==null) return 'Not provided';
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return months[date.month-1]+' '+date.year.toString();
 }
 
 class _PorterGroup {
