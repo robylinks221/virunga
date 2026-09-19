@@ -925,15 +925,18 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
                                               p,
                                               quantity,
                                             );
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
+                                            setState(() {});
+                                            ScaffoldMessenger.of(context).showSnackBar(
                                               SnackBar(
-                                                content: Text(
-                                                  '${p.name} added to cart',
+                                                content: Text('${p.name} added to cart'),
+                                                action: SnackBarAction(
+                                                  label: 'VIEW CART',
+                                                  onPressed: () => Navigator.of(context).push(
+                                                    MaterialPageRoute(builder: (_) => const MarketplaceCartPage()),
+                                                  ),
                                                 ),
                                               ),
                                             );
-                                            setState(() {});
                                           }
                                         : null,
                                     style: FilledButton.styleFrom(
@@ -963,6 +966,31 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
                               ),
                             ],
                           ),
+                          if (_MarketplaceCart.totalQuantity > 0) ...[
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 50,
+                              child: OutlinedButton.icon(
+                                onPressed: () async {
+                                  await Navigator.of(context).push(
+                                    MaterialPageRoute(builder: (_) => const MarketplaceCartPage()),
+                                  );
+                                  if (mounted) setState(() {});
+                                },
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: AppColors.primary,
+                                  side: const BorderSide(color: AppColors.primary, width: 1.4),
+                                  shape: const StadiumBorder(),
+                                ),
+                                icon: const Icon(Icons.shopping_bag_outlined, size: 19),
+                                label: Text(
+                                  'View Cart  (${_MarketplaceCart.totalQuantity})',
+                                  style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800),
+                                ),
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: 12),
                           Row(
                             children: [
@@ -1380,7 +1408,26 @@ class _MarketplaceCartPageState extends State<MarketplaceCartPage> {
     final items = _MarketplaceCart.items;
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(backgroundColor: AppColors.primary, foregroundColor: Colors.white, title: const Text('Your Cart', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700))),
+      appBar: AppBar(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        title: const Text('Your Cart', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
+        actions: [
+          if (items.isNotEmpty)
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(right: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(color: AppColors.accent, borderRadius: BorderRadius.circular(20)),
+                child: Text(
+                  _MarketplaceCart.totalQuantity.toString() + ' items',
+                  style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800),
+                ),
+              ),
+            ),
+        ],
+      ),
       body: items.isEmpty
         ? const Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
             Icon(Icons.shopping_bag_outlined, color: AppColors.primary, size: 44),
@@ -1390,14 +1437,14 @@ class _MarketplaceCartPageState extends State<MarketplaceCartPage> {
             Text('Crafts you add will appear here.', style: TextStyle(color: AppColors.textSecondary, fontSize: 11)),
           ]))
         : ListView.separated(
-            padding: const EdgeInsets.fromLTRB(20, 22, 20, 34),
+            padding: const EdgeInsets.fromLTRB(18, 20, 18, 120),
             itemCount: items.length,
             separatorBuilder: (_, __) => const SizedBox(height: 10),
             itemBuilder: (_, i) {
               final item = items[i];
               return Container(
                 padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(17), border: Border.all(color: AppColors.cardBorder)),
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.cardBorder)),
                 child: Row(children: [
                   ClipRRect(borderRadius: BorderRadius.circular(12), child: _CraftImage(url: item.product.image, width: 76, height: 76, fit: BoxFit.cover)),
                   const SizedBox(width: 12),
@@ -1406,7 +1453,7 @@ class _MarketplaceCartPageState extends State<MarketplaceCartPage> {
                     const SizedBox(height: 4),
                     Text(item.product.country, style: const TextStyle(color: AppColors.textSecondary, fontSize: 10)),
                     const SizedBox(height: 4),
-                    Text(_formatPrice(item.product.price * item.quantity), style: const TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.w700)),
+                    Text(_formatPrice(item.product.price * item.quantity), style: const TextStyle(color: AppColors.accent, fontSize: 12, fontWeight: FontWeight.w800)),
                     const SizedBox(height: 7),
                     Row(children: [
                       _cartQty(Icons.remove_rounded, () => setState(() {
@@ -1436,7 +1483,7 @@ class _MarketplaceCartPageState extends State<MarketplaceCartPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Row(children: [
-                      const Text('Cart total', style: TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+                      const Text('Cart Total', style: TextStyle(color: AppColors.textSecondary, fontSize: 11)),
                       const Spacer(),
                       Text(_formatPrice(_MarketplaceCart.totalPrice), style: const TextStyle(color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.w700)),
                     ]),
