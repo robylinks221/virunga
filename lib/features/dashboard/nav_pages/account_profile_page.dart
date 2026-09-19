@@ -402,7 +402,7 @@ class _AccountTile extends StatelessWidget {
                 width: 45,
                 height: 45,
                 decoration: BoxDecoration(
-                  color: AppColors.accentSoft,
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(13),
                 ),
                 child: Icon(icon, color: AppColors.primary, size: 21),
@@ -534,7 +534,7 @@ class _AccountSettingsPage extends StatelessWidget {
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: AppColors.accentSoft,
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(13),
                     ),
                     child: Icon(item.icon, color: AppColors.primary, size: 20),
