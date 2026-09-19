@@ -117,16 +117,16 @@ class _PublicMarketplacePageState extends State<PublicMarketplacePage> {
           slivers: [
             SliverToBoxAdapter(
               child: Container(
-                color: AppColors.primary,
-                padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+                color: AppColors.background,
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('AUTHENTIC CRAFTS', style: TextStyle(color: AppColors.accent, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.4)),
                     const SizedBox(height: 6),
-                    const Text('Made across Greater Virunga.', style: TextStyle(color: Colors.white, fontSize: 25, height: 1.15, fontWeight: FontWeight.w700)),
+                    const Text('Unique African Crafts', style: TextStyle(color: AppColors.primary, fontSize: 27, height: 1.1, fontWeight: FontWeight.w800)),
                     const SizedBox(height: 7),
-                    Text('Discover local making, heritage and artisan stories from Uganda, Rwanda and DR Congo.', style: TextStyle(color: Colors.white.withOpacity(.72), fontSize: 12, height: 1.45)),
+                    const Text('Support local artisans and discover crafts made across Greater Virunga.', style: TextStyle(color: AppColors.textSecondary, fontSize: 12, height: 1.45)),
                     const SizedBox(height: 18),
                     TextField(
                       controller: _search,
@@ -324,7 +324,7 @@ class _ProductCardState extends State<_ProductCard> {
       borderRadius: BorderRadius.circular(18),
       onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => PublicCraftDetailPage(product: product))),
       child: Container(
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18), border: Border.all(color: AppColors.cardBorder)),
+        decoration: BoxDecoration(color: AppColors.accentSoft.withOpacity(.35), borderRadius: BorderRadius.circular(18), border: Border.all(color: AppColors.cardBorder)),
         clipBehavior: Clip.antiAlias,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -366,7 +366,7 @@ class _ProductCardState extends State<_ProductCard> {
                   Row(children: [const Icon(Icons.location_on_outlined, size: 13, color: AppColors.textSecondary), const SizedBox(width: 3), Expanded(child: Text(product.country, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textSecondary, fontSize: 10)))]),
                   const SizedBox(height: 7),
                   Row(children: [
-                    Expanded(child: Text(_formatPrice(product.price), style: const TextStyle(color: AppColors.primary, fontSize: 11.5, fontWeight: FontWeight.w700))),
+                    Expanded(child: Text(_formatPrice(product.price), style: const TextStyle(color: AppColors.accent, fontSize: 12, fontWeight: FontWeight.w800))),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                       decoration: BoxDecoration(
@@ -524,6 +524,8 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
           pinned: true,
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
+          title: const Text('Product Details', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+          centerTitle: true,
           leading: Padding(padding: const EdgeInsets.all(8), child: _circle(Icons.arrow_back_rounded, () => Navigator.pop(context))),
           actions: [
             _circle(Icons.share_outlined, () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Share craft link coming soon.')))),
@@ -554,7 +556,7 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
-              decoration: BoxDecoration(color: AppColors.mintSoft, borderRadius: BorderRadius.circular(18)),
+              decoration: BoxDecoration(color: AppColors.accentSoft, borderRadius: BorderRadius.circular(18)),
               child: Text(p.category.toUpperCase(), style: const TextStyle(color: AppColors.primary, fontSize: 8.5, fontWeight: FontWeight.w800, letterSpacing: .8)),
             ),
             const SizedBox(height: 12),
@@ -571,7 +573,7 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.mintSoft,
+                color: AppColors.accentSoft.withOpacity(.55),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: AppColors.cardBorder),
               ),
@@ -615,7 +617,7 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
               Row(children: [
                 Container(
                   height: 52,
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(26), border: Border.all(color: AppColors.cardBorder)),
+                  decoration: BoxDecoration(color: AppColors.mintSoft, borderRadius: BorderRadius.circular(26), border: Border.all(color: AppColors.primary.withOpacity(.12))),
                   child: Row(children: [
                     _qty(Icons.remove_rounded, () { if (quantity > 1) setState(() => quantity--); }),
                     SizedBox(width: 34, child: Text('$quantity', textAlign: TextAlign.center, style: const TextStyle(color: AppColors.primary, fontSize: 15, fontWeight: FontWeight.w800))),
@@ -649,13 +651,13 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
             Row(children: [
               Expanded(child: SizedBox(height: 48, child: OutlinedButton.icon(
                 onPressed: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Seller messaging coming soon.'))),
-                style: OutlinedButton.styleFrom(foregroundColor: AppColors.accent, backgroundColor: AppColors.accentSoft, side: const BorderSide(color: AppColors.accent), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                style: OutlinedButton.styleFrom(foregroundColor: Colors.white, backgroundColor: AppColors.primary, side: const BorderSide(color: AppColors.primary), shape: const StadiumBorder()),
                 icon: const Icon(Icons.chat_bubble_outline_rounded, size: 19), label: const Text('Message Seller', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
               ))),
               const SizedBox(width: 10),
               Expanded(child: SizedBox(height: 48, child: OutlinedButton.icon(
                 onPressed: () => setState(() => _SavedCrafts.toggle(p)),
-                style: OutlinedButton.styleFrom(foregroundColor: AppColors.accent, backgroundColor: AppColors.accentSoft, side: const BorderSide(color: AppColors.accent), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                style: OutlinedButton.styleFrom(foregroundColor: Colors.white, backgroundColor: AppColors.accent, side: const BorderSide(color: AppColors.accent), shape: const StadiumBorder()),
                 icon: Icon(saved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded, size: 19), label: Text(saved ? 'Saved' : 'Save for Later', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
               ))),
             ]),
@@ -805,7 +807,7 @@ class _SavedCraftsPageState extends State<SavedCraftsPage> {
                   const SizedBox(height: 20),
                   OutlinedButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    style: OutlinedButton.styleFrom(foregroundColor: AppColors.primary, side: const BorderSide(color: AppColors.primary), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                    style: OutlinedButton.styleFrom(foregroundColor: Colors.white, backgroundColor: AppColors.accent, side: const BorderSide(color: AppColors.accent), shape: const StadiumBorder()),
                     child: const Text('Explore Marketplace', style: TextStyle(fontWeight: FontWeight.w700)),
                   ),
                 ]),
