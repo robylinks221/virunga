@@ -12,7 +12,7 @@ class AppColors {
   static const accentLight = Color(0xFFFFA45C);
   static const accentSoft = Color(0xFFFFEBDD);
 
-  static const background = Color(0xFFFAFBF8);
+  static const background = Color(0xFFF5F1E8);
   static const surface = Color(0xFFFFFFFF);
   static const textPrimary = Color(0xFF14231D);
   static const textSecondary = Color(0xFF6F7A75);
