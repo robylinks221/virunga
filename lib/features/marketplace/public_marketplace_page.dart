@@ -4,6 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../../core/theme/app_theme.dart';
+import '../../core/storage/token_storage.dart';
+import '../auth/auth_service.dart';
+import '../auth/login_page.dart';
+
+Future<bool> _requireMarketplaceLogin(BuildContext context) async {
+  final auth=AuthService(tokenStorage:const TokenStorage());
+  final loggedIn=await auth.restoreSession();
+  if(loggedIn)return true;
+  if(!context.mounted)return false;
+  await Navigator.of(context).push(MaterialPageRoute(builder:(_)=>LoginPage(authService:auth)));
+  return false;
+}
 
 class PublicMarketplacePage extends StatefulWidget {
   const PublicMarketplacePage({super.key});
@@ -106,7 +118,11 @@ class _PublicMarketplacePageState extends State<PublicMarketplacePage> {
           ),
           IconButton(
             tooltip: 'Cart',
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MarketplaceCartPage())),
+            onPressed: () async {
+              if(!await _requireMarketplaceLogin(context))return;
+              if(!context.mounted)return;
+              Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MarketplaceCartPage()));
+            },
             icon: _cartIcon(),
           ),
         ],
@@ -920,7 +936,9 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
                                   height: 52,
                                   child: FilledButton.icon(
                                     onPressed: available
-                                        ? () {
+                                        ? () async {
+                                            if(!await _requireMarketplaceLogin(context))return;
+                                            if(!mounted)return;
                                             _MarketplaceCart.add(
                                               p,
                                               quantity,
@@ -973,6 +991,8 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
                               height: 50,
                               child: OutlinedButton.icon(
                                 onPressed: () async {
+                                  if(!await _requireMarketplaceLogin(context))return;
+                                  if(!mounted)return;
                                   await Navigator.of(context).push(
                                     MaterialPageRoute(builder: (_) => const MarketplaceCartPage()),
                                   );
