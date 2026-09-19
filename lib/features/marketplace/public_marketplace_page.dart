@@ -324,7 +324,7 @@ class _ProductCardState extends State<_ProductCard> {
       borderRadius: BorderRadius.circular(18),
       onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => PublicCraftDetailPage(product: product))),
       child: Container(
-        decoration: BoxDecoration(color: AppColors.accentSoft.withOpacity(.35), borderRadius: BorderRadius.circular(18), border: Border.all(color: AppColors.cardBorder)),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18), border: Border.all(color: AppColors.cardBorder)),
         clipBehavior: Clip.antiAlias,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -682,7 +682,7 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
                               vertical: 7,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.mintSoft,
+                              color: Colors.white,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Row(
@@ -740,7 +740,7 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
                             width: double.infinity,
                             padding: const EdgeInsets.all(13),
                             decoration: BoxDecoration(
-                              color: AppColors.accentSoft.withOpacity(.50),
+                              color: Colors.white,
                               borderRadius: BorderRadius.circular(18),
                             ),
                             child: Row(
@@ -1221,7 +1221,7 @@ class _CraftProductSection extends StatelessWidget {
                 width: 30,
                 height: 30,
                 decoration: const BoxDecoration(
-                  color: AppColors.accentSoft,
+                  color: Colors.white,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -1268,7 +1268,7 @@ class CraftSellerStorePage extends StatelessWidget {
           color: AppColors.primary,
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
           child: Column(children: [
-            Container(width: 86, height: 86, decoration: BoxDecoration(color: AppColors.accentSoft, shape: BoxShape.circle, border: Border.all(color: AppColors.accent, width: 2)), child: const Icon(Icons.person_rounded, color: AppColors.primary, size: 42)),
+            Container(width: 86, height: 86, decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: AppColors.accent, width: 2)), child: const Icon(Icons.person_rounded, color: AppColors.primary, size: 42)),
             const SizedBox(height: 13),
             Text(seller.isEmpty ? 'Local Craft Seller' : seller, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontSize: 23, fontWeight: FontWeight.w800)),
             if (community.trim().isNotEmpty || country.trim().isNotEmpty) ...[
@@ -1341,7 +1341,7 @@ class _SavedCraftsPageState extends State<SavedCraftsPage> {
                   Container(
                     width: 68,
                     height: 68,
-                    decoration: const BoxDecoration(color: AppColors.accentSoft, shape: BoxShape.circle),
+                    decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
                     child: const Icon(Icons.favorite_border_rounded, color: AppColors.primary, size: 30),
                   ),
                   const SizedBox(height: 17),
@@ -1614,7 +1614,7 @@ class _CraftImage extends StatelessWidget {
   final BoxFit fit;
   @override
   Widget build(BuildContext context) {
-    if (url.isEmpty) return Container(width: width, height: height, color: AppColors.accentSoft, alignment: Alignment.center, child: const Icon(Icons.image_outlined, color: AppColors.primary));
-    return Image.network(url, width: width, height: height, fit: fit, errorBuilder: (_, __, ___) => Container(width: width, height: height, color: AppColors.accentSoft, alignment: Alignment.center, child: const Icon(Icons.broken_image_outlined, color: AppColors.primary)));
+    if (url.isEmpty) return Container(width: width, height: height, color: Colors.white, alignment: Alignment.center, child: const Icon(Icons.image_outlined, color: AppColors.primary));
+    return Image.network(url, width: width, height: height, fit: fit, errorBuilder: (_, __, ___) => Container(width: width, height: height, color: Colors.white, alignment: Alignment.center, child: const Icon(Icons.broken_image_outlined, color: AppColors.primary)));
   }
 }
