@@ -803,7 +803,7 @@ class _ApiCraftCategoriesState extends State<_ApiCraftCategories> {
                   Container(
                     width: 62,
                     height: 62,
-                    decoration: const BoxDecoration(color: AppColors.accentSoft, shape: BoxShape.circle),
+                    decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
                     child: const Icon(Icons.handyman_outlined, color: AppColors.primary, size: 24),
                   ),
                   const SizedBox(height: 7),
@@ -877,8 +877,8 @@ class _RealCraftCarouselState extends State<_RealCraftCarousel> {
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Expanded(
                     child: craft.image.isEmpty
-                      ? Container(color: AppColors.accentSoft, child: const Center(child: Icon(Icons.image_outlined, color: AppColors.primary)))
-                      : Image.network(craft.image, width: double.infinity, fit: BoxFit.cover, errorBuilder: (_, __, ___) => Container(color: AppColors.accentSoft, child: const Center(child: Icon(Icons.broken_image_outlined, color: AppColors.primary)))),
+                      ? Container(color: Colors.white, child: const Center(child: Icon(Icons.image_outlined, color: AppColors.primary)))
+                      : Image.network(craft.image, width: double.infinity, fit: BoxFit.cover, errorBuilder: (_, __, ___) => Container(color: Colors.white, child: const Center(child: Icon(Icons.broken_image_outlined, color: AppColors.primary)))),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(12),
@@ -1006,7 +1006,7 @@ class _ParkPorterCard extends StatelessWidget {
           Text(_porterJoined(porter.joinedAt),style:const TextStyle(color:AppColors.primary,fontSize:10.5,fontWeight:FontWeight.w700)),
           const Spacer(),
           Row(children:[
-            if(porter.isGroupLeader) Container(padding:const EdgeInsets.symmetric(horizontal:8,vertical:4),decoration:BoxDecoration(color:AppColors.accentSoft,borderRadius:BorderRadius.circular(12)),child:const Text('GROUP LEADER',style:TextStyle(color:AppColors.primary,fontSize:7,fontWeight:FontWeight.w800))),
+            if(porter.isGroupLeader) Container(padding:const EdgeInsets.symmetric(horizontal:8,vertical:4),decoration:BoxDecoration(color: Colors.white,borderRadius:BorderRadius.circular(12)),child:const Text('GROUP LEADER',style:TextStyle(color:AppColors.primary,fontSize:7,fontWeight:FontWeight.w800))),
             const Spacer(),
             const Text('View Profile',style:TextStyle(color:AppColors.accent,fontSize:9.5,fontWeight:FontWeight.w800)),
             const SizedBox(width:4),const Icon(Icons.arrow_forward_rounded,color:AppColors.accent,size:15),
@@ -1041,7 +1041,7 @@ class PorterDetailPage extends StatelessWidget {
         _porterDetailRow('Status',porter.isActive?'Active':'Inactive'),
       ])),
       const SizedBox(height:18),
-      Container(padding:const EdgeInsets.all(18),decoration:BoxDecoration(color:AppColors.accentSoft,borderRadius:BorderRadius.circular(22)),child:const Text('Porters support visitors and local communities around the Greater Virunga landscape. Profile information shown here comes from the porter directory.',style:TextStyle(color:AppColors.textPrimary,fontSize:11.5,height:1.5))),
+      Container(padding:const EdgeInsets.all(18),decoration:BoxDecoration(color: Colors.white,borderRadius:BorderRadius.circular(22)),child:const Text('Porters support visitors and local communities around the Greater Virunga landscape. Profile information shown here comes from the porter directory.',style:TextStyle(color:AppColors.textPrimary,fontSize:11.5,height:1.5))),
       const SizedBox(height:18),
       SizedBox(
         height:54,
@@ -1169,7 +1169,7 @@ class PorterBookingReviewPage extends StatelessWidget {
         if(notes.isNotEmpty)...[_porterDetailDivider(),_porterDetailRow('Notes',notes)],
       ])),
       const SizedBox(height:18),
-      Container(padding:const EdgeInsets.all(16),decoration:BoxDecoration(color:AppColors.accentSoft,borderRadius:BorderRadius.circular(18)),child:const Text('Backend submission is not enabled yet. Your request has not been sent or confirmed.',style:TextStyle(color:AppColors.textPrimary,fontSize:11,height:1.45,fontWeight:FontWeight.w600))),
+      Container(padding:const EdgeInsets.all(16),decoration:BoxDecoration(color: Colors.white,borderRadius:BorderRadius.circular(18)),child:const Text('Backend submission is not enabled yet. Your request has not been sent or confirmed.',style:TextStyle(color:AppColors.textPrimary,fontSize:11,height:1.45,fontWeight:FontWeight.w600))),
       const SizedBox(height:18),
       SizedBox(height:52,child:ElevatedButton(onPressed:null,style:ElevatedButton.styleFrom(disabledBackgroundColor:AppColors.divider,disabledForegroundColor:AppColors.textMuted,shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(26))),child:const Text('SUBMISSION COMING SOON',style:TextStyle(fontSize:11,fontWeight:FontWeight.w800)))),
     ]),
@@ -1184,7 +1184,7 @@ Widget _porterBookingField({required String label,required Widget child})=>Conta
     const SizedBox(height:7),child,
   ]),
 );
-Widget _qtyButton(IconData icon,VoidCallback onTap)=>InkWell(onTap:onTap,borderRadius:BorderRadius.circular(20),child:Container(width:34,height:34,decoration:BoxDecoration(color:AppColors.accentSoft,shape:BoxShape.circle),child:Icon(icon,color:AppColors.primary,size:17)));
+Widget _qtyButton(IconData icon,VoidCallback onTap)=>InkWell(onTap:onTap,borderRadius:BorderRadius.circular(20),child:Container(width:34,height:34,decoration:BoxDecoration(color: Colors.white,shape:BoxShape.circle),child:Icon(icon,color:AppColors.primary,size:17)));
 Widget _bookingTextField(TextEditingController controller,String label,{TextInputType? keyboardType,int maxLines=1,String? Function(String?)? validator})=>TextFormField(
   controller:controller,keyboardType:keyboardType,maxLines:maxLines,validator:validator,
   style:const TextStyle(color:AppColors.textPrimary,fontSize:12),
@@ -1378,7 +1378,7 @@ class _PorterMemberCard extends StatelessWidget {
           if (porter.isGroupLeader)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-              decoration: BoxDecoration(color: AppColors.accentSoft, borderRadius: BorderRadius.circular(8)),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
               child: const Text('GROUP LEADER', style: TextStyle(color: AppColors.primary, fontSize: 6.8, fontWeight: FontWeight.w700, letterSpacing: .3)),
             ),
         ]),
@@ -1517,7 +1517,7 @@ Widget _listCard({required IconData icon, required String title, required String
         Container(
           width: 43,
           height: 43,
-          decoration: BoxDecoration(color: AppColors.accentSoft, borderRadius: BorderRadius.circular(12)),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
           child: Icon(icon, color: AppColors.primary, size: 20),
         ),
         const SizedBox(width: 12),
@@ -1618,7 +1618,7 @@ Widget _craftCategories({VoidCallback? onTap}) {
               Container(
                 width: 62,
                 height: 62,
-                decoration: const BoxDecoration(color: AppColors.accentSoft, shape: BoxShape.circle),
+                decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
                 child: Icon(item.$2, color: AppColors.primary, size: 25),
               ),
               const SizedBox(height: 7),
