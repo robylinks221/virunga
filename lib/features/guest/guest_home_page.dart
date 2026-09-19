@@ -37,8 +37,8 @@ class _GuestHomePageState extends State<GuestHomePage> {
   static const deepGreen = AppColors.primary;
   static const ink = Color(0xFF14231D);
   static const muted = Color(0xFF6F7A75);
-  static const background = Color(0xFFFAFBF8);
-  static const softGreen = Color(0xFFEAF3EE);
+  static const background = AppColors.background;
+  static const softGreen = Colors.white;
   static const border = Color(0xFFE5EAE7);
   static const gold = AppColors.accent;
 
