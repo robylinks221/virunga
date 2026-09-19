@@ -541,7 +541,7 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
                   Container(width: 9, height: 9, decoration: BoxDecoration(color: available ? AppColors.success : AppColors.danger, shape: BoxShape.circle)),
                   const SizedBox(width: 7),
-                  Text(available ? 'In Stock  ·  undefined available' : 'Out of Stock', style: const TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.w700)),
+                  Text(available ? 'In Stock  ·  ${p.quantityAvailable} available' : 'Out of Stock', style: const TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.w700)),
                 ]),
               ),
             ),
@@ -571,7 +571,7 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.mintSoft,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: AppColors.cardBorder),
               ),
@@ -595,10 +595,11 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
                     ]),
                 ])),
                 OutlinedButton(
-                  onPressed: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Seller profile coming soon.'))),
+                  onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => CraftSellerStorePage(seller: p.seller, community: p.community, country: p.country))),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                    side: const BorderSide(color: AppColors.primary),
+                    foregroundColor: Colors.white,
+                    backgroundColor: AppColors.accent,
+                    side: const BorderSide(color: AppColors.accent),
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
                   ),
@@ -625,7 +626,7 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
                 Expanded(child: SizedBox(height: 52, child: FilledButton.icon(
                   onPressed: () {
                     _MarketplaceCart.add(p, quantity);
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('undefined added to cart')));
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${p.name} added to cart')));
                     setState(() {});
                   },
                   style: FilledButton.styleFrom(
@@ -648,13 +649,13 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
             Row(children: [
               Expanded(child: SizedBox(height: 48, child: OutlinedButton.icon(
                 onPressed: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Seller messaging coming soon.'))),
-                style: OutlinedButton.styleFrom(foregroundColor: AppColors.primary, side: const BorderSide(color: AppColors.cardBorder), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                style: OutlinedButton.styleFrom(foregroundColor: AppColors.accent, backgroundColor: AppColors.accentSoft, side: const BorderSide(color: AppColors.accent), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                 icon: const Icon(Icons.chat_bubble_outline_rounded, size: 19), label: const Text('Message Seller', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
               ))),
               const SizedBox(width: 10),
               Expanded(child: SizedBox(height: 48, child: OutlinedButton.icon(
                 onPressed: () => setState(() => _SavedCrafts.toggle(p)),
-                style: OutlinedButton.styleFrom(foregroundColor: AppColors.primary, side: const BorderSide(color: AppColors.cardBorder), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                style: OutlinedButton.styleFrom(foregroundColor: AppColors.accent, backgroundColor: AppColors.accentSoft, side: const BorderSide(color: AppColors.accent), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                 icon: Icon(saved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded, size: 19), label: Text(saved ? 'Saved' : 'Save for Later', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
               ))),
             ]),
@@ -702,6 +703,64 @@ class _ProductValue extends StatelessWidget {
     const SizedBox(height: 7),
     Text(text, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.primary, fontSize: 8.5, height: 1.25, fontWeight: FontWeight.w600)),
   ]);
+}
+
+
+class CraftSellerStorePage extends StatelessWidget {
+  const CraftSellerStorePage({super.key, required this.seller, required this.community, required this.country});
+  final String seller, community, country;
+
+  @override
+  Widget build(BuildContext context) {
+    final key = seller.trim().toLowerCase();
+    final products = _MarketplaceCatalog.products.where((x) => x.seller.trim().toLowerCase() == key).toList();
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(backgroundColor: AppColors.primary, foregroundColor: Colors.white, title: const Text('Craft Seller', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700))),
+      body: CustomScrollView(slivers: [
+        SliverToBoxAdapter(child: Container(
+          color: AppColors.primary,
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+          child: Column(children: [
+            Container(width: 86, height: 86, decoration: BoxDecoration(color: AppColors.accentSoft, shape: BoxShape.circle, border: Border.all(color: AppColors.accent, width: 2)), child: const Icon(Icons.person_rounded, color: AppColors.primary, size: 42)),
+            const SizedBox(height: 13),
+            Text(seller.isEmpty ? 'Local Craft Seller' : seller, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontSize: 23, fontWeight: FontWeight.w800)),
+            if (community.trim().isNotEmpty || country.trim().isNotEmpty) ...[
+              const SizedBox(height: 7),
+              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                const Icon(Icons.location_on_rounded, color: AppColors.accent, size: 16), const SizedBox(width: 4),
+                Flexible(child: Text([community, country].where((x) => x.trim().isNotEmpty).join(', '), textAlign: TextAlign.center, style: TextStyle(color: Colors.white.withOpacity(.76), fontSize: 11.5))),
+              ]),
+            ],
+            const SizedBox(height: 15),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(color: AppColors.accent, borderRadius: BorderRadius.circular(22)),
+              child: Text(products.length.toString() + (products.length == 1 ? ' Craft' : ' Crafts'), style: const TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.w800)),
+            ),
+          ]),
+        )),
+        const SliverToBoxAdapter(child: Padding(
+          padding: EdgeInsets.fromLTRB(20, 22, 20, 14),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('CRAFT COLLECTION', style: TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 1.1)),
+            SizedBox(height: 5),
+            Text('Crafts by this seller', style: TextStyle(color: AppColors.primary, fontSize: 21, fontWeight: FontWeight.w800)),
+          ]),
+        )),
+        if (products.isEmpty)
+          const SliverToBoxAdapter(child: Padding(padding: EdgeInsets.fromLTRB(20, 50, 20, 30), child: Center(child: Text('No other crafts are available from this seller yet.', textAlign: TextAlign.center, style: TextStyle(color: AppColors.textSecondary)))))
+        else
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 34),
+            sliver: SliverGrid(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: .61),
+              delegate: SliverChildBuilderDelegate((_, i) => _ProductCard(product: products[i]), childCount: products.length),
+            ),
+          ),
+      ]),
+    );
+  }
 }
 
 class SavedCraftsPage extends StatefulWidget {
