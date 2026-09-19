@@ -1042,9 +1042,156 @@ class PorterDetailPage extends StatelessWidget {
       ])),
       const SizedBox(height:18),
       Container(padding:const EdgeInsets.all(18),decoration:BoxDecoration(color:AppColors.accentSoft,borderRadius:BorderRadius.circular(22)),child:const Text('Porters support visitors and local communities around the Greater Virunga landscape. Profile information shown here comes from the porter directory.',style:TextStyle(color:AppColors.textPrimary,fontSize:11.5,height:1.5))),
+      const SizedBox(height:18),
+      SizedBox(
+        height:54,
+        child:ElevatedButton(
+          onPressed:porter.isActive?()=>Navigator.of(context).push(MaterialPageRoute(builder:(_)=>PorterBookingPage(porter:porter))):null,
+          style:ElevatedButton.styleFrom(backgroundColor:AppColors.accent,foregroundColor:Colors.white,disabledBackgroundColor:AppColors.divider,shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(28)),elevation:0),
+          child:Text(porter.isActive?'BOOK THIS PORTER':'PORTER UNAVAILABLE',style:const TextStyle(fontSize:12,fontWeight:FontWeight.w800,letterSpacing:.4)),
+        ),
+      ),
     ]));
   }
 }
+class PorterBookingPage extends StatefulWidget {
+  const PorterBookingPage({super.key,required this.porter});
+  final _Porter porter;
+  @override
+  State<PorterBookingPage> createState()=>_PorterBookingPageState();
+}
+class _PorterBookingPageState extends State<PorterBookingPage> {
+  final _formKey=GlobalKey<FormState>();
+  final _name=TextEditingController();
+  final _phone=TextEditingController();
+  final _email=TextEditingController();
+  final _notes=TextEditingController();
+  DateTime? _date;
+  int _visitors=1;
+
+  @override
+  void dispose(){_name.dispose();_phone.dispose();_email.dispose();_notes.dispose();super.dispose();}
+
+  Future<void> _pickDate() async {
+    final now=DateTime.now();
+    final picked=await showDatePicker(context:context,initialDate:now.add(const Duration(days:1)),firstDate:now,lastDate:DateTime(now.year+2),helpText:'Select visit date');
+    if(picked!=null)setState(()=>_date=picked);
+  }
+
+  void _continueRequest(){
+    if(!_formKey.currentState!.validate())return;
+    if(_date==null){ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text('Please select your visit date.')));return;}
+    Navigator.of(context).push(MaterialPageRoute(builder:(_)=>PorterBookingReviewPage(
+      porter:widget.porter,
+      visitorName:_name.text.trim(),
+      phone:_phone.text.trim(),
+      email:_email.text.trim(),
+      notes:_notes.text.trim(),
+      visitDate:_date!,
+      visitors:_visitors,
+    )));
+  }
+
+  @override
+  Widget build(BuildContext context)=>Scaffold(
+    backgroundColor:AppColors.background,
+    appBar:AppBar(backgroundColor:AppColors.primary,foregroundColor:Colors.white,surfaceTintColor:Colors.transparent,elevation:0,title:const Text('Book a Porter',style:TextStyle(fontSize:17,fontWeight:FontWeight.w800))),
+    body:Form(key:_formKey,child:ListView(physics:const BouncingScrollPhysics(),padding:const EdgeInsets.fromLTRB(20,22,20,38),children:[
+      Container(padding:const EdgeInsets.all(18),decoration:BoxDecoration(color:AppColors.primary,borderRadius:BorderRadius.circular(24)),child:Row(children:[
+        Container(width:68,height:68,padding:const EdgeInsets.all(3),decoration:const BoxDecoration(color:Colors.white,shape:BoxShape.circle),child:ClipOval(child:Image.asset(_porterAvatar,fit:BoxFit.cover))),
+        const SizedBox(width:13),
+        Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
+          const Text('SELECTED PORTER',style:TextStyle(color:AppColors.accent,fontSize:8,fontWeight:FontWeight.w800,letterSpacing:.9)),
+          const SizedBox(height:5),Text(widget.porter.name,style:const TextStyle(color:Colors.white,fontSize:18,fontWeight:FontWeight.w800)),
+          const SizedBox(height:4),Text(widget.porter.park,style:TextStyle(color:Colors.white.withOpacity(.72),fontSize:10.5)),
+        ])),
+      ])),
+      const SizedBox(height:24),
+      const Text('YOUR VISIT',style:TextStyle(color:AppColors.accent,fontSize:9,fontWeight:FontWeight.w800,letterSpacing:1)),
+      const SizedBox(height:6),
+      const Text('Plan your porter request',style:TextStyle(color:AppColors.primary,fontSize:22,fontWeight:FontWeight.w800)),
+      const SizedBox(height:15),
+      _porterBookingField(label:'National Park',child:Text(widget.porter.park,style:const TextStyle(color:AppColors.textPrimary,fontSize:12,fontWeight:FontWeight.w600))),
+      const SizedBox(height:12),
+      InkWell(onTap:_pickDate,borderRadius:BorderRadius.circular(18),child:_porterBookingField(label:'Visit Date',child:Row(children:[
+        Expanded(child:Text(_date==null?'Select your date':_bookingDate(_date!),style:TextStyle(color:_date==null?AppColors.textSecondary:AppColors.textPrimary,fontSize:12,fontWeight:FontWeight.w600))),
+        const Icon(Icons.calendar_month_outlined,color:AppColors.accent,size:20),
+      ]))),
+      const SizedBox(height:12),
+      _porterBookingField(label:'Number of Visitors',child:Row(children:[
+        _qtyButton(Icons.remove,()=>setState(()=>_visitors=_visitors>1?_visitors-1:1)),
+        Expanded(child:Text('$_visitors',textAlign:TextAlign.center,style:const TextStyle(color:AppColors.primary,fontSize:16,fontWeight:FontWeight.w800))),
+        _qtyButton(Icons.add,()=>setState(()=>_visitors++)),
+      ])),
+      const SizedBox(height:24),
+      const Text('CONTACT DETAILS',style:TextStyle(color:AppColors.accent,fontSize:9,fontWeight:FontWeight.w800,letterSpacing:1)),
+      const SizedBox(height:12),
+      _bookingTextField(_name,'Full Name',validator:(v)=>v==null||v.trim().isEmpty?'Enter your full name':null),
+      const SizedBox(height:11),
+      _bookingTextField(_phone,'Phone Number',keyboardType:TextInputType.phone,validator:(v)=>v==null||v.trim().isEmpty?'Enter your phone number':null),
+      const SizedBox(height:11),
+      _bookingTextField(_email,'Email Address',keyboardType:TextInputType.emailAddress),
+      const SizedBox(height:11),
+      _bookingTextField(_notes,'Notes (optional)',maxLines:4),
+      const SizedBox(height:22),
+      SizedBox(height:54,child:ElevatedButton(onPressed:_continueRequest,style:ElevatedButton.styleFrom(backgroundColor:AppColors.accent,foregroundColor:Colors.white,elevation:0,shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(28))),child:const Text('CONTINUE',style:TextStyle(fontSize:12,fontWeight:FontWeight.w800,letterSpacing:.5)))),
+      const SizedBox(height:10),
+      const Text('This prepares your porter request for review. Online submission will be connected when the porter-booking API is available.',textAlign:TextAlign.center,style:TextStyle(color:AppColors.textMuted,fontSize:9.5,height:1.4)),
+    ])),
+  );
+}
+
+class PorterBookingReviewPage extends StatelessWidget {
+  const PorterBookingReviewPage({super.key,required this.porter,required this.visitorName,required this.phone,required this.email,required this.notes,required this.visitDate,required this.visitors});
+  final _Porter porter;
+  final String visitorName,phone,email,notes;
+  final DateTime visitDate;
+  final int visitors;
+  @override
+  Widget build(BuildContext context)=>Scaffold(
+    backgroundColor:AppColors.background,
+    appBar:AppBar(backgroundColor:AppColors.primary,foregroundColor:Colors.white,surfaceTintColor:Colors.transparent,title:const Text('Review Request',style:TextStyle(fontSize:17,fontWeight:FontWeight.w800))),
+    body:ListView(padding:const EdgeInsets.fromLTRB(20,22,20,38),children:[
+      Container(padding:const EdgeInsets.all(20),decoration:BoxDecoration(color:AppColors.primary,borderRadius:BorderRadius.circular(24)),child:const Column(children:[
+        Icon(Icons.check_circle_outline_rounded,color:AppColors.accent,size:38),SizedBox(height:10),
+        Text('Porter request ready',style:TextStyle(color:Colors.white,fontSize:21,fontWeight:FontWeight.w800)),
+        SizedBox(height:6),Text('Review the details below before submission.',textAlign:TextAlign.center,style:TextStyle(color:Colors.white70,fontSize:10.5)),
+      ])),
+      const SizedBox(height:18),
+      Container(padding:const EdgeInsets.all(18),decoration:BoxDecoration(color:Colors.white,borderRadius:BorderRadius.circular(22),border:Border.all(color:AppColors.cardBorder)),child:Column(children:[
+        _porterDetailRow('Porter',porter.name),_porterDetailDivider(),
+        _porterDetailRow('National Park',porter.park),_porterDetailDivider(),
+        _porterDetailRow('Visit Date',_bookingDate(visitDate)),_porterDetailDivider(),
+        _porterDetailRow('Visitors',visitors.toString()),_porterDetailDivider(),
+        _porterDetailRow('Name',visitorName),_porterDetailDivider(),
+        _porterDetailRow('Phone',phone),
+        if(email.isNotEmpty)...[_porterDetailDivider(),_porterDetailRow('Email',email)],
+        if(notes.isNotEmpty)...[_porterDetailDivider(),_porterDetailRow('Notes',notes)],
+      ])),
+      const SizedBox(height:18),
+      Container(padding:const EdgeInsets.all(16),decoration:BoxDecoration(color:AppColors.accentSoft,borderRadius:BorderRadius.circular(18)),child:const Text('Backend submission is not enabled yet. Your request has not been sent or confirmed.',style:TextStyle(color:AppColors.textPrimary,fontSize:11,height:1.45,fontWeight:FontWeight.w600))),
+      const SizedBox(height:18),
+      SizedBox(height:52,child:ElevatedButton(onPressed:null,style:ElevatedButton.styleFrom(disabledBackgroundColor:AppColors.divider,disabledForegroundColor:AppColors.textMuted,shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(26))),child:const Text('SUBMISSION COMING SOON',style:TextStyle(fontSize:11,fontWeight:FontWeight.w800)))),
+    ]),
+  );
+}
+
+Widget _porterBookingField({required String label,required Widget child})=>Container(
+  padding:const EdgeInsets.fromLTRB(16,12,16,13),
+  decoration:BoxDecoration(color:Colors.white,borderRadius:BorderRadius.circular(18),border:Border.all(color:AppColors.cardBorder)),
+  child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
+    Text(label.toUpperCase(),style:const TextStyle(color:AppColors.textMuted,fontSize:7.5,fontWeight:FontWeight.w800,letterSpacing:.7)),
+    const SizedBox(height:7),child,
+  ]),
+);
+Widget _qtyButton(IconData icon,VoidCallback onTap)=>InkWell(onTap:onTap,borderRadius:BorderRadius.circular(20),child:Container(width:34,height:34,decoration:BoxDecoration(color:AppColors.accentSoft,shape:BoxShape.circle),child:Icon(icon,color:AppColors.primary,size:17)));
+Widget _bookingTextField(TextEditingController controller,String label,{TextInputType? keyboardType,int maxLines=1,String? Function(String?)? validator})=>TextFormField(
+  controller:controller,keyboardType:keyboardType,maxLines:maxLines,validator:validator,
+  style:const TextStyle(color:AppColors.textPrimary,fontSize:12),
+  decoration:InputDecoration(labelText:label,labelStyle:const TextStyle(color:AppColors.textSecondary,fontSize:11),filled:true,fillColor:Colors.white,contentPadding:const EdgeInsets.symmetric(horizontal:16,vertical:15),enabledBorder:OutlineInputBorder(borderRadius:BorderRadius.circular(17),borderSide:const BorderSide(color:AppColors.cardBorder)),focusedBorder:OutlineInputBorder(borderRadius:BorderRadius.circular(17),borderSide:const BorderSide(color:AppColors.primary,width:1.3)),errorBorder:OutlineInputBorder(borderRadius:BorderRadius.circular(17),borderSide:const BorderSide(color:AppColors.danger))),
+);
+String _bookingDate(DateTime date){const m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return date.day.toString()+' '+m[date.month-1]+' '+date.year.toString();}
+
 Widget _porterDetailRow(String label,String value)=>Padding(padding:const EdgeInsets.symmetric(vertical:3),child:Row(crossAxisAlignment:CrossAxisAlignment.start,children:[
   SizedBox(width:92,child:Text(label.toUpperCase(),style:const TextStyle(color:AppColors.textMuted,fontSize:7.5,fontWeight:FontWeight.w800,letterSpacing:.6))),
   Expanded(child:Text(value.trim().isEmpty?'Not provided':value,style:const TextStyle(color:AppColors.textPrimary,fontSize:11,height:1.35,fontWeight:FontWeight.w600))),
