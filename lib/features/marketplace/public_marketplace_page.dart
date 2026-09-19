@@ -621,7 +621,7 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
                                       ),
                                       if (available)
                                         Text(
-                                          'undefined available',
+                                          '${p.quantityAvailable} available',
                                           style: TextStyle(
                                             color:
                                                 Colors.white.withOpacity(.88),
@@ -633,6 +633,22 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
                                 ],
                               ),
                             ),
+                          ),
+                          const SizedBox(height: 28),
+                          _CraftProductSection(
+                            title: 'Other Products from this Seller',
+                            products: _MarketplaceCatalog.products
+                                .where((x) => x.id != p.id && x.seller.trim().toLowerCase() == p.seller.trim().toLowerCase())
+                                .take(6)
+                                .toList(),
+                          ),
+                          const SizedBox(height: 24),
+                          _CraftProductSection(
+                            title: 'Recently Viewed',
+                            products: _RecentlyViewed.items
+                                .where((x) => x.id != p.id)
+                                .take(6)
+                                .toList(),
                           ),
                         ],
                       ),
@@ -929,7 +945,7 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
                                                 .showSnackBar(
                                               SnackBar(
                                                 content: Text(
-                                                  'undefined added to cart',
+                                                  '${p.name} added to cart',
                                                 ),
                                               ),
                                             );
@@ -981,8 +997,8 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
                                       );
                                     },
                                     style: FilledButton.styleFrom(
-                                      backgroundColor: AppColors.mintSoft,
-                                      foregroundColor: AppColors.primary,
+                                      backgroundColor: AppColors.primary,
+                                      foregroundColor: Colors.white,
                                       elevation: 0,
                                       shape: const StadiumBorder(),
                                     ),
@@ -1009,8 +1025,8 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
                                       () => _SavedCrafts.toggle(p),
                                     ),
                                     style: FilledButton.styleFrom(
-                                      backgroundColor: AppColors.mintSoft,
-                                      foregroundColor: AppColors.primary,
+                                      backgroundColor: AppColors.primary,
+                                      foregroundColor: Colors.white,
                                       elevation: 0,
                                       shape: const StadiumBorder(),
                                     ),
@@ -1082,6 +1098,48 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
           size: 19,
         ),
       ),
+    );
+  }
+}
+
+class _CraftProductSection extends StatelessWidget {
+  const _CraftProductSection({
+    required this.title,
+    required this.products,
+  });
+
+  final String title;
+  final List<CraftProduct> products;
+
+  @override
+  Widget build(BuildContext context) {
+    if (products.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            color: AppColors.primary,
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(height: 11),
+        SizedBox(
+          height: 225,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: products.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 11),
+            itemBuilder: (_, i) => SizedBox(
+              width: 154,
+              child: _ProductCard(product: products[i]),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
