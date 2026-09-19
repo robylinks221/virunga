@@ -799,11 +799,13 @@ class PortersPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const destinations = [
+    const parks = [
       _PorterDestination('Bwindi Impenetrable National Park', 'Uganda', 'Mountain forest', 'assets/images/onboarding_wildlife.jpg'),
       _PorterDestination('Mgahinga Gorilla National Park', 'Uganda', 'Volcanoes and forest', 'assets/images/onboarding_landscape.jpg'),
-      _PorterDestination('Volcanoes National Park', 'Rwanda', 'Mountain landscape', 'assets/images/onboarding_community.jpg'),
+      _PorterDestination('Queen Elizabeth National Park', 'Uganda', 'Savannah and forest', 'assets/images/onboarding_community.jpg'),
+      _PorterDestination('Volcanoes National Park', 'Rwanda', 'Volcanic mountain landscape', 'assets/images/onboarding_landscape.jpg'),
       _PorterDestination('Virunga National Park', 'DR Congo', 'Forest and mountain terrain', 'assets/images/onboarding_wildlife.jpg'),
+      _PorterDestination('Kahuzi-Biega National Park', 'DR Congo', 'Mountain and lowland forest', 'assets/images/onboarding_community.jpg'),
     ];
 
     return Scaffold(
@@ -813,7 +815,7 @@ class PortersPage extends StatelessWidget {
         foregroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        title: const Text('Porters', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+        title: const Text('Find Porters', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
       ),
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
@@ -821,87 +823,40 @@ class PortersPage extends StatelessWidget {
           SliverToBoxAdapter(
             child: Container(
               color: AppColors.primary,
-              padding: const EdgeInsets.fromLTRB(20, 4, 20, 25),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Text('FIND A PORTER', style: TextStyle(color: AppColors.accent, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.3)),
-                const SizedBox(height: 7),
-                const Text('Choose a national park.', style: TextStyle(color: Colors.white, fontSize: 28, height: 1.08, fontWeight: FontWeight.w700)),
-                const SizedBox(height: 9),
-                Text('Select a national park to discover the porters connected to its surrounding communities.', style: TextStyle(color: Colors.white.withOpacity(.72), fontSize: 12, height: 1.5)),
-              ]),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 22, 20, 0),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(22),
-                child: SizedBox(
-                  height: 245,
-                  child: Stack(fit: StackFit.expand, children: [
-                    Image.asset('assets/images/onboarding_community.jpg', fit: BoxFit.cover),
-                    const DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0x08000000), Color(0xE6000000)]))),
-                    const Padding(
-                      padding: EdgeInsets.all(18),
-                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Spacer(),
-                        Text('LOCAL KNOWLEDGE', style: TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1.1)),
-                        SizedBox(height: 6),
-                        Text('Supporting journeys through demanding landscapes.', style: TextStyle(color: Colors.white, fontSize: 20, height: 1.15, fontWeight: FontWeight.w700)),
-                      ]),
-                    ),
-                  ]),
-                ),
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('PORTER DIRECTORY', style: TextStyle(color: AppColors.accent, fontSize: 9.5, fontWeight: FontWeight.w800, letterSpacing: 1.2)),
+                  const SizedBox(height: 7),
+                  const Text('Find a porter by\nnational park.', style: TextStyle(color: Colors.white, fontSize: 29, height: 1.08, fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 10),
+                  Text('Choose a national park below to view the porters registered around that destination.', style: TextStyle(color: Colors.white.withOpacity(.72), fontSize: 12, height: 1.5)),
+                ],
               ),
             ),
           ),
           const SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.fromLTRB(20, 27, 20, 13),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('WHY PORTERS MATTER', style: TextStyle(color: AppColors.accent, fontSize: 9.5, fontWeight: FontWeight.w700, letterSpacing: 1.2)),
-                SizedBox(height: 5),
-                Text('Local support on the trail', style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
-                SizedBox(height: 7),
-                Text('Porters support visitors through challenging terrain while bringing practical knowledge of the landscapes and communities around protected areas.', style: TextStyle(color: AppColors.textSecondary, fontSize: 11.5, height: 1.55)),
-              ]),
-            ),
-          ),
-          const SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(20, 2, 20, 25),
-              child: Row(children: [
-                Expanded(child: _PorterRole(icon: Icons.backpack_outlined, title: 'Trail Support')),
-                SizedBox(width: 9),
-                Expanded(child: _PorterRole(icon: Icons.terrain_outlined, title: 'Local Knowledge')),
-                SizedBox(width: 9),
-                Expanded(child: _PorterRole(icon: Icons.groups_2_outlined, title: 'Community')),
-              ]),
-            ),
-          ),
-          const SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(20, 3, 20, 13),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('NATIONAL PARKS', style: TextStyle(color: AppColors.accent, fontSize: 9.5, fontWeight: FontWeight.w700, letterSpacing: 1.2)),
-                SizedBox(height: 5),
-                Text('Find porters by national park', style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
-                SizedBox(height: 6),
-                Text('Tap a park to see its registered porters.', style: TextStyle(color: AppColors.textSecondary, fontSize: 11.5, height: 1.45)),
-              ]),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: 218,
-              child: ListView.separated(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 25),
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                itemCount: destinations.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 11),
-                itemBuilder: (_, index) => _PorterDestinationCard(item: destinations[index]),
+              padding: EdgeInsets.fromLTRB(20, 24, 20, 15),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('CHOOSE A NATIONAL PARK', style: TextStyle(color: AppColors.accent, fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 1.1)),
+                  SizedBox(height: 6),
+                  Text('Where are you looking?', style: TextStyle(color: AppColors.primary, fontSize: 23, fontWeight: FontWeight.w800)),
+                  SizedBox(height: 6),
+                  Text('Tap a park to see its porter directory.', style: TextStyle(color: AppColors.textSecondary, fontSize: 11.5)),
+                ],
               ),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 34),
+            sliver: SliverList.separated(
+              itemCount: parks.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 13),
+              itemBuilder: (context, index) => _PorterDestinationCard(item: parks[index]),
             ),
           ),
         ],
@@ -910,58 +865,78 @@ class PortersPage extends StatelessWidget {
   }
 }
 
-class _PorterRole extends StatelessWidget {
-  const _PorterRole({required this.icon, required this.title});
-  final IconData icon;
-  final String title;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    height: 92,
-    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 13),
-    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.cardBorder)),
-    child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-      Icon(icon, color: AppColors.primary, size: 21),
-      const SizedBox(height: 8),
-      Text(title, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textPrimary, fontSize: 9.5, fontWeight: FontWeight.w700)),
-    ]),
-  );
-}
-
 class _PorterDestinationCard extends StatelessWidget {
   const _PorterDestinationCard({required this.item});
   final _PorterDestination item;
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-    width: 165,
-    child: InkWell(
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => DestinationDetailPage(
-            name: item.name,
-            country: item.country,
-          ),
-        ),
+  Widget build(BuildContext context) => InkWell(
+    onTap: () => Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => DestinationDetailPage(name: item.name, country: item.country),
       ),
-      borderRadius: BorderRadius.circular(18),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(18),
-        child: Stack(fit: StackFit.expand, children: [
-        Image.asset(item.image, fit: BoxFit.cover),
-        const DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0x00000000), Color(0xE6000000)]))),
-        Padding(
-          padding: const EdgeInsets.all(13),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Spacer(),
-            Text(item.country.toUpperCase(), style: const TextStyle(color: AppColors.accent, fontSize: 8, fontWeight: FontWeight.w700, letterSpacing: .7)),
-            const SizedBox(height: 4),
-            Text(item.name, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
-            const SizedBox(height: 3),
-            Text(item.landscape, style: const TextStyle(color: Colors.white70, fontSize: 9.5)),
-          ]),
-        ),
-        ]),
+    ),
+    borderRadius: BorderRadius.circular(22),
+    child: Container(
+      height: 174,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: AppColors.primary,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(.08),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(item.image, fit: BoxFit.cover),
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [Color(0xE6032329), Color(0xA0032329), Color(0x18032329)],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 18, 16, 17),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                        decoration: BoxDecoration(color: AppColors.accent, borderRadius: BorderRadius.circular(14)),
+                        child: Text(item.country.toUpperCase(), style: const TextStyle(color: Colors.white, fontSize: 7.5, fontWeight: FontWeight.w800, letterSpacing: .7)),
+                      ),
+                      const Spacer(),
+                      Text(item.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: 19, height: 1.12, fontWeight: FontWeight.w800)),
+                      const SizedBox(height: 5),
+                      Text(item.landscape, style: TextStyle(color: Colors.white.withOpacity(.76), fontSize: 10.5)),
+                      const SizedBox(height: 9),
+                      const Text('VIEW PORTERS', style: TextStyle(color: AppColors.accent, fontSize: 8.5, fontWeight: FontWeight.w800, letterSpacing: .8)),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Container(
+                  width: 43,
+                  height: 43,
+                  decoration: BoxDecoration(color: Colors.white.withOpacity(.94), shape: BoxShape.circle),
+                  child: const Icon(Icons.arrow_forward_rounded, color: AppColors.primary, size: 20),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     ),
   );
