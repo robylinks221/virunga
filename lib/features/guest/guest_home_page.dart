@@ -37,7 +37,7 @@ class _GuestHomePageState extends State<GuestHomePage> {
   static const deepGreen = AppColors.primary;
   static const ink = Color(0xFF14231D);
   static const muted = Color(0xFF6F7A75);
-  static const background = AppColors.background;
+  static const background = Color(0xFFF5F1E8);
   static const softGreen = Colors.white;
   static const border = Color(0xFFE5EAE7);
   static const gold = AppColors.accent;
@@ -866,7 +866,7 @@ class _CountryState extends State<_Country> {
                   alignment: Alignment.center,
                   child: const Icon(
                     Icons.north_east_rounded,
-                    color: Color(0xFF0E3A35),
+                    color: Colors.white,
                     size: 24,
                   ),
                 ),
@@ -1249,7 +1249,7 @@ class _HomeCraftCarouselState extends State<_HomeCraftCarousel> {
                 ),
                 child: Container(
                   width: 178,
-                  decoration: BoxDecoration(border: Border.all(color: AppColors.cardBorder), borderRadius: BorderRadius.circular(19)),
+                  decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.cardBorder), borderRadius: BorderRadius.circular(19)),
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     SizedBox(
                       height: 139,
@@ -1320,8 +1320,9 @@ class _DestinationState extends State<_Destination> {
       width: 184,
       margin: const EdgeInsets.only(right: 13),
       decoration: BoxDecoration(
-        color: _GuestHomePageState.deepGreen,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: _GuestHomePageState.border),
         boxShadow: const [
           BoxShadow(
             color: Color(0x16000000),
@@ -1371,7 +1372,7 @@ class _DestinationState extends State<_Destination> {
               ),
               Container(
                 width: double.infinity,
-                color: _GuestHomePageState.deepGreen,
+                color: Colors.white,
                 padding: const EdgeInsets.fromLTRB(13, 10, 13, 11),
                 child: Column(
                   children: [
@@ -1383,7 +1384,7 @@ class _DestinationState extends State<_Destination> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: _GuestHomePageState.ink,
                               fontSize: 12,
                               height: 1.1,
                               fontWeight: FontWeight.w800,
@@ -1393,14 +1394,14 @@ class _DestinationState extends State<_Destination> {
                         const SizedBox(width: 7),
                         const Icon(
                           Icons.star_rounded,
-                          color: Color(0xFFD8C2A3),
+                          color: _GuestHomePageState.gold,
                           size: 15,
                         ),
                         const SizedBox(width: 2),
                         Text(
                           _rating,
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: _GuestHomePageState.ink,
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
                           ),
@@ -1410,13 +1411,13 @@ class _DestinationState extends State<_Destination> {
                     Container(
                       height: 1,
                       margin: const EdgeInsets.symmetric(vertical: 9),
-                      color: const Color(0xFFD8C2A3).withOpacity(0.24),
+                      color: _GuestHomePageState.border,
                     ),
                     Row(
                       children: [
                         const Icon(
                           Icons.location_on_outlined,
-                          color: Color(0xFFD8C2A3),
+                          color: _GuestHomePageState.gold,
                           size: 14,
                         ),
                         const SizedBox(width: 3),
@@ -1426,7 +1427,7 @@ class _DestinationState extends State<_Destination> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: _GuestHomePageState.muted,
                               fontSize: 10,
                               fontWeight: FontWeight.w500,
                             ),
@@ -1439,7 +1440,7 @@ class _DestinationState extends State<_Destination> {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFD8C2A3),
+                            color: _GuestHomePageState.gold,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: const Row(
@@ -1448,7 +1449,7 @@ class _DestinationState extends State<_Destination> {
                               Text(
                                 'Explore',
                                 style: TextStyle(
-                                  color: Color(0xFF0E3A35),
+                                  color: Colors.white,
                                   fontSize: 9,
                                   fontWeight: FontWeight.w800,
                                 ),
@@ -1456,7 +1457,7 @@ class _DestinationState extends State<_Destination> {
                               SizedBox(width: 2),
                               Icon(
                                 Icons.chevron_right_rounded,
-                                color: Color(0xFF0E3A35),
+                                color: Colors.white,
                                 size: 14,
                               ),
                             ],
