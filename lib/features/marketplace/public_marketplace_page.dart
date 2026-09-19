@@ -634,26 +634,6 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 28),
-                          _CraftProductSection(
-                            title: 'Other Products from the Seller',
-                            subtitle: 'More crafts created by the same artisan',
-                            icon: Icons.storefront_outlined,
-                            products: _MarketplaceCatalog.products
-                                .where((x) => x.id != p.id && x.seller.trim().toLowerCase() == p.seller.trim().toLowerCase())
-                                .take(6)
-                                .toList(),
-                          ),
-                          const SizedBox(height: 24),
-                          _CraftProductSection(
-                            title: 'Recently Viewed Products',
-                            subtitle: 'Continue exploring crafts you opened recently',
-                            icon: Icons.history_rounded,
-                            products: _RecentlyViewed.items
-                                .where((x) => x.id != p.id)
-                                .take(6)
-                                .toList(),
-                          ),
                         ],
                       ),
                     ),
@@ -1055,6 +1035,37 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
                         ],
                       ),
                     ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(18, 4, 18, 0),
+                      child: _CraftProductSection(
+                        title: 'Other Products from the Seller',
+                        subtitle: 'More crafts created by the same artisan',
+                        icon: Icons.storefront_outlined,
+                        products: _MarketplaceCatalog.products
+                            .where(
+                              (x) =>
+                                  x.id != p.id &&
+                                  x.seller.trim().toLowerCase() ==
+                                      p.seller.trim().toLowerCase(),
+                            )
+                            .take(6)
+                            .toList(),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(18, 0, 18, 0),
+                      child: _CraftProductSection(
+                        title: 'Recently Viewed Products',
+                        subtitle: 'Continue exploring crafts you opened recently',
+                        icon: Icons.history_rounded,
+                        products: _RecentlyViewed.items
+                            .where((x) => x.id != p.id)
+                            .take(6)
+                            .toList(),
+                      ),
+                    ),
+                    const SizedBox(height: 32),
                   ],
                 ),
               ),
@@ -1195,7 +1206,7 @@ class _CraftProductSection extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           SizedBox(
-            height: 225,
+            height: 248,
             child: ListView.separated(
               clipBehavior: Clip.none,
               scrollDirection: Axis.horizontal,
