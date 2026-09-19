@@ -800,10 +800,10 @@ class PortersPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const destinations = [
-      _PorterDestination('Bwindi', 'Uganda', 'Mountain forest', 'assets/images/onboarding_wildlife.jpg'),
-      _PorterDestination('Mgahinga', 'Uganda', 'Volcanoes and forest', 'assets/images/onboarding_landscape.jpg'),
-      _PorterDestination('Volcanoes', 'Rwanda', 'Mountain landscape', 'assets/images/onboarding_community.jpg'),
-      _PorterDestination('Virunga', 'DR Congo', 'Forest and mountain terrain', 'assets/images/onboarding_wildlife.jpg'),
+      _PorterDestination('Bwindi Impenetrable National Park', 'Uganda', 'Mountain forest', 'assets/images/onboarding_wildlife.jpg'),
+      _PorterDestination('Mgahinga Gorilla National Park', 'Uganda', 'Volcanoes and forest', 'assets/images/onboarding_landscape.jpg'),
+      _PorterDestination('Volcanoes National Park', 'Rwanda', 'Mountain landscape', 'assets/images/onboarding_community.jpg'),
+      _PorterDestination('Virunga National Park', 'DR Congo', 'Forest and mountain terrain', 'assets/images/onboarding_wildlife.jpg'),
     ];
 
     return Scaffold(
@@ -933,9 +933,19 @@ class _PorterDestinationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SizedBox(
     width: 165,
-    child: ClipRRect(
+    child: InkWell(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => DestinationDetailPage(
+            name: item.name,
+            country: item.country,
+          ),
+        ),
+      ),
       borderRadius: BorderRadius.circular(18),
-      child: Stack(fit: StackFit.expand, children: [
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: Stack(fit: StackFit.expand, children: [
         Image.asset(item.image, fit: BoxFit.cover),
         const DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0x00000000), Color(0xE6000000)]))),
         Padding(
@@ -949,7 +959,8 @@ class _PorterDestinationCard extends StatelessWidget {
             Text(item.landscape, style: const TextStyle(color: Colors.white70, fontSize: 9.5)),
           ]),
         ),
-      ]),
+        ]),
+      ),
     ),
   );
 }
