@@ -823,11 +823,11 @@ class PortersPage extends StatelessWidget {
               color: AppColors.primary,
               padding: const EdgeInsets.fromLTRB(20, 4, 20, 25),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Text('PEOPLE OF THE LANDSCAPE', style: TextStyle(color: AppColors.accent, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.3)),
+                const Text('FIND A PORTER', style: TextStyle(color: AppColors.accent, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.3)),
                 const SizedBox(height: 7),
-                const Text('Strength behind\nevery journey.', style: TextStyle(color: Colors.white, fontSize: 28, height: 1.08, fontWeight: FontWeight.w700)),
+                const Text('Choose a national park.', style: TextStyle(color: Colors.white, fontSize: 28, height: 1.08, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 9),
-                Text('Discover the role of porters across the mountain and forest destinations of Greater Virunga.', style: TextStyle(color: Colors.white.withOpacity(.72), fontSize: 12, height: 1.5)),
+                Text('Select a national park to discover the porters connected to its surrounding communities.', style: TextStyle(color: Colors.white.withOpacity(.72), fontSize: 12, height: 1.5)),
               ]),
             ),
           ),
@@ -883,9 +883,11 @@ class PortersPage extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.fromLTRB(20, 3, 20, 13),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('ACROSS THE REGION', style: TextStyle(color: AppColors.accent, fontSize: 9.5, fontWeight: FontWeight.w700, letterSpacing: 1.2)),
+                Text('NATIONAL PARKS', style: TextStyle(color: AppColors.accent, fontSize: 9.5, fontWeight: FontWeight.w700, letterSpacing: 1.2)),
                 SizedBox(height: 5),
-                Text('Porters by destination', style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
+                Text('Find porters by national park', style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
+                SizedBox(height: 6),
+                Text('Tap a park to see its registered porters.', style: TextStyle(color: AppColors.textSecondary, fontSize: 11.5, height: 1.45)),
               ]),
             ),
           ),
