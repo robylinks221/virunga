@@ -114,7 +114,7 @@ class ExploreSectionPage extends StatelessWidget {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: AppColors.accentSoft,
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(13),
                     ),
                     child: Icon(item.icon, color: AppColors.primary, size: 22),
@@ -1109,7 +1109,7 @@ class _ConservationFocusCard extends StatelessWidget {
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18), border: Border.all(color: AppColors.cardBorder)),
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Container(width: 42, height: 42, decoration: BoxDecoration(color: AppColors.accentSoft, borderRadius: BorderRadius.circular(12)), child: Icon(item.icon, color: AppColors.primary, size: 20)),
+      Container(width: 42, height: 42, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)), child: Icon(item.icon, color: AppColors.primary, size: 20)),
       const Spacer(),
       Text(item.title, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w700)),
       const SizedBox(height: 5),
@@ -1299,7 +1299,7 @@ class _PeopleEntryCard extends StatelessWidget {
           Container(
             width: 47,
             height: 47,
-            decoration: BoxDecoration(color: AppColors.accentSoft, borderRadius: BorderRadius.circular(13)),
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(13)),
             child: Icon(icon, color: AppColors.primary, size: 21),
           ),
           const SizedBox(width: 12),
