@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../../core/theme/app_theme.dart';
+import '../../core/storage/token_storage.dart';
 import '../auth/auth_service.dart';
+import '../auth/login_page.dart';
 import '../marketplace/public_marketplace_page.dart';
 
 void _open(BuildContext context, Widget page) {
@@ -1019,39 +1021,59 @@ class _ParkPorterCard extends StatelessWidget {
 class PorterDetailPage extends StatelessWidget {
   const PorterDetailPage({super.key,required this.porter});
   final _Porter porter;
+
+  Future<void> _book(BuildContext context) async {
+    final auth=AuthService(tokenStorage:const TokenStorage());
+    final loggedIn=await auth.restoreSession();
+    if(!context.mounted)return;
+    if(!loggedIn){
+      await Navigator.of(context).push(MaterialPageRoute(builder:(_)=>LoginPage(authService:auth)));
+      return;
+    }
+    if(!context.mounted)return;
+    Navigator.of(context).push(MaterialPageRoute(builder:(_)=>PorterBookingPage(porter:porter)));
+  }
+
   @override
   Widget build(BuildContext context) {
     final location=[porter.community,porter.park,porter.country].where((x)=>x.trim().isNotEmpty).join(', ');
-    return Scaffold(backgroundColor:AppColors.background,appBar:AppBar(backgroundColor:AppColors.primary,foregroundColor:Colors.white,surfaceTintColor:Colors.transparent,elevation:0,title:const Text('Porter Profile',style:TextStyle(fontSize:17,fontWeight:FontWeight.w800))),body:ListView(physics:const BouncingScrollPhysics(),padding:const EdgeInsets.fromLTRB(20,22,20,38),children:[
-      Container(padding:const EdgeInsets.all(20),decoration:BoxDecoration(color:AppColors.primary,borderRadius:BorderRadius.circular(26)),child:Column(children:[
-        Container(width:104,height:104,padding:const EdgeInsets.all(4),decoration:const BoxDecoration(color:Colors.white,shape:BoxShape.circle),child:ClipOval(child:Image.asset(_porterAvatar,fit:BoxFit.cover))),
-        const SizedBox(height:14),Text(porter.name,textAlign:TextAlign.center,style:const TextStyle(color:Colors.white,fontSize:23,height:1.15,fontWeight:FontWeight.w800)),
-        const SizedBox(height:6),Text(porter.isGroupLeader?'Community Porter · Group Leader':'Community Porter',style:const TextStyle(color:AppColors.accent,fontSize:10,fontWeight:FontWeight.w700)),
-      ])),
-      const SizedBox(height:22),
-      Container(padding:const EdgeInsets.all(18),decoration:BoxDecoration(color:Colors.white,borderRadius:BorderRadius.circular(22),border:Border.all(color:AppColors.cardBorder)),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
-        const Text('PORTER DETAILS',style:TextStyle(color:AppColors.accent,fontSize:9,fontWeight:FontWeight.w800,letterSpacing:1)),
-        const SizedBox(height:17),
-        _porterDetailRow('Location',location),_porterDetailDivider(),
-        _porterDetailRow('Community',porter.community),_porterDetailDivider(),
-        _porterDetailRow('National Park',porter.park),_porterDetailDivider(),
-        _porterDetailRow('Country',porter.country),_porterDetailDivider(),
-        _porterDetailRow('Porter Group',porter.group),_porterDetailDivider(),
-        _porterDetailRow('Joined',_porterJoined(porter.joinedAt)),_porterDetailDivider(),
-        _porterDetailRow('Status',porter.isActive?'Active':'Inactive'),
-      ])),
-      const SizedBox(height:18),
-      Container(padding:const EdgeInsets.all(18),decoration:BoxDecoration(color: Colors.white,borderRadius:BorderRadius.circular(22)),child:const Text('Porters support visitors and local communities around the Greater Virunga landscape. Profile information shown here comes from the porter directory.',style:TextStyle(color:AppColors.textPrimary,fontSize:11.5,height:1.5))),
-      const SizedBox(height:18),
-      SizedBox(
-        height:54,
-        child:ElevatedButton(
-          onPressed:porter.isActive?()=>Navigator.of(context).push(MaterialPageRoute(builder:(_)=>PorterBookingPage(porter:porter))):null,
-          style:ElevatedButton.styleFrom(backgroundColor:AppColors.accent,foregroundColor:Colors.white,disabledBackgroundColor:AppColors.divider,shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(28)),elevation:0),
-          child:Text(porter.isActive?'BOOK THIS PORTER':'PORTER UNAVAILABLE',style:const TextStyle(fontSize:12,fontWeight:FontWeight.w800,letterSpacing:.4)),
+    return Scaffold(
+      backgroundColor:AppColors.background,
+      appBar:AppBar(backgroundColor:AppColors.primary,foregroundColor:Colors.white,surfaceTintColor:Colors.transparent,elevation:0,title:const Text('Porter Profile',style:TextStyle(fontSize:17,fontWeight:FontWeight.w800))),
+      body:ListView(physics:const BouncingScrollPhysics(),padding:const EdgeInsets.fromLTRB(20,22,20,28),children:[
+        Container(padding:const EdgeInsets.all(20),decoration:BoxDecoration(color:AppColors.primary,borderRadius:BorderRadius.circular(26)),child:Column(children:[
+          Container(width:104,height:104,padding:const EdgeInsets.all(4),decoration:const BoxDecoration(color:Colors.white,shape:BoxShape.circle),child:ClipOval(child:Image.asset(_porterAvatar,fit:BoxFit.cover))),
+          const SizedBox(height:14),Text(porter.name,textAlign:TextAlign.center,style:const TextStyle(color:Colors.white,fontSize:23,height:1.15,fontWeight:FontWeight.w800)),
+          const SizedBox(height:6),Text(porter.isGroupLeader?'Community Porter · Group Leader':'Community Porter',style:const TextStyle(color:AppColors.accent,fontSize:10,fontWeight:FontWeight.w700)),
+        ])),
+        const SizedBox(height:22),
+        Container(padding:const EdgeInsets.all(18),decoration:BoxDecoration(color:Colors.white,borderRadius:BorderRadius.circular(22),border:Border.all(color:AppColors.cardBorder)),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
+          const Text('PORTER DETAILS',style:TextStyle(color:AppColors.accent,fontSize:9,fontWeight:FontWeight.w800,letterSpacing:1)),
+          const SizedBox(height:17),
+          _porterDetailRow('Location',location),_porterDetailDivider(),
+          _porterDetailRow('Community',porter.community),_porterDetailDivider(),
+          _porterDetailRow('National Park',porter.park),_porterDetailDivider(),
+          _porterDetailRow('Country',porter.country),_porterDetailDivider(),
+          _porterDetailRow('Porter Group',porter.group),_porterDetailDivider(),
+          _porterDetailRow('Joined',_porterJoined(porter.joinedAt)),_porterDetailDivider(),
+          _porterDetailRow('Status',porter.isActive?'Active':'Inactive'),
+        ])),
+        const SizedBox(height:18),
+        Container(padding:const EdgeInsets.all(18),decoration:BoxDecoration(color:Colors.white,borderRadius:BorderRadius.circular(22),border:Border.all(color:AppColors.cardBorder)),child:const Text('Porters support visitors and local communities around the Greater Virunga landscape. Profile information shown here comes from the porter directory.',style:TextStyle(color:AppColors.textPrimary,fontSize:11.5,height:1.5))),
+      ]),
+      bottomNavigationBar:SafeArea(
+        minimum:const EdgeInsets.fromLTRB(20,10,20,14),
+        child:SizedBox(
+          height:56,
+          width:double.infinity,
+          child:ElevatedButton(
+            onPressed:porter.isActive?()=>_book(context):null,
+            style:ElevatedButton.styleFrom(backgroundColor:AppColors.accent,foregroundColor:Colors.white,disabledBackgroundColor:AppColors.divider,elevation:0,shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(28))),
+            child:Text(porter.isActive?'BOOK THIS PORTER':'PORTER UNAVAILABLE',style:const TextStyle(fontSize:12,fontWeight:FontWeight.w800,letterSpacing:.4)),
+          ),
         ),
       ),
-    ]));
+    );
   }
 }
 class PorterBookingPage extends StatefulWidget {
@@ -1062,15 +1084,12 @@ class PorterBookingPage extends StatefulWidget {
 }
 class _PorterBookingPageState extends State<PorterBookingPage> {
   final _formKey=GlobalKey<FormState>();
-  final _name=TextEditingController();
-  final _phone=TextEditingController();
-  final _email=TextEditingController();
   final _notes=TextEditingController();
   DateTime? _date;
   int _visitors=1;
 
   @override
-  void dispose(){_name.dispose();_phone.dispose();_email.dispose();_notes.dispose();super.dispose();}
+  void dispose(){_notes.dispose();super.dispose();}
 
   Future<void> _pickDate() async {
     final now=DateTime.now();
@@ -1083,9 +1102,6 @@ class _PorterBookingPageState extends State<PorterBookingPage> {
     if(_date==null){ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text('Please select your visit date.')));return;}
     Navigator.of(context).push(MaterialPageRoute(builder:(_)=>PorterBookingReviewPage(
       porter:widget.porter,
-      visitorName:_name.text.trim(),
-      phone:_phone.text.trim(),
-      email:_email.text.trim(),
       notes:_notes.text.trim(),
       visitDate:_date!,
       visitors:_visitors,
@@ -1124,14 +1140,8 @@ class _PorterBookingPageState extends State<PorterBookingPage> {
         _qtyButton(Icons.add,()=>setState(()=>_visitors++)),
       ])),
       const SizedBox(height:24),
-      const Text('CONTACT DETAILS',style:TextStyle(color:AppColors.accent,fontSize:9,fontWeight:FontWeight.w800,letterSpacing:1)),
+      const Text('ADDITIONAL DETAILS',style:TextStyle(color:AppColors.accent,fontSize:9,fontWeight:FontWeight.w800,letterSpacing:1)),
       const SizedBox(height:12),
-      _bookingTextField(_name,'Full Name',validator:(v)=>v==null||v.trim().isEmpty?'Enter your full name':null),
-      const SizedBox(height:11),
-      _bookingTextField(_phone,'Phone Number',keyboardType:TextInputType.phone,validator:(v)=>v==null||v.trim().isEmpty?'Enter your phone number':null),
-      const SizedBox(height:11),
-      _bookingTextField(_email,'Email Address',keyboardType:TextInputType.emailAddress),
-      const SizedBox(height:11),
       _bookingTextField(_notes,'Notes (optional)',maxLines:4),
       const SizedBox(height:22),
       SizedBox(height:54,child:ElevatedButton(onPressed:_continueRequest,style:ElevatedButton.styleFrom(backgroundColor:AppColors.accent,foregroundColor:Colors.white,elevation:0,shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(28))),child:const Text('CONTINUE',style:TextStyle(fontSize:12,fontWeight:FontWeight.w800,letterSpacing:.5)))),
@@ -1142,9 +1152,9 @@ class _PorterBookingPageState extends State<PorterBookingPage> {
 }
 
 class PorterBookingReviewPage extends StatelessWidget {
-  const PorterBookingReviewPage({super.key,required this.porter,required this.visitorName,required this.phone,required this.email,required this.notes,required this.visitDate,required this.visitors});
+  const PorterBookingReviewPage({super.key,required this.porter,required this.notes,required this.visitDate,required this.visitors});
   final _Porter porter;
-  final String visitorName,phone,email,notes;
+  final String notes;
   final DateTime visitDate;
   final int visitors;
   @override
@@ -1162,10 +1172,7 @@ class PorterBookingReviewPage extends StatelessWidget {
         _porterDetailRow('Porter',porter.name),_porterDetailDivider(),
         _porterDetailRow('National Park',porter.park),_porterDetailDivider(),
         _porterDetailRow('Visit Date',_bookingDate(visitDate)),_porterDetailDivider(),
-        _porterDetailRow('Visitors',visitors.toString()),_porterDetailDivider(),
-        _porterDetailRow('Name',visitorName),_porterDetailDivider(),
-        _porterDetailRow('Phone',phone),
-        if(email.isNotEmpty)...[_porterDetailDivider(),_porterDetailRow('Email',email)],
+        _porterDetailRow('Visitors',visitors.toString()),
         if(notes.isNotEmpty)...[_porterDetailDivider(),_porterDetailRow('Notes',notes)],
       ])),
       const SizedBox(height:18),
