@@ -553,7 +553,7 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
                           const SizedBox(width: 7),
                           Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                             Text(available ? 'In Stock' : 'Out of Stock', style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700)),
-                            if (available) Text('undefined available', style: TextStyle(color: Colors.white.withOpacity(.88), fontSize: 10)),
+                            if (available) Text('${p.quantityAvailable} available', style: TextStyle(color: Colors.white.withOpacity(.88), fontSize: 10)),
                           ]),
                         ]),
                       ),
@@ -652,7 +652,7 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
                         child: FilledButton.icon(
                           onPressed: available ? () {
                             _MarketplaceCart.add(p, quantity);
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('undefined added to cart')));
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${p.name} added to cart')));
                             setState(() {});
                           } : null,
                           style: FilledButton.styleFrom(backgroundColor: AppColors.accent, foregroundColor: Colors.white, disabledBackgroundColor: AppColors.divider, shape: const StadiumBorder()),
@@ -690,6 +690,7 @@ class _PublicCraftDetailPageState extends State<PublicCraftDetailPage> {
           ),
         ),
       ]),
+    ),
     );
   }
 
