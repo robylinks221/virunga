@@ -853,10 +853,17 @@ class PortersPage extends StatelessWidget {
           ),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 34),
-            sliver: SliverList.separated(
-              itemCount: parks.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 13),
-              itemBuilder: (context, index) => _PorterDestinationCard(item: parks[index]),
+            sliver: SliverGrid(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) => _PorterDestinationCard(item: parks[index]),
+                childCount: parks.length,
+              ),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: .82,
+              ),
             ),
           ),
         ],
@@ -876,18 +883,17 @@ class _PorterDestinationCard extends StatelessWidget {
         builder: (_) => DestinationDetailPage(name: item.name, country: item.country),
       ),
     ),
-    borderRadius: BorderRadius.circular(22),
+    borderRadius: BorderRadius.circular(20),
     child: Container(
-      height: 174,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: AppColors.primary,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(.08),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+            color: AppColors.primary.withOpacity(.07),
+            blurRadius: 16,
+            offset: const Offset(0, 7),
           ),
         ],
       ),
@@ -898,40 +904,74 @@ class _PorterDestinationCard extends StatelessWidget {
           const DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [Color(0xE6032329), Color(0xA0032329), Color(0x18032329)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0x08000000), Color(0xE8032329)],
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(18, 18, 16, 17),
-            child: Row(
+            padding: const EdgeInsets.all(13),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                        decoration: BoxDecoration(color: AppColors.accent, borderRadius: BorderRadius.circular(14)),
-                        child: Text(item.country.toUpperCase(), style: const TextStyle(color: Colors.white, fontSize: 7.5, fontWeight: FontWeight.w800, letterSpacing: .7)),
-                      ),
-                      const Spacer(),
-                      Text(item.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: 19, height: 1.12, fontWeight: FontWeight.w800)),
-                      const SizedBox(height: 5),
-                      Text(item.landscape, style: TextStyle(color: Colors.white.withOpacity(.76), fontSize: 10.5)),
-                      const SizedBox(height: 9),
-                      const Text('VIEW PORTERS', style: TextStyle(color: AppColors.accent, fontSize: 8.5, fontWeight: FontWeight.w800, letterSpacing: .8)),
-                    ],
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.accent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    item.country.toUpperCase(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 7,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: .6,
+                    ),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Container(
-                  width: 43,
-                  height: 43,
-                  decoration: BoxDecoration(color: Colors.white.withOpacity(.94), shape: BoxShape.circle),
-                  child: const Icon(Icons.arrow_forward_rounded, color: AppColors.primary, size: 20),
+                const Spacer(),
+                Text(
+                  item.name,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    height: 1.12,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  item.landscape,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(.72),
+                    fontSize: 8.5,
+                  ),
+                ),
+                const SizedBox(height: 9),
+                const Row(
+                  children: [
+                    Text(
+                      'VIEW PORTERS',
+                      style: TextStyle(
+                        color: AppColors.accent,
+                        fontSize: 7.5,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: .6,
+                      ),
+                    ),
+                    Spacer(),
+                    Icon(
+                      Icons.arrow_forward_rounded,
+                      color: AppColors.accent,
+                      size: 15,
+                    ),
+                  ],
                 ),
               ],
             ),
